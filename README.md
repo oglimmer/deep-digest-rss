@@ -25,9 +25,10 @@ npm run dev
 cd news-backend
 ./mvnw spring-boot:run
 
-# the scraper needs will access the REST API
+# the scraper needs will access the REST API, so wait for it to be started
+# YOU HAVE TO CHANGE THE REST API ENDPOINT IN scraper/generateAiSummaryAndPushToDB.js !!!
 cd scraper
-# see readme.md in scraper dir
+# see readme.md in scraper dir for how to start
 ```
 
 Access http://localhost:5173/ for the UI
