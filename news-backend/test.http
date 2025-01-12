@@ -1,0 +1,15 @@
+### get today
+http://localhost:8888/api/v1/news?daysAgo=1
+
+
+### create tiem
+POST http://localhost:8888/api/v1/news
+Accept: application/json
+Content-Type: application/json
+User-Agent: PostmanRuntime/7.26.8
+
+{
+    "refId": "test2",
+    "url": "test",
+    "text": "test"
+}

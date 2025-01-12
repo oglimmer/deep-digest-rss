@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: news
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}/news_prod?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    username: news
+    password: news
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    # org.hibernate.orm.jdbc.bind: TRACE
+    de.oglimmer: DEBUG
+server:
+  port: 8888
