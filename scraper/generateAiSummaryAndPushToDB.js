@@ -3,13 +3,6 @@ import { promises as fs } from 'fs';
 
 const sendMessage = async (refId, url, title, systemContent) => {
   try {
-    // Read content from the page.txt file
-    // let systemContent = await fs.readFile('page.txt', 'utf8');
-
-    // systemContent = systemContent.replace(/\n/g, '');
-    // systemContent = systemContent.replace(/[^\x00-\x7FàèìòùÀÈÌÒÙ]/g, '');
-
-    // console.log(systemContent);
 
     // Prepare the request payload
     const payload = {

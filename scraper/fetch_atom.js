@@ -40,7 +40,7 @@ async function getSavedIds(filePath) {
 }
 
 async function saveIdAndUrl(id, url, title) {
-  await fs.appendFile('ids.txt', `${id}\n`);
+  await fs.appendFile('fetched_from_rss.txt', `${id}\n`);
   await fs.appendFile('url.txt', `${id} ${url} ${title}\n`);
 }
 
@@ -50,7 +50,7 @@ async function processAtomFeed() {
     const parsedFeed = await parseAtomFeed(xml);
 
     const entries = parsedFeed.feed.entry || [];
-    const savedIds = await getSavedIds(path.resolve('ids.txt'));
+    const savedIds = await getSavedIds(path.resolve('fetched_from_rss.txt'));
 
     let count = 0;
 
