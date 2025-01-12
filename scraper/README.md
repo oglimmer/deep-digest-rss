@@ -2,7 +2,7 @@
 
 ## requirements
 
-Ollama needs to run on the host.
+Ollama needs to run on the host. Model `llama3.1:8b` needs to be available.
 
 It needs 32 GB RAM available for Ollama.
 
