@@ -3,4 +3,4 @@ url*
 page*
 fetched_from_rss.txt
 pushed_to_db.txt
-
+.env

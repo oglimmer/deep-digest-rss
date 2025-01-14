@@ -1,12 +1,16 @@
 import fetch from 'node-fetch';
 import { promises as fs } from 'fs';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const { USERNAME, PASSWORD, URL, MODEL } = process.env;
 
 const sendMessage = async (refId, url, title, systemContent) => {
   try {
 
     // Prepare the request payload
     const payload = {
-      model: 'llama3.1:8b',
+      model: MODEL,
       messages: [
         {
           role: 'system',
@@ -40,10 +44,11 @@ const sendMessage = async (refId, url, title, systemContent) => {
     console.log(summary);
 
     try {
-      const response = await fetch('https://api-news.oglimmer.com/api/v1/news', {
+      const response = await fetch(URL + '/api/v1/news', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64')
         },
         body: JSON.stringify({
           refId: refId,
@@ -53,7 +58,9 @@ const sendMessage = async (refId, url, title, systemContent) => {
         })
       });
       const result = await response.json();
-      // console.log(result);
+      if (result.status != 200) {
+        console.error('Error:', response);
+      }
 
     } catch (error) {
       console.error(error);
