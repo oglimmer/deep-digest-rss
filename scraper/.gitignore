@@ -1,6 +1,6 @@
 node_modules
 url*
 page*
-fetched_from_rss.txt
-pushed_to_db.txt
+fetch_atom.txt
+pushToDB.txt
 .env

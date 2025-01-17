@@ -15,21 +15,21 @@ npm i
 
 ## data files description
 
-### pushed_to_db.txt
+### pushToDB.txt
 
-Created by `downloadAndGenerateAiSummary.sh`. Contains all ids which have been pushed to the DB. 
+Created and read by `run.sh`. Contains all ids which have been pushed to the DB. 
 
-Log only.
+Critical state file.
 
-### fetched_from_rss.txt
+### fetch_atom.txt
 
-Created by `fetch_atom.js`. Contains all RSS ids which have been converted into a url.txt and thus should be processed again.
+Created and read by `fetch_atom.js`. Contains all RSS ids which have been converted into a url.txt and thus should be processed again.
 
 Critical state file.
 
 ### url.txt
 
-Created by `fetch_atom.js`. Contains URLs to be processed by `downloadAndGenerateAiSummary.sh`. Will be removed after.
+Created by `fetch_atom.js`. Contains URLs read by `run.sh`. Will be removed after.
 
 Temporary processing file.
 

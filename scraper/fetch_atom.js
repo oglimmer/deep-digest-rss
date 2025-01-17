@@ -40,7 +40,7 @@ async function getSavedIds(filePath) {
 }
 
 async function saveIdAndUrl(id, url, title) {
-  await fs.appendFile('fetched_from_rss.txt', `${id}\n`);
+  await fs.appendFile('fetch_atom.txt', `${id}\n`);
   await fs.appendFile('url.txt', `${id} ${url} ${title}\n`);
 }
 
@@ -50,7 +50,7 @@ async function processAtomFeed() {
     const parsedFeed = await parseAtomFeed(xml);
 
     const entries = parsedFeed.feed.entry || [];
-    const savedIds = await getSavedIds(path.resolve('fetched_from_rss.txt'));
+    const savedIds = await getSavedIds(path.resolve('fetch_atom.txt'));
 
     let count = 0;
 
@@ -84,5 +84,40 @@ function renameFileIfExists() {
   }
 }
 
-renameFileIfExists();
-processAtomFeed();
+// Function to read file content and parse it into an array of IDs
+function getIdsFromFile(filePath, columnIndex) {
+  const fileContent = fsBase.readFileSync(filePath, 'utf-8');
+  const lines = fileContent.split('\n');
+  const ids = lines.map(line => {
+      const columns = line.split(' ');
+      return columns[columnIndex]?.trim();
+  }).filter(Boolean); // Remove empty or undefined values
+  return ids;
+}
+
+// Function to check if all IDs from one list exist in another
+function checkIdsExist(sourceIds, targetIds) {
+  return sourceIds.every(id => targetIds.includes(id));
+}
+
+if (fsBase.existsSync('url.txt')) {
+  // Paths to the files
+  const urlFilePath = 'url.txt';
+  const pushToDBFilePath = 'pushToDB.txt';
+
+  // Extract IDs from the files
+  const urlIds = getIdsFromFile(urlFilePath, 0); // Extract from column 0 of url.txt
+  const pushToDBIds = getIdsFromFile(pushToDBFilePath, 0); // Extract all lines from pushToDB.txt
+
+  // Check if all IDs in url.txt are present in pushToDB.txt
+  const allIdsExist = checkIdsExist(urlIds, pushToDBIds);
+
+  if (allIdsExist) {
+    renameFileIfExists();
+    processAtomFeed();  
+  } else {
+    console.log('Some IDs from url.txt are missing in pushToDB.txt, thus not processed yet. Skipping to fetch more URLs.');
+  }
+} else {
+  processAtomFeed();
+}
