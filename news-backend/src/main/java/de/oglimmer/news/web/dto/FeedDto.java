@@ -17,6 +17,8 @@ public class FeedDto {
 
     private String title;
 
+    private String cookie;
+
     private Instant createdOn;
 
 }

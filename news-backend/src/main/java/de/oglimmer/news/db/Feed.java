@@ -29,6 +29,10 @@ public class Feed {
     @NotNull
     private String title;
 
+    @Lob
+    @Column(length = 81_920)
+    private String cookie;
+
     @Column(nullable = false)
     @NotNull
     private Instant createdOn;
