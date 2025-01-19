@@ -12,6 +12,21 @@ docker run -d --name mariadb \
        -e MARIADB_PASSWORD=news \
        -p 3306:3306 mariadb:latest
 ```
+## requirements
+
+The scraper needs either Ollama or a ChatGPT API key.
+
+When using ollama you can choose betwee a high memory setup which needs at least 32 GB RAM or a low memory setup, which runs with 8 GB of RAM.
+
+Check the configuration in scrapter/.env.example
+
+## usage
+
+```bash
+npm i
+./run.sh
+```
+
 
 ## start
 
@@ -25,10 +40,9 @@ npm run dev
 cd news-backend
 ./mvnw spring-boot:run
 
-# the scraper needs will access the REST API, so wait for it to be started
+# the scraper needs access the REST API, so wait for it to be started
 cd scraper
 # copy .env.exmaple to .env
-# see readme.md in scraper dir for how to start
 ```
 
 Access http://localhost:5173/ for the UI
