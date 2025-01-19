@@ -49,7 +49,7 @@ while true; do
       done
 
       echo "No more items to process. Sleeping for 60 seconds."
-      sleep 10
+      sleep 60
 
   else
       echo "An unexpected HTTP status code was returned: $responseBodyAndStatus"
