@@ -4,15 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
-public class CreateNewsDto {
-
-    private Long feedId;
-
-    private Long originalFeedItemId;
-
-    private String text;
-
+public class FilterFeedItemToProcessDto {
+    private List<String> refIds;
 }

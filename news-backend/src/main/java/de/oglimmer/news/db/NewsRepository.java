@@ -9,5 +9,6 @@ public interface NewsRepository extends ListCrudRepository<News, Long> {
 
     List<News> findByCreatedOnBetweenOrderByCreatedOnDesc(Instant start, Instant end);
 
+    List<News> findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(long feedId, Instant start, Instant end);
 }
 

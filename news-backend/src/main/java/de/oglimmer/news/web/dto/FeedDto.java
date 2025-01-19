@@ -9,18 +9,14 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-public class NewsDto {
+public class FeedDto {
 
     private Long id;
 
-    private Long feedId;
-
-    private Instant createdOn;
-
     private String url;
 
-    private String text;
-
     private String title;
+
+    private Instant createdOn;
 
 }

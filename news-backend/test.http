@@ -1,15 +1,51 @@
+### get all feeds
+http://localhost:8888/api/v1/feed
+
 ### get today
-http://localhost:8888/api/v1/news?daysAgo=1
+http://localhost:8888/api/v1/news?daysAgo=0&feedId=1
 
 
-### create tiem
+### create feed-item-to-process
+POST http://localhost:8888/api/v1/feed-item-to-process
+Accept: application/json
+Content-Type: application/json
+User-Agent: PostmanRuntime/7.26.8
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+{
+  "feedId": 1,
+  "refId": "refid-5",
+  "url": "https://www.google.com",
+  "title": "test"
+}
+
+### get next feed-item-to-process
+GET http://localhost:8888/api/v1/feed-item-to-process/next
+Accept: application/json
+Content-Type: application/json
+User-Agent: PostmanRuntime/7.26.8
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+### get next feed-item-to-process
+POST http://localhost:8888/api/v1/feed-item-to-process/filter
+Accept: application/json
+Content-Type: application/json
+User-Agent: PostmanRuntime/7.26.8
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+{
+  "refIds": ["refid-1","refid-2","refid-3","refid-6"]
+}
+
+### create news
 POST http://localhost:8888/api/v1/news
 Accept: application/json
 Content-Type: application/json
 User-Agent: PostmanRuntime/7.26.8
+Authorization: Basic d3JpdGU6d3JpdGU=
 
 {
-    "refId": "test2",
-    "url": "test",
-    "text": "test"
+  "feedId": 1,
+  "originalFeedItemId": 10,
+  "text": "test - text -2"
 }

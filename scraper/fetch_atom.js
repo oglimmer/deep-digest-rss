@@ -1,10 +1,12 @@
 import fetch from 'node-fetch';
 import { Parser } from 'xml2js';
-import { promises as fs } from 'fs';
-import fsBase from 'fs';
-import path from 'path';
+import dotenv from 'dotenv';
 
-const ATOM_FEED_URL = 'https://www.heise.de/rss/heise-atom.xml'; // Replace with your Atom feed URL
+dotenv.config();
+const { URL, USERNAME, PASSWORD } = process.env;
+
+const ATOM_FEED_URL = process.argv[2]
+const FEED_ID = process.argv[3]
 
 async function fetchAtomFeed(url) {
   const response = await fetch(url);
@@ -27,97 +29,101 @@ async function parseAtomFeed(xml) {
   });
 }
 
-async function getSavedIds(filePath) {
-  try {
-    const data = await fs.readFile(filePath, 'utf-8');
-    return new Set(data.split('\n').filter(Boolean));
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return new Set(); // File doesn't exist, return empty set
+function convertXmlToUnifiedDataStructure(parsedFeed, refIds, unifiedEntries) {
+  if (parsedFeed.feed && parsedFeed.feed.entry) {
+    const entries = parsedFeed.feed.entry;
+
+    for (const entry of entries) {
+      const id = entry.id[0];
+      const link = entry.link[0].$.href;
+      const title = entry.title[0]['_'];
+
+      unifiedEntries[id] = { link, title };
+      refIds.push(id);
     }
-    throw err;
+  } else if (parsedFeed.rss && parsedFeed.rss.channel) {
+    for (const channel of parsedFeed.rss.channel) {
+      const items = channel.item;
+  
+      for (const item of items) {
+        const id = item.guid[0];
+        const link = item.link[0];
+        const title = item.title[0];
+  
+        unifiedEntries[id] = { link, title };
+        refIds.push(id);
+      }
+    }
   }
 }
 
-async function saveIdAndUrl(id, url, title) {
-  await fs.appendFile('fetch_atom.txt', `${id}\n`);
-  await fs.appendFile('url.txt', `${id} ${url} ${title}\n`);
+async function filterExistingEntries(refIds) {
+  const response = await fetch(URL + '/api/v1/feed-item-to-process/filter', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64')
+    },
+    body: JSON.stringify({ refIds: refIds })
+  });
+
+  if (!response.ok) {
+    console.log("Call filter failed:", response.status, response.statusText);
+    console.log(await response.text());
+    process.exit(1);
+  }
+
+  const responseData = await response.json();
+  // console.log('POST request response:', responseData);
+  return responseData;
 }
+
+async function postFeedItem(refId, entry) {
+  const response = await fetch(URL + '/api/v1/feed-item-to-process', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64')
+    },
+    body: JSON.stringify({
+      feedId: FEED_ID,
+      refId: refId,
+      url: entry.link,
+      title: entry.title
+    })
+  });
+
+  if (!response.ok) {
+    console.log("Call create feed-item failed:", response.status, response.statusText);
+    console.log(await response.text());
+    process.exit(1);
+  }
+
+  // const responseData = await response.json();
+  // console.log('POST request response:', responseData);
+}
+
 
 async function processAtomFeed() {
   try {
     const xml = await fetchAtomFeed(ATOM_FEED_URL);
     const parsedFeed = await parseAtomFeed(xml);
 
-    const entries = parsedFeed.feed.entry || [];
-    const savedIds = await getSavedIds(path.resolve('fetch_atom.txt'));
+    const refIds = [];
+    const unifiedEntries = {};
+    convertXmlToUnifiedDataStructure(parsedFeed, refIds, unifiedEntries);
 
-    let count = 0;
+    const filteredRefIds = await filterExistingEntries(refIds);
 
-    for (const entry of entries) {
-      const id = entry.id[0];
-      const link = entry.link[0].$.href;
-      const title = entry.title[0];
-
-      if (!savedIds.has(id)) {
-        await saveIdAndUrl(id, link, title['_']);
-        count++;
-      }
-    }
-
-    console.log('Done processing the Atom feed. Added %d new entries.', count);
+    for (const refId of filteredRefIds) {
+      await postFeedItem(refId, unifiedEntries[refId]);
+    }      
+  
+    const currentDateTime = new Date().toLocaleString();
+    console.log('Done processing the Atom feed [%s] Added %d new entries. [%s]', ATOM_FEED_URL, filteredRefIds.length, currentDateTime);
   } catch (err) {
     console.error(`Error: ${err.message}`);
   }
 }
 
-function renameFileIfExists() {
-  if (fsBase.existsSync('url.txt')) {
-      let number = 1;
-      let newFilePath;
-      do {
-          newFilePath = `url.txt.${number}`;
-          number++;
-      } while (fsBase.existsSync(newFilePath));
-      fsBase.renameSync('url.txt', newFilePath);
-      console.log(`Renamed 'url.txt' to '${newFilePath}'`);
-  }
-}
-
-// Function to read file content and parse it into an array of IDs
-function getIdsFromFile(filePath, columnIndex) {
-  const fileContent = fsBase.readFileSync(filePath, 'utf-8');
-  const lines = fileContent.split('\n');
-  const ids = lines.map(line => {
-      const columns = line.split(' ');
-      return columns[columnIndex]?.trim();
-  }).filter(Boolean); // Remove empty or undefined values
-  return ids;
-}
-
-// Function to check if all IDs from one list exist in another
-function checkIdsExist(sourceIds, targetIds) {
-  return sourceIds.every(id => targetIds.includes(id));
-}
-
-if (fsBase.existsSync('url.txt')) {
-  // Paths to the files
-  const urlFilePath = 'url.txt';
-  const pushToDBFilePath = 'pushToDB.txt';
-
-  // Extract IDs from the files
-  const urlIds = getIdsFromFile(urlFilePath, 0); // Extract from column 0 of url.txt
-  const pushToDBIds = getIdsFromFile(pushToDBFilePath, 0); // Extract all lines from pushToDB.txt
-
-  // Check if all IDs in url.txt are present in pushToDB.txt
-  const allIdsExist = checkIdsExist(urlIds, pushToDBIds);
-
-  if (allIdsExist) {
-    renameFileIfExists();
-    processAtomFeed();  
-  } else {
-    console.log('Some IDs from url.txt are missing in pushToDB.txt, thus not processed yet. Skipping to fetch more URLs.');
-  }
-} else {
-  processAtomFeed();
-}
+processAtomFeed();

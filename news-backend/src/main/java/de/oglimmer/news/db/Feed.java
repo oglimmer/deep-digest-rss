@@ -5,44 +5,38 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
-@Entity(name = "news")
+@Entity(name = "feed")
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "feed")
+@ToString(exclude = {"feedItems", "news"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class News {
+public class Feed {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @NotNull
-    private Feed feed;
-
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @NotNull
-    private FeedItemToProcess originalFeedItem;
-
     @Column(nullable = false)
-//    @NotNull
+    @NotNull
     private String url;
 
     @Column(nullable = false)
-//    @NotNull
-    private String title;
-
-    @Lob
-    @Column(nullable = false, length = 2_000_000)
     @NotNull
-    private String text;
+    private String title;
 
     @Column(nullable = false)
     @NotNull
     private Instant createdOn;
+
+    @OneToMany(mappedBy = "feed", fetch = FetchType.LAZY)
+    private List<FeedItemToProcess> feedItems;
+
+    @OneToMany(mappedBy = "feed", fetch = FetchType.LAZY)
+    private List<News> news;
 
 }

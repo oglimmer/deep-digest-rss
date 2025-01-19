@@ -2,37 +2,56 @@
 
 set -eu
 
+source ./.env
+
 while true; do
 
-  # any RSS url not in fetch_atom.txt will be written to url.txt and directly added to fetch_atom.txt
-  node fetch_atom.js
+  responseBodyAndStatus=$(curl -s -w "%{http_code}" "$URL/api/v1/feed-item-to-process/next" \
+    -H "Content-Type: application/json" \
+    -u "$USERNAME:$PASSWORD")
+  
+  if [[ $responseBodyAndStatus == *200 ]]; then
+      body=$(echo "$responseBodyAndStatus" | sed 's/...$//')
 
-  if [[ -f "url.txt" ]]; then
-    # Read each line in url.txt
-    while IFS=' ' read -r id url title; do
-      if ! $(grep -Fxq "$id" pushToDB.txt); then
-        if [[ -n "$id" && -n "$url" ]]; then
-          echo "********************************************************"
+      id=$(echo "$body" | jq -r '.id')
+      refId=$(echo "$body" | jq -r '.refId')
+      url=$(echo "$body" | jq -r '.url')
+      title=$(echo "$body" | jq -r '.title')
+      feed_id=$(echo "$body" | jq -r '.feed.id')
+      
+      start_time=$(date +%s)
+      echo "********************************************************"
 
-          echo "Fetching URL: $url with ID: $id"
+      echo "Fetching URL: $url with refId: $refId"
 
-          curl -s "$url" > page.html
+      curl -s "$url" > page.html
 
-          # Convert HTML to text based on the operating system
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            # textutil -convert txt page.html
-            cat page.html | node html2txt.js | node shrink.js > page.txt
-          else
-            cat page.html | node html2txt.js | node shrink.js > page.txt
-          fi
-
-          cat page.txt | node generateAiSummary.js | node pushToDB.js "$id" "$url" "$title"
-
-          echo "$id" >> pushToDB.txt
-        fi
+      # Convert HTML to text based on the operating system
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        # textutil -convert txt page.html
+        cat page.html | node html2txt.js | node shrink.js > page.txt
+      else
+        cat page.html | node html2txt.js | node shrink.js > page.txt
       fi
-    done < "url.txt"
-  fi
 
-  sleep 60
+      cat page.txt | node generateAiSummary.js | node pushToDB.js $feed_id $id
+
+      end_time=$(date +%s)
+      total_time=$((end_time - start_time))
+      echo "Fetching, text generation and upload completed in $total_time seconds."
+  elif [ "$responseBodyAndStatus" = "404" ]; then
+      
+      responseAllFeeds=$(curl -s "$URL/api/v1/feed" -H "Content-Type: application/json")
+      echo "$responseAllFeeds" | jq -c '.[]' | while read item; do
+        id=$(echo "$item" | jq -r '.id')
+        url=$(echo "$item" | jq -r '.url')
+        node fetch_atom.js "$url" $id
+      done
+
+      echo "No more items to process. Sleeping for 60 seconds."
+      sleep 10
+
+  else
+      echo "An unexpected HTTP status code was returned: $responseBodyAndStatus"
+  fi
 done

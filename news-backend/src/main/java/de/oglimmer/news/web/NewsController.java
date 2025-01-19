@@ -22,15 +22,18 @@ public class NewsController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public List<NewsDto> getNews(@RequestParam(required = false, defaultValue = "0") int daysAgo) {
-        return newsService.getNews(daysAgo).stream()
+    public List<NewsDto> getNews(@RequestParam(required = false, defaultValue = "0") int daysAgo,
+                                 @RequestParam(required = false, defaultValue = "0") long feedId) {
+        return newsService.getNews(feedId, daysAgo).stream()
                 .map(news -> modelMapper.map(news, NewsDto.class))
                 .collect(Collectors.toList());
     }
 
     @PostMapping
     public NewsDto createNews(@RequestBody CreateNewsDto newsDto) {
-        return modelMapper.map(newsService.createNews(modelMapper.map(newsDto, News.class)), NewsDto.class);
+        News dataFromUser = modelMapper.map(newsDto, News.class);
+        News dataAfterPersist = newsService.createNews(dataFromUser);
+        return modelMapper.map(dataAfterPersist, NewsDto.class);
     }
 
 }

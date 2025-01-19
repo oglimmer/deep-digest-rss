@@ -7,12 +7,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CreateNewsDto {
-
-    private Long feedId;
-
-    private Long originalFeedItemId;
-
-    private String text;
-
+public class PatchFeedItemToProcessDto {
+    private String processState;
 }

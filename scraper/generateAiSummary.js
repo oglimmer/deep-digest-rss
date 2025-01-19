@@ -1,11 +1,52 @@
 import fetch from 'node-fetch';
-import { promises as fs } from 'fs';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const { MODEL } = process.env;
+const { MODEL, CHATGPT_API_KEY, GENERATION_ENGINE } = process.env;
 
-const f2 = async (systemContent) => {
+const chatgpt = async (systemContent) => {
+  const payload = {
+    model: "gpt-4o-mini", // Replace with your desired model, e.g., "gpt-4" or "gpt-3.5-turbo"
+    messages: [
+      {
+        role: "system",
+        content: "Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
+      },
+      {
+        role: "user",
+        content: "Fasse den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${CHATGPT_API_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.log("Call chatgpt failed:", response.status, response.statusText);
+      console.log(await response.text());
+      process.exit(1);
+    }
+
+    const result = await response.json();
+    const summary = result.choices[0].message.content;
+
+    return summary;
+  } catch (error) {
+    console.error("Error fetching ChatGPT response:", error);
+    throw error;
+  }
+};
+
+
+const ollamaHighMem = async (systemContent) => {
   
   const payload = {
     model: MODEL,
@@ -34,6 +75,11 @@ const f2 = async (systemContent) => {
     },
     body: JSON.stringify(payload),
   });
+  if (response.status != 200) {
+    // exit 1
+    console.log("Call ollama failed:", response);
+    process.exit(1);
+  }
 
   const result = await response.json();
   const summary = result.message.content;
@@ -41,7 +87,7 @@ const f2 = async (systemContent) => {
   return summary;
 }
 
-const f1 = async (systemContent) => {
+const ollamaLowMem = async (systemContent) => {
 
   const response = await fetch('http://localhost:11434/api/generate', {
     method: 'POST',
@@ -77,8 +123,20 @@ process.stdin.on('data', function(chunk) {
 process.stdin.on('end', async () => {
     // systemContent = data.trim().replace(/[\n\r\t]/g, '').replace(/"/g, ' ').replace(/'/g, ' ');
 
-    const summary = await f1(systemContent);
+    switch (GENERATION_ENGINE) {
+      case 'ollama-low':
+        console.log(await ollamaLowMem(systemContent));
+        break;
+      case 'chatgpt':
+        console.log(await chatgpt(systemContent));
+        break;
+      case 'ollama-high':
+        console.log(await ollamaHighMem(systemContent));
+        break;
+      default:
+        console.log("Invalid generation engine specified");
+        process.exit(1);
+    }
 
-    console.log(summary);
 });
 

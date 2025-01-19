@@ -4,9 +4,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 const { USERNAME, PASSWORD, URL } = process.env;
 
-const refId = process.argv[2];
-const url = process.argv[3];
-const title = process.argv[4];
+const feedId = process.argv[2];
+const id = process.argv[3];
 
 let systemContent = '';
 process.stdin.setEncoding('utf8');
@@ -24,9 +23,8 @@ process.stdin.on('end', async () => {
         'Authorization': 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64')
       },
       body: JSON.stringify({
-        refId: refId,
-        url: url,
-        title: title,
+        feedId: feedId,
+        originalFeedItemId: id,
         text: systemContent
       })
     });

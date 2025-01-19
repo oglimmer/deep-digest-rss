@@ -4,22 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.Instant;
-
 @Getter
 @Setter
 @ToString
-public class NewsDto {
-
-    private Long id;
+public class CreateFeedItemToProcessDto {
 
     private Long feedId;
 
-    private Instant createdOn;
+    private String refId;
 
     private String url;
-
-    private String text;
 
     private String title;
 

@@ -8,13 +8,13 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@Entity(name = "news")
+@Entity(name = "feed_item_to_process")
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = "feed")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class News {
+public class FeedItemToProcess {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,25 +24,29 @@ public class News {
     @NotNull
     private Feed feed;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @Column(nullable = false, unique = true)
     @NotNull
-    private FeedItemToProcess originalFeedItem;
+    private String refId;
 
     @Column(nullable = false)
-//    @NotNull
+    @NotNull
     private String url;
 
     @Column(nullable = false)
-//    @NotNull
+    @NotNull
     private String title;
 
-    @Lob
-    @Column(nullable = false, length = 2_000_000)
+    @Column(nullable = false)
     @NotNull
-    private String text;
+    @Enumerated(EnumType.STRING)
+    private ProcessState processState;
 
     @Column(nullable = false)
     @NotNull
     private Instant createdOn;
+
+    @Column(nullable = false)
+    @NotNull
+    private Instant updatedOn;
 
 }

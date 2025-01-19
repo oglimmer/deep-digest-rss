@@ -63,6 +63,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/actuator/**", "/actuator").hasRole("actuator-public")
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").hasRole("doc")
                                 .requestMatchers(POST, "/api/v1/news").hasRole("write")
+                                .requestMatchers("/api/v1/feed-item-to-process").hasRole("write")
+                                .requestMatchers(POST,"/api/v1/feed").hasRole("write")
                                 .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
