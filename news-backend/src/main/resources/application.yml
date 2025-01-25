@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:news-properties.yml
   application:
     name: news
   datasource:
@@ -9,13 +11,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    open-in-view: false
+    open-in-view: true
 logging:
   level:
     root: INFO
     org.hibernate.SQL: DEBUG
     # org.hibernate.orm.jdbc.bind: TRACE
     de.oglimmer: DEBUG
+
 server:
   port: 8888
 

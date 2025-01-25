@@ -25,7 +25,11 @@ const daysAgo = ref(0)
 
 const fetchFeeds = async () => {
   try {
-    const response = await fetch(`${__API_URL__}/api/v1/feed`)
+    const response = await fetch(`${__API_URL__}/api/v1/feed`, {
+      headers: {
+        'Authorization': `Basic ${btoa('read:read')}`
+      }
+    })
     if (response.ok) {
       feedEntries.value = await response.json()
     } else {
@@ -42,7 +46,11 @@ watch(selectedFeed, () => {
 
 const fetchNews = async (daysAgo: number, feedId: number) => {
   try {
-    const response = await fetch(`${__API_URL__}/api/v1/news?daysAgo=${daysAgo}&feedId=${feedId}`)
+    const response = await fetch(`${__API_URL__}/api/v1/news?daysAgo=${daysAgo}&feedId=${feedId}`, {
+      headers: {
+        'Authorization': `Basic ${btoa('read:read')}`
+      }
+    })
     if (response.ok) {
       newsEntries.value = await response.json()
     } else {

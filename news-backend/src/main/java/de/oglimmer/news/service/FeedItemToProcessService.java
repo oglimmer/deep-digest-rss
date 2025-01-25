@@ -43,7 +43,8 @@ public class FeedItemToProcessService {
         FeedItemToProcess feedItemToProcess = feedItemToProcessRepository.findById(id).orElseThrow();
         switch (feedItemToProcess.getProcessState()) {
             case ProcessState.IN_PROGRESS:
-                if (!patchFeedItemToProcessDto.getProcessState().equals(ProcessState.ERROR.name())) {
+                if (!patchFeedItemToProcessDto.getProcessState().equals(ProcessState.ERROR.name())
+                && !patchFeedItemToProcessDto.getProcessState().equals(ProcessState.NEW.name())) {
                     throw new IllegalArgumentException("Cannot change state from IN_PROGRESS to " + patchFeedItemToProcessDto.getProcessState());
                 }
                 break;

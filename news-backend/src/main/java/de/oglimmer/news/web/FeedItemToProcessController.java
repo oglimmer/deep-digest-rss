@@ -46,7 +46,8 @@ public class FeedItemToProcessController {
 
     @PatchMapping("/{id}")
     public FeedItemToProcessDto patchFeedItemToProcess(@RequestBody PatchFeedItemToProcessDto patchFeedItemToProcessDto, @PathVariable Long id) {
-        return modelMapper.map(feedItemToProcessService.patchFeedItemToProcess(id, patchFeedItemToProcessDto), FeedItemToProcessDto.class);
+        FeedItemToProcess feedItemToProcess = feedItemToProcessService.patchFeedItemToProcess(id, patchFeedItemToProcessDto);
+        return modelMapper.map(feedItemToProcess, FeedItemToProcessDto.class);
     }
 
 }

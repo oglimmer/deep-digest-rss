@@ -1,0 +1,3 @@
+app:
+  externalDomain: http://localhost:8888
+  tokenKey: foobar
