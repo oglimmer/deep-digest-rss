@@ -1,5 +1,6 @@
 package de.oglimmer.news.config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +18,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
-
-import lombok.AllArgsConstructor;
 
 import static org.springframework.http.HttpMethod.POST;
 
@@ -96,6 +95,7 @@ public class SecurityConfiguration {
                         .rememberMeServices(rememberMeServices)
                 )
                 .httpBasic(Customizer.withDefaults())
+                .with(new QueryParamAuthConfigurer<>(), Customizer.withDefaults())
                 .build();
     }
 
