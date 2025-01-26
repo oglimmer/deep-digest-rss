@@ -1,0 +1,43 @@
+services:
+  frontend:
+    build: news-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - API_URL=http://localhost:8888
+      - API_USER=read
+      - API_PASSWORD=read
+  backend:
+    build: news-backend
+    ports:
+      - "8888:8888"
+    environment:
+      - DB_HOST=database
+      - AUTH_ACTUATOR_PASSWORD=xxx
+      - AUTH_SWAGGER_PASSWORD=xxx
+      - AUTH_WRITE_PASSWORD=write
+      - APP_EXTERNAL_DOMAIN=http://localhost:8888
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=news_prod
+      - MYSQL_USER=news
+      - MYSQL_PASSWORD=news
+    healthcheck:
+      test: mariadb -unews -pnews news_prod -e "select 1"
+      interval: 10s
+      timeout: 60s
+      retries: 5
+  scraper:
+    build: scraper
+    environment:
+      - NO_ENV_FILE=true
+      - USERNAME=write
+      - PASSWORD=write
+      - URL=http://backend:8888
+      - CHATGPT_API_KEY=???
+      - GENERATION_ENGINE=chatgpt

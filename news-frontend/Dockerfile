@@ -3,6 +3,8 @@ FROM node:18-alpine
 
 # make REST API URL configurable via environment variable
 ARG API_URL
+ARG API_USER
+ARG API_PASSWORD
 
 # Set the working directory
 WORKDIR /app

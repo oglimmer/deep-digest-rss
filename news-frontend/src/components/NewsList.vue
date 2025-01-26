@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 
+const Authorization = `Basic ${btoa(__API_USER__+':'+__API_USER__)}`;
+
 interface NewsEntry {
   id: number
   feedId: number
@@ -26,9 +28,7 @@ const daysAgo = ref(0)
 const fetchFeeds = async () => {
   try {
     const response = await fetch(`${__API_URL__}/api/v1/feed`, {
-      headers: {
-        'Authorization': `Basic ${btoa('read:read')}`
-      }
+      headers: { Authorization }
     })
     if (response.ok) {
       feedEntries.value = await response.json()
@@ -47,9 +47,7 @@ watch(selectedFeed, () => {
 const fetchNews = async (daysAgo: number, feedId: number) => {
   try {
     const response = await fetch(`${__API_URL__}/api/v1/news?daysAgo=${daysAgo}&feedId=${feedId}`, {
-      headers: {
-        'Authorization': `Basic ${btoa('read:read')}`
-      }
+      headers: { Authorization }
     })
     if (response.ok) {
       newsEntries.value = await response.json()

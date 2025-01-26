@@ -2,7 +2,9 @@
 
 set -eu
 
-source ./.env
+if [ -z "${NO_ENV_FILE:-}" ] && [ -f .env ]; then
+  source ./.env
+fi
 
 lastItemInProcess=
 

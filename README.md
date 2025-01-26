@@ -1,5 +1,7 @@
 # a news overview generator using AI
 
+Add a CHATGPT API key into docker-compose.yml and run `docker compose up --build`.
+
 ## setup
 
 run this for the database
