@@ -76,6 +76,10 @@ onMounted(() => {
   fetchFeeds()
 })
 
+const refreshNews = () => {
+  fetchNews(daysAgo.value, selectedFeed.value)
+}
+
 const morningNews = computed(() => {
   return newsEntries.value.filter((entry) => {
     const hour = new Date(entry.createdOn).getHours()
@@ -98,10 +102,9 @@ const nightNews = computed(() => {
 })
 
 const formattedOldestNewsDate = computed(() => {
-  if (newsEntries.value.length === 0) {
-    return ''
-  }
-  return new Date(newsEntries.value?.[0].createdOn).toLocaleDateString()
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo.value)
+  return date.toLocaleDateString()
 });
 </script>
 
@@ -112,8 +115,9 @@ const formattedOldestNewsDate = computed(() => {
       <option value="0">Alle Feeds</option>
       <option v-for="feed in feedEntries" :key="feed.id" :value="feed.id">{{ feed.title }}</option>
     </select> &nbsp;
-    <button @click="previousDay">Previous Day</button> &nbsp;
-    <button @click="nextDay" :disabled="daysAgo === 0">Next Day</button>
+    <button @click="previousDay" :disabled="newsEntries.length === 0">Previous Day</button> &nbsp;
+    <button @click="nextDay" :disabled="daysAgo === 0">Next Day</button> &nbsp;
+    <button @click="refreshNews">Refresh</button>
     <div v-if="newsEntries.length > 0">
 
       <h3 v-if="nightNews.length > 0">Night News</h3>
