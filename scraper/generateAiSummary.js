@@ -2,11 +2,11 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const { MODEL, CHATGPT_API_KEY, GENERATION_ENGINE } = process.env;
+const { MODEL, API_KEY, GENERATION_ENGINE } = process.env;
 
 const chatgpt = async (systemContent) => {
   const payload = {
-    model: "gpt-4o-mini", // Replace with your desired model, e.g., "gpt-4" or "gpt-3.5-turbo"
+    model: MODEL, // Replace with your desired model, e.g., "gpt-4" or "gpt-3.5-turbo"
     messages: [
       {
         role: "system",
@@ -24,7 +24,49 @@ const chatgpt = async (systemContent) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${CHATGPT_API_KEY}`,
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.log("Call Deepseek failed:", response.status, response.statusText);
+      console.log(await response.text());
+      process.exit(1);
+    }
+
+    const result = await response.json();
+    const summary = result.choices[0].message.content;
+
+    return summary;
+  } catch (error) {
+    console.error("Error fetching Deepseek response:", error);
+    throw error;
+  }
+};
+
+
+const deepseek = async (systemContent) => {
+  const payload = {
+    model: MODEL,
+    messages: [
+      {
+        role: "system",
+        content: "Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
+      },
+      {
+        role: "user",
+        content: "Fasse den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`,
       },
       body: JSON.stringify(payload),
     });
@@ -129,6 +171,9 @@ process.stdin.on('end', async () => {
         break;
       case 'chatgpt':
         console.log(await chatgpt(systemContent));
+        break;
+      case 'deepseek':
+        console.log(await deepseek(systemContent));
         break;
       case 'ollama-high':
         console.log(await ollamaHighMem(systemContent));

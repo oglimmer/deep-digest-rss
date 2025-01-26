@@ -1,6 +1,6 @@
 # a news overview generator using AI
 
-Add a CHATGPT API key into docker-compose.yml and run `docker compose up --build`.
+Add a Chatgpt or Deepseek API key into docker-compose.yml and run `docker compose up --build`.
 
 ## setup
 
