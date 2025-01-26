@@ -31,6 +31,16 @@ public class NewsService {
         }
     }
 
+    public List<News> getNewsRollingWindow(long feedId, int daysAgo) {
+        Instant start = Instant.now().minus(daysAgo, ChronoUnit.DAYS);
+        Instant end = start.plus(1, ChronoUnit.DAYS);
+        if (feedId == 0) {
+            return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
+        } else {
+            return newsRepository.findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(feedId, start, end);
+        }
+    }
+
     public News createNews(News news) {
         news.getOriginalFeedItem().setProcessState(ProcessState.DONE);
         news.getOriginalFeedItem().setUpdatedOn(Instant.now());
