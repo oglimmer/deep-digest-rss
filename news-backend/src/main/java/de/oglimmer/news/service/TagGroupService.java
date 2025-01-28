@@ -47,8 +47,8 @@ public class TagGroupService {
         }
     }
 
-    public Map<String, String[]> getTodaysTags() {
-        LocalDate today = LocalDate.now();
+    public Map<String, String[]> getTags(int daysAgo) {
+        LocalDate today = LocalDate.now().minusDays(daysAgo);
         return tagGroupRepository.findByCreatedOn(today)
                 .stream()
                 .collect(Collectors.toMap(TagGroup::getTitle, tagGroup -> tagGroup.getTags().stream().map(Tags::getText).toArray(String[]::new)));

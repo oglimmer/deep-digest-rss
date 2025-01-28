@@ -29,8 +29,8 @@ public class TagGroupController {
     }
 
     @GetMapping
-    public Map<String, String[]> getTodaysTags() {
-        return tagGroupService.getTodaysTags();
+    public Map<String, String[]> getTags(@RequestParam(required = false, defaultValue = "0") int daysAgo) {
+        return tagGroupService.getTags(daysAgo);
     }
 
 

@@ -77,19 +77,21 @@ const fetchNews = async (daysAgo: number, feedId: number) => {
 const previousDay = () => {
   daysAgo.value += 1
   fetchNews(daysAgo.value, selectedFeed.value)
+  fetchTagGroup(daysAgo.value)
 }
 
 const nextDay = () => {
   if (daysAgo.value > 0) {
     daysAgo.value -= 1
     fetchNews(daysAgo.value, selectedFeed.value)
+    fetchTagGroup(daysAgo.value)
   }
 }
 
 onMounted(() => {
   fetchNews(daysAgo.value, selectedFeed.value)
   fetchFeeds()
-  fetchTagGroup()
+  fetchTagGroup(daysAgo.value)
 })
 
 const refreshNews = () => {
@@ -117,9 +119,9 @@ const filteredNewsByTagGroup = computed(() => {
   return newsEntries.value.filter((entry) => !(excludeAds.value && entry.advertising) && entry.tags.some((tag) => tags.includes(tag)))
 })
 
-const fetchTagGroup = async () => {
+const fetchTagGroup = async (daysAgo: number) => {
   try {
-    const response = await fetch(`${__API_URL__}/api/v1/tag-group`, {
+    const response = await fetch(`${__API_URL__}/api/v1/tag-group?daysAgo=${daysAgo}`, {
       headers: { Authorization }
     })
     if (response.ok) {
