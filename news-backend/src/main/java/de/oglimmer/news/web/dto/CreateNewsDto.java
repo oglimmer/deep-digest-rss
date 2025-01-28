@@ -15,4 +15,8 @@ public class CreateNewsDto {
 
     private String text;
 
+    private Boolean advertising;
+
+    private String[] tags;
+
 }

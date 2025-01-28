@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import NewsSection from './NewsSection.vue';
 
 const Authorization = `Basic ${btoa(__API_USER__+':'+__API_USER__)}`;
 
@@ -10,6 +12,8 @@ interface NewsEntry {
   url: string
   text: string
   title: string
+  advertising: boolean
+  tags: string[]
 }
 
 interface FeedEntry {
@@ -21,9 +25,20 @@ interface FeedEntry {
 
 const feedEntries = ref<FeedEntry[]>([])
 const selectedFeed = ref(0)
+const tagGroupKeys = ref<string[]>([])
+const selectedTagGroup = ref('')
 
 const newsEntries = ref<NewsEntry[]>([])
 const daysAgo = ref(0)
+
+const cookies = useCookies()
+const excludeAds = ref(cookies.get('excludeAds') === true)
+
+watch(excludeAds, (newValue) => {
+  const expirationDate = new Date()
+  expirationDate.setDate(expirationDate.getDate() + 365)
+  cookies.set('excludeAds', newValue, { expires: expirationDate })
+})
 
 const fetchFeeds = async () => {
   try {
@@ -74,28 +89,66 @@ const nextDay = () => {
 onMounted(() => {
   fetchNews(daysAgo.value, selectedFeed.value)
   fetchFeeds()
+  fetchTagGroup()
 })
 
 const refreshNews = () => {
   fetchNews(daysAgo.value, selectedFeed.value)
 }
 
+let tagGroupData: Record<string, string[]> = {}
+
+const tagGroupCounts = computed(() => {
+  const counts: Record<string, number> = {};
+  for (const key of tagGroupKeys.value) {
+    const tags = tagGroupData[key] || [];
+    counts[key] = newsEntries.value.filter((entry) =>
+      entry.tags.some((tag) => tags.includes(tag))
+    ).length;
+  }
+  return counts;
+});
+  
+const filteredNewsByTagGroup = computed(() => {
+  if (!selectedTagGroup.value) {
+    return newsEntries.value.filter((entry) => !(excludeAds.value && entry.advertising))
+  }
+  const tags = tagGroupData[selectedTagGroup.value] || [];
+  return newsEntries.value.filter((entry) => !(excludeAds.value && entry.advertising) && entry.tags.some((tag) => tags.includes(tag)))
+})
+
+const fetchTagGroup = async () => {
+  try {
+    const response = await fetch(`${__API_URL__}/api/v1/tag-group`, {
+      headers: { Authorization }
+    })
+    if (response.ok) {
+      tagGroupData = await response.json()
+      tagGroupKeys.value = Object.keys(tagGroupData)
+    } else {
+      console.error('Failed to fetch tag group data')
+    }
+  } catch (error) {
+    console.error('Error fetching tag group data:', error)
+  }
+};
+
 const morningNews = computed(() => {
-  return newsEntries.value.filter((entry) => {
+  return filteredNewsByTagGroup.value.filter((entry) => {
     const hour = new Date(entry.createdOn).getHours()
     return hour >= 0 && hour < 12
   })
 })
 
 const afternoonNews = computed(() => {
-  return newsEntries.value.filter((entry) => {
+  return filteredNewsByTagGroup.value.filter((entry) => {
     const hour = new Date(entry.createdOn).getHours()
     return hour >= 12 && hour < 18
   })
 })
 
 const nightNews = computed(() => {
-  return newsEntries.value.filter((entry) => {
+  return filteredNewsByTagGroup.value.filter((entry) => {
     const hour = new Date(entry.createdOn).getHours()
     return hour >= 18 && hour < 24
   })
@@ -115,34 +168,25 @@ const formattedOldestNewsDate = computed(() => {
       <option value="0">Alle Feeds</option>
       <option v-for="feed in feedEntries" :key="feed.id" :value="feed.id">{{ feed.title }}</option>
     </select> &nbsp;
-    <button @click="previousDay" :disabled="newsEntries.length === 0">Previous Day</button> &nbsp;
+    <button @click="previousDay" :disabled="filteredNewsByTagGroup.length === 0">Previous Day</button> &nbsp;
     <button @click="nextDay" :disabled="daysAgo === 0">Next Day</button> &nbsp;
-    <button @click="refreshNews">Refresh</button>
-    <div v-if="newsEntries.length > 0">
+    <button @click="refreshNews">Refresh</button> |
+    <label>
+      Exclude Ads
+      <input type="checkbox" v-model="excludeAds" />        
+    </label> |
+    Filter
+    <select v-model="selectedTagGroup">
+      <option value=""></option>
+      <option v-for="key in tagGroupKeys" :key="key" :value="key">
+        {{ key }} ({{ tagGroupCounts[key] }})
+      </option>
+    </select> &nbsp;
+    <div v-if="filteredNewsByTagGroup.length > 0">
 
-      <h3 v-if="nightNews.length > 0">Night News</h3>
-      <ul v-if="nightNews.length > 0">
-        <li v-for="entry in nightNews" :key="entry.id">
-          <a :href="entry.url" target="_blank">[{{ entry.feedId }}]</a> {{ entry.title }}
-          <p>{{ entry.text }}</p>
-        </li>
-      </ul>
-
-      <h3 v-if="afternoonNews.length > 0">Afternoon News</h3>
-      <ul v-if="afternoonNews.length > 0">
-        <li v-for="entry in afternoonNews" :key="entry.id">
-          <a :href="entry.url" target="_blank">[{{ entry.feedId }}]</a> {{ entry.title }}
-          <p>{{ entry.text }}</p>
-        </li>
-      </ul>
-
-      <h3 v-if="morningNews.length > 0">Morning News</h3>
-      <ul v-if="morningNews.length > 0">
-        <li v-for="entry in morningNews" :key="entry.id">
-          <a :href="entry.url" target="_blank">[{{ entry.feedId }}]</a> {{ entry.title }}
-          <p>{{ entry.text }}</p>
-        </li>
-      </ul>
+      <NewsSection :newsEntries="nightNews" sectionHeader="Night News" />
+      <NewsSection :newsEntries="afternoonNews" sectionHeader="Afternoon News" />
+      <NewsSection :newsEntries="morningNews" sectionHeader="Morning News" />
 
     </div>
     <p v-else>Keine Nachrichten für diesen Tag</p>

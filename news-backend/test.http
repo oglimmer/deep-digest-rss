@@ -1,8 +1,10 @@
 ### get all feeds
-http://localhost:8888/api/v1/feed
+GET http://localhost:8888/api/v1/feed
+Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get today
-http://localhost:8888/api/v1/news?daysAgo=0&feedId=1
+GET http://localhost:8888/api/v1/news?daysAgo=0&feedId=1
+Authorization: Basic d3JpdGU6d3JpdGU=
 
 
 ### create feed-item-to-process
@@ -46,6 +48,146 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 
 {
   "feedId": 1,
-  "originalFeedItemId": 10,
-  "text": "test - text -2"
+  "originalFeedItemId": 253,
+  "text": "test - text -2",
+  "advertising": true,
+  "tags": ["tag1","tag3"]
+}
+
+### get all tag gropus
+GET http://localhost:8888/api/v1/tag-group/raw
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+### get all tag gropus
+GET http://localhost:8888/api/v1/tag-group
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+### get all tag gropus
+PATCH http://localhost:8888/api/v1/tag-group
+Content-Type: application/json
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+{
+  "tags": {
+    "Software Development": [
+      "Softwareentwicklung",
+      "C#",
+      ".NET",
+      "NMF Expressions",
+      "Algorithmen",
+      "Datenanalyse",
+      "Java",
+      "Codierung",
+      "SQL-Injection",
+      "Remote Code Execution"
+    ],
+    "Energy and Power Solutions": [
+      "Notstromversorgung",
+      "Ecoflow Delta 3 Pro",
+      "Powerstation",
+      "Camping",
+      "Akkukapazität",
+      "USV-Funktion",
+      "Solarpanel",
+      "Leistung",
+      "Anschlüsse",
+      "Ladezeit"
+    ],
+    "Politics and International Relations": [
+      "Donald Trump",
+      "Tim Cook",
+      "Strafzölle",
+      "Kartellklage",
+      "EU-Regulierung",
+      "Klimaziele",
+      "FDP",
+      "Migration",
+      "Ausreisezentren",
+      "Abschiebungen"
+    ],
+    "Technology and IT Security": [
+      "IT-Ausgaben",
+      "Gartner",
+      "KI-optimierte Server",
+      "Hyperscaler",
+      "generative KI",
+      "Marktanalyse",
+      "Cybersecurity",
+      "Firewalls",
+      "Firmware",
+      "Bootloader"
+    ],
+    "Sports": [
+      "VfB Stuttgart",
+      "Fußball-Bundesliga",
+      "FC St. Pauli",
+      "Union Berlin",
+      "Steffen Baumgart",
+      "Morgan Guilavogui",
+      "Danel Sinani",
+      "Handball-WM",
+      "Deutschland",
+      "Portugal"
+    ],
+    "Science and Astronomy": [
+      "Asteroid",
+      "Mond",
+      "Studie",
+      "Astronomie",
+      "Weltall",
+      "Erde",
+      "Kosmologie",
+      "The Astrophysical Journal Letters",
+      "Teleskope",
+      "Apollo"
+    ],
+    "Social Issues and Culture": [
+      "LGBTQ+",
+      "Rassismus",
+      "Sexuelle Belästigung",
+      "Migrationsdebatte",
+      "Soziale Probleme",
+      "Alkoholiker",
+      "Obdachlosigkeit",
+      "Randalierer",
+      "Kultur",
+      "Sprachförderung"
+    ],
+    "Business and Economy": [
+      "Elon Musk",
+      "Donald Tusk",
+      "Dani Dayan",
+      "Olaf Scholz",
+      "Yad Vashem",
+      "Nationalsozialismus",
+      "Deutsche Geschichte",
+      "Politische Kontroversen",
+      "Wirtschaft",
+      "Ifo-Index"
+    ],
+    "Environment and Climate": [
+      "Klimaziele",
+      "Klimaschutz",
+      "Photovoltaik",
+      "Elektromobilität",
+      "Elektroautos",
+      "Gebrauchtwagen",
+      "TÜV-Report",
+      "Kaufberatung",
+      "Hyundai Kona EV",
+      "Opel Corsa-e"
+    ],
+    "Entertainment and Media": [
+      "Reese Witherspoon",
+      "Natürlich blond",
+      "Geschworenendienst",
+      "Hollywood",
+      "Jura",
+      "Beverly Hills",
+      "Hundebissfall",
+      "Steven Spielberg",
+      "Drew Barrymore",
+      "E.T. – Der Außerirdische"
+    ]
+  }
 }

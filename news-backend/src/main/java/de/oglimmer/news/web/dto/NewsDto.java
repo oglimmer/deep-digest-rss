@@ -23,4 +23,8 @@ public class NewsDto {
 
     private String title;
 
+    private Boolean advertising;
+
+    private String[] tags;
+
 }

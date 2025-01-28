@@ -13,12 +13,17 @@ import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Configuration
 public class ModelMapperConfig {
 
     private FeedRepository feedRepository;
     private FeedItemToProcessRepository feedItemToProcessRepository;
+    private TagsRepository tagsRepository;
 
     @Bean
     public ModelMapper modelMapper() {
@@ -61,6 +66,20 @@ public class ModelMapperConfig {
                 .findById(context.getSource())
                 .orElseThrow(() -> new InvalidDataException("FeedItemToProcess mit der id " + context.getSource() + " existiert nicht"))
                 : null;
+        Converter<String[], List<Tags>> tagsConverter = context -> {
+            if (context.getSource() == null) {
+                return null;
+            }
+            return Arrays.stream(context.getSource())
+                    .map(tagName -> tagsRepository.findByText(tagName).orElse(Tags.builder().text(tagName).build()))
+                    .collect(Collectors.toList());
+        };
+        Converter<List<Tags>, String[]> tagsConverterBack = context -> {
+            if (context.getSource() == null) {
+                return null;
+            }
+            return context.getSource().stream().map(Tags::getText).toArray(String[]::new);
+        };
 
         modelMapper.addMappings(new PropertyMap<CreateNewsDto, News>() {
             @Override
@@ -71,11 +90,13 @@ public class ModelMapperConfig {
                 skip(destination.getUrl());
                 using(feedConverter).map(source.getFeedId(), destination.getFeed());
                 using(feedItemToProcessConverter).map(source.getOriginalFeedItemId(), destination.getOriginalFeedItem());
+                using(tagsConverter).map(source.getTags(), destination.getTags());
             }
         });
         modelMapper.addMappings(new PropertyMap<News, NewsDto>() {
             @Override
             protected void configure() {
+                using(tagsConverterBack).map(source.getTags(), destination.getTags());
             }
         });
     }

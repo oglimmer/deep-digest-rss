@@ -1,9 +1,6 @@
 package de.oglimmer.news.service;
 
-import de.oglimmer.news.db.FeedItemToProcessRepository;
-import de.oglimmer.news.db.NewsRepository;
-import de.oglimmer.news.db.News;
-import de.oglimmer.news.db.ProcessState;
+import de.oglimmer.news.db.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +16,7 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final FeedItemToProcessRepository feedItemToProcessRepository;
+    private final TagsRepository tagsRepository;
 
     public List<News> getNews(long feedId, int daysAgo) {
         // the variable daysAgo defines for which day data is shown. daysAgo = 0 means today. daysAgo = 1 yesterday and so on. we only return the data for this day
@@ -47,6 +45,7 @@ public class NewsService {
         news.setCreatedOn(Instant.now());
         news.setTitle(news.getOriginalFeedItem().getTitle());
         news.setUrl(news.getOriginalFeedItem().getUrl());
+        tagsRepository.saveAll(news.getTags());
         feedItemToProcessRepository.save(news.getOriginalFeedItem());
         return newsRepository.save(news);
     }

@@ -10,13 +10,16 @@ const chatgpt = async (systemContent) => {
     messages: [
       {
         role: "system",
-        content: "Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
+        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. Gültige Tags sind 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', 'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', 'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', 'Verkehr', 'Recht', 'Demokratie', 'Handel', 'Energie', 'Musik', 'Film', 'Literatur', 'Wissenschaft'. Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
       },
       {
         role: "user",
         content: "Fasse den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
       },
     ],
+    response_format: {
+      type: "json_object"
+    },
   };
 
   try {
@@ -30,8 +33,8 @@ const chatgpt = async (systemContent) => {
     });
 
     if (!response.ok) {
-      console.log("Call Deepseek failed:", response.status, response.statusText);
-      console.log(await response.text());
+      console.error("Call chatgpt failed:", response.status, response.statusText);
+      console.error(await response.text());
       process.exit(1);
     }
 
@@ -40,7 +43,7 @@ const chatgpt = async (systemContent) => {
 
     return summary;
   } catch (error) {
-    console.error("Error fetching Deepseek response:", error);
+    console.error("Error fetching chatgpt response:", error);
     throw error;
   }
 };
@@ -52,14 +55,22 @@ const deepseek = async (systemContent) => {
     messages: [
       {
         role: "system",
-        content: "Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
+        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. Gültige Tags sind 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', 'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', 'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', 'Verkehr', 'Recht', 'Demokratie', 'Handel', 'Energie', 'Musik', 'Film', 'Literatur', 'Wissenschaft'. Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
       },
       {
         role: "user",
         content: "Fasse den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
       },
     ],
+    response_format: {
+      type: "json_object"
+    },
+    max_tokens: 6000,
+    presence_penalty: 1.0,
+    stream: false,
   };
+
+  // console.error(payload);
 
   try {
     const response = await fetch("https://api.deepseek.com/chat/completions", {
@@ -72,17 +83,22 @@ const deepseek = async (systemContent) => {
     });
 
     if (!response.ok) {
-      console.log("Call chatgpt failed:", response.status, response.statusText);
-      console.log(await response.text());
+      console.error("Call deepseek failed:", response.status, response.statusText);
+      console.error(await response.text());
       process.exit(1);
     }
 
-    const result = await response.json();
+    const resultBody = await response.text();
+    if (!resultBody.trim()) {
+      console.error("Empty news response from deepseek");
+      process.exit(1);
+    }
+    const result = JSON.parse(resultBody);
     const summary = result.choices[0].message.content;
 
     return summary;
   } catch (error) {
-    console.error("Error fetching ChatGPT response:", error);
+    console.error("Error fetching deepseek response:", error);
     throw error;
   }
 };
@@ -105,10 +121,32 @@ const ollamaHighMem = async (systemContent) => {
     stream: false,
     options: {
       num_ctx: 50024
+    },
+    "format": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "advertising": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "summary",
+        "tags",
+        "advertising"
+      ]
     }
   };
 
-  // console.log(payload)
+  // console.error(payload)
 
   const response = await fetch('http://localhost:11434/api/chat', {
     method: 'POST',
@@ -119,7 +157,7 @@ const ollamaHighMem = async (systemContent) => {
   });
   if (response.status != 200) {
     // exit 1
-    console.log("Call ollama failed:", response);
+    console.error("Call ollama failed:", response);
     process.exit(1);
   }
 
@@ -145,7 +183,7 @@ const ollamaLowMem = async (systemContent) => {
 
   if (response.status != 200) {
     // exit 1
-    console.log("Call ollama failed:", response);
+    console.error("Call ollama failed:", response);
     process.exit(1);
   }
 

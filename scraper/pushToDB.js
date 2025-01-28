@@ -16,6 +16,16 @@ process.stdin.on('data', function(chunk) {
 
 process.stdin.on('end', async () => {
   try {
+    console.log(systemContent);
+
+    if (!systemContent.trim()) {
+      console.error('No content to push to db');
+      process.exit(1);
+    }
+
+    const parsedContent = JSON.parse(systemContent);
+    const { summary, tags, advertising } = parsedContent;
+
     const response = await fetch(URL + '/api/v1/news', {
       method: 'POST',
       headers: {
@@ -25,10 +35,12 @@ process.stdin.on('end', async () => {
       body: JSON.stringify({
         feedId: feedId,
         originalFeedItemId: id,
-        text: systemContent
+        text: summary,
+        tags: tags,
+        advertising: advertising
       })
     });
-    // const result = await response.json();
+
     if (response.status != 200) {
       console.error('Call to news-api failed. ', response);
       process.exit(1);

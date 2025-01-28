@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,17 +30,24 @@ public class News {
     private FeedItemToProcess originalFeedItem;
 
     @Column(nullable = false)
-//    @NotNull
     private String url;
 
     @Column(nullable = false)
-//    @NotNull
     private String title;
 
     @Lob
     @Column(nullable = false, length = 2_000_000)
     @NotNull
     private String text;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "news_tags",
+            joinColumns = @JoinColumn(name = "news_id"),
+            inverseJoinColumns = @JoinColumn(name = "tags_id"))
+    private List<Tags> tags;
+
+    private Boolean advertising;
 
     @Column(nullable = false)
     @NotNull

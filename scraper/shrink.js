@@ -23,7 +23,7 @@ process.stdin.on('end', () => {
         // Replace the words with an empty string
         const cleanedString = data.replace(regex, '').replace(/\s+/g, ' ').trim();
 
-        const maxLength = 100000;
+        const maxLength = MAX_SIZE;
         let output = '';
         if (cleanedString.length > maxLength) {
             output = cleanedString.slice(0, maxLength);
