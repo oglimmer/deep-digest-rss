@@ -6,11 +6,11 @@ WORKDIR /app
 
 # Copy the pom.xml and download dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN MAVEN_OPTS=-XX:UseSVE=0 mvn dependency:go-offline
 
 # Copy the source code and build the application
 COPY src ./src
-RUN mvn package -DskipTests
+RUN MAVEN_OPTS=-XX:UseSVE=0 mvn package -DskipTests
 
 # Second stage: Create the runtime image
 FROM openjdk:21-jdk-slim
@@ -25,4 +25,4 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8888
 
 # Run the JAR file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:UseSVE=0", "-jar", "app.jar"]

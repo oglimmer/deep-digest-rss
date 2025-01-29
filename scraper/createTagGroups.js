@@ -179,7 +179,7 @@ try {
         }),
     });
 
-    if (responsePatch.status != 200) {
+    if (responsePatch.status != 200 && responsePatch.status != 304) {
       console.error('Call to tag-group failed. ', responsePatch);
       process.exit(1);
     }

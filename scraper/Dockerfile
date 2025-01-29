@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y jq
 
 WORKDIR /app
 
-copy . .
+COPY . .
 
 RUN npm install
 

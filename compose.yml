@@ -52,8 +52,7 @@ services:
       # - GENERATION_ENGINE=anthropic
   scraper-tags:
     build: scraper
-    command:
-     - ./run.sh taggroups
+    command: ["./run.sh", "taggroups"]
     environment:
       - NO_ENV_FILE=true
       - USERNAME=write
