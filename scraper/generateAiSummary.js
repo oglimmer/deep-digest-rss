@@ -103,6 +103,59 @@ const deepseek = async (systemContent) => {
   }
 };
 
+const anthropic = async (systemContent) => {
+  const payload = {
+    model: MODEL,
+    messages: [
+      {
+        role: "user",
+        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit " + 
+          " true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. " + 
+          "Gültige Tags sind 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', " + 
+          "'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', " + 
+          "'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', " + 
+          "'Verkehr', 'Recht', 'Demokratie', 'Handel', 'Energie', 'Musik', 'Film', 'Literatur', 'Wissenschaft'. <content>" + systemContent + "</content>" +
+          "Fasse den content auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
+      },
+    ],
+    "max_tokens": 8000
+  };
+
+  // console.error(payload);
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("Call anthropics failed:", response.status, response.statusText);
+      console.error(await response.text());
+      process.exit(1);
+    }
+
+    const resultBody = await response.text();
+    if (!resultBody.trim()) {
+      console.error("Empty news response from anthropics");
+      process.exit(1);
+    }
+    const result = JSON.parse(resultBody);
+    const summary = result.content[0].text;
+
+    return summary;
+  } catch (error) {
+    console.error("Error fetching anthropics response:", error);
+    throw error;
+  }
+};
+
+
 
 const ollamaHighMem = async (systemContent) => {
   
@@ -212,6 +265,9 @@ process.stdin.on('end', async () => {
         break;
       case 'deepseek':
         console.log(await deepseek(systemContent));
+        break;
+      case 'anthropic':
+        console.log(await anthropic(systemContent));
         break;
       case 'ollama-high':
         console.log(await ollamaHighMem(systemContent));

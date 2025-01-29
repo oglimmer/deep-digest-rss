@@ -69,7 +69,44 @@ try {
             console.error("Error fetching chatgpt response:", error);
             throw error;
         }
-        
+    } else if (GENERATION_ENGINE === 'anthropic') {
+      
+            const payload = {
+                model: MODEL,
+                messages: [
+                    {
+                        role: "user",
+                        content: question,
+                    },
+                ],
+                "max_tokens": 8000
+            };
+    
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "x-api-key": API_KEY,
+                        "anthropic-version": "2023-06-01",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload),
+                });
+    
+                if (!response.ok) {
+                    console.error("Call anthropic failed:", response.status, response.statusText);
+                    console.error(await response.text());
+                    process.exit(1);
+                }
+    
+                const result = await response.json();
+                genResult = result.content[0].text;
+    
+            } catch (error) {
+                console.error("Error fetching anthropic response:", error);
+                throw error;
+            }
+            
     } else if (GENERATION_ENGINE === 'deepseek') {      
           const payload = {
               model: MODEL,
