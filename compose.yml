@@ -32,6 +32,8 @@ services:
       interval: 10s
       timeout: 60s
       retries: 5
+    ports:
+      - "3306:3306"
   scraper:
     build: scraper
     environment:

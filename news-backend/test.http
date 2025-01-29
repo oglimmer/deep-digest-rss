@@ -191,3 +191,25 @@ Authorization: Basic d3JpdGU6d3JpdGU=
     ]
   }
 }
+
+### get all tag gropus
+PATCH http://localhost:8888/api/v1/tag-group
+Content-Type: application/json
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+{
+  "tags": {
+    "Software Development": [
+      "Softwareentwicklung",
+      "C#",
+      ".NET",
+      "NMF Expressions",
+      "Algorithmen",
+      "Datenanalyse",
+      "Java",
+      "Codierung",
+      "SQL-Injection",
+      "Remote Code Execution"
+    ]
+  }
+}
