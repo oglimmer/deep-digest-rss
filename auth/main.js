@@ -36,8 +36,11 @@ app.get('/', async (req, res) => {
     if (req.cookies && req.cookies.auth) {
         const reply = await client.get(req.cookies.auth);
         if (reply === 'exists') {
+            console.log(`Session token ${req.cookies.auth} is valid`);
             res.status(200).send('200 OK');
             return;
+        } else {
+            console.log(`Session token ${req.cookies.auth} is invalid`);
         }
     }
 
@@ -46,6 +49,7 @@ app.get('/', async (req, res) => {
     const credentials = parseBasicAuth(authHeader);
 
     if (!credentials) {
+        console.log('No valid cookie or basic auth header');
         res.setHeader('WWW-Authenticate', 'Basic realm="Authentication Required"');
         res.status(401).send('Authentication required');
         return;
@@ -55,16 +59,18 @@ app.get('/', async (req, res) => {
         // Generate a new session token and store in Redis
         const sessionToken = Math.random().toString(36).substring(2);
         await client.set(sessionToken, 'exists', { EX: lifetimeInSecods });
+        console.log(`New session token ${sessionToken} created`);
 
-        // Set the cookie
-        res.cookie('auth', sessionToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: lifetimeInSecods * 1000
-        });
-
-        res.status(200).send('200 OK');
+        res
+            .status(200)
+            .cookie('auth', sessionToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV !== 'debug',
+                maxAge: lifetimeInSecods * 1000
+            })
+            .send('200 OK');
     } else {
+        console.log('Invalid credentials');
         res.setHeader('WWW-Authenticate', 'Basic realm="Authentication Required"');
         res.status(401).send('Invalid credentials');
     }
