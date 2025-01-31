@@ -38,32 +38,19 @@ services:
     build: scraper
     environment:
       - NO_ENV_FILE=true
-      - USERNAME=write
-      - PASSWORD=write
-      - URL=http://backend:8888
-      # - MODEL=gpt-4o-mini
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=chatgpt
-      # - MODEL=deepseek-chat
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=deepseek
-      # - MODEL=claude-3-5-sonnet-20241022
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=anthropic
+      - USERNAME=${USERNAME:?No username defined}
+      - PASSWORD=${PASSWORD:?No password defined}
+      - URL=${URL:?No URL defined}
+      - MODEL=${MODEL:?No model defined}
+      - API_KEY=${API_KEY:?No API KEY defined}
+      - GENERATION_ENGINE=${GENERATION_ENGINE:?No generation engine defined}
   scraper-tags:
     build: scraper
     command: ["./run.sh", "taggroups"]
     environment:
-      - NO_ENV_FILE=true
-      - USERNAME=write
-      - PASSWORD=write
-      - URL=http://backend:8888
-      # - MODEL=gpt-4o-mini
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=chatgpt
-      # - MODEL=deepseek-chat
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=deepseek
-      # - MODEL=claude-3-5-sonnet-20241022
-      # - API_KEY=XXX
-      # - GENERATION_ENGINE=anthropic
+      - USERNAME=${USERNAME:?No username defined}
+      - PASSWORD=${PASSWORD:?No password defined}
+      - URL=${URL:?No URL defined}
+      - MODEL=${MODEL:?No model defined}
+      - API_KEY=${API_KEY:?No API KEY defined}
+      - GENERATION_ENGINE=${GENERATION_ENGINE:?No generation engine defined}

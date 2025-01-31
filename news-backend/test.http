@@ -3,7 +3,7 @@ GET http://localhost:8888/api/v1/feed
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get today
-GET http://localhost:8888/api/v1/news?daysAgo=0&feedId=1
+GET http://localhost:8888/api/v1/news?daysAgo=0&feedId=0
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 

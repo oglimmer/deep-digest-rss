@@ -46,7 +46,7 @@ function convertXmlToUnifiedDataStructure(parsedFeed, refIds, unifiedEntries) {
       const items = channel.item;
   
       for (const item of items) {
-        const id = item.guid[0];
+        const id = item.guid[0]['_'] ? item.guid[0]['_'] : item.guid[0];
         const link = item.link[0];
         const title = item.title[0];
   

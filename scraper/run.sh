@@ -4,8 +4,13 @@ set -eu
 
 cd "$(dirname "$0")"
 
-if [ -z "${NO_ENV_FILE:-}" ] && [ -f .env ]; then
-  source ./.env
+if [ -z "${NO_ENV_FILE:-}" ]; then
+  if [ -f ../.env ]; then
+    cp ../.env ./.env
+  fi
+  if [ -f .env ]; then
+    source ./.env
+  fi
 fi
 
 ## fetch only
