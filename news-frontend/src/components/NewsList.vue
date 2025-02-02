@@ -59,7 +59,7 @@ onMounted(async () => {
 
 const refreshNews = async () => {
   loading.value = true
-  await fetchNews(daysAgoToDate(), selectedFeed.value)
+  newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
   loading.value = false
 }
 
