@@ -1,4 +1,4 @@
-package de.oglimmer.news.config;
+package de.oglimmer.news.config.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

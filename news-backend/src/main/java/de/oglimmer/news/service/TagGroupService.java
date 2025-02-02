@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,9 +77,8 @@ public class TagGroupService {
         return true;
     }
 
-    public Map<String, String[]> getTags(int daysAgo) {
-        LocalDate today = LocalDate.now().minusDays(daysAgo);
-        return tagGroupRepository.findByCreatedOn(today)
+    public Map<String, String[]> getTags(LocalDate dateUtc) {
+        return tagGroupRepository.findByCreatedOn(dateUtc)
                 .stream()
                 .collect(Collectors.toMap(TagGroup::getTitle, tagGroup -> tagGroup.getTags().stream().map(Tags::getText).toArray(String[]::new)));
     }

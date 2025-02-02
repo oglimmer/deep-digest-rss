@@ -1,5 +1,6 @@
 package de.oglimmer.news.config;
 
+import de.oglimmer.news.config.auth.QueryParamAuthConfigurer;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

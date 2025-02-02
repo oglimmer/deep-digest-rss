@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service
 @AllArgsConstructor
@@ -18,9 +20,8 @@ public class NewsService {
     private final FeedItemToProcessRepository feedItemToProcessRepository;
     private final TagsRepository tagsRepository;
 
-    public List<News> getNews(long feedId, int daysAgo) {
-        // the variable daysAgo defines for which day data is shown. daysAgo = 0 means today. daysAgo = 1 yesterday and so on. we only return the data for this day
-        Instant start = Instant.now().truncatedTo(ChronoUnit.DAYS).minus(daysAgo, ChronoUnit.DAYS);
+    public List<News> getNews(long feedId, LocalDate date, TimeZone timeZone) {
+        Instant start = date.atStartOfDay(timeZone.toZoneId()).toInstant();
         Instant end = start.plus(1, ChronoUnit.DAYS);
         if (feedId == 0) {
             return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);

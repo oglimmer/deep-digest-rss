@@ -1,4 +1,4 @@
-package de.oglimmer.news.config;
+package de.oglimmer.news.config.auth;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

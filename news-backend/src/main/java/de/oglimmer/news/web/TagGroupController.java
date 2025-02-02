@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.*;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -32,10 +34,21 @@ public class TagGroupController {
     }
 
     @GetMapping
-    public Map<String, String[]> getTags(@RequestParam(required = false, defaultValue = "0") int daysAgo) {
-        return tagGroupService.getTags(daysAgo);
+    public Map<String, String[]> getTags(@RequestParam(required = false, defaultValue = "") String date,
+                                         @RequestParam(required = false, defaultValue = "Europe/Berlin") String timeZone) {
+        LocalDate dateAsLocalDate = date.isEmpty() ? LocalDate.now() : LocalDate.parse(date);
+        TimeZone timeZoneAsTimeZone = TimeZone.getTimeZone(timeZone);
+        LocalDate dateAsUtc = convertDateToDateByMovingTimeFromLocalToUtc(timeZoneAsTimeZone, dateAsLocalDate);
+        return tagGroupService.getTags(dateAsUtc);
     }
 
+    private static LocalDate convertDateToDateByMovingTimeFromLocalToUtc(TimeZone timeZoneAsTimeZone, LocalDate dateAsLocalDate) {
+        ZoneId zoneId = timeZoneAsTimeZone.toZoneId();
+        LocalTime localTime = LocalTime.now(zoneId);
+        LocalDateTime zonedDateTimeOriginal = dateAsLocalDate.atTime(localTime);
+        ZonedDateTime utcZonedDateTime = zonedDateTimeOriginal.atZone((ZoneId.of("UTC")));
+        return utcZonedDateTime.toLocalDate();
+    }
 
     @PatchMapping
     public ResponseEntity<Void> updateTags(@RequestBody CreateTagGroupDto createTagGroupDto) {

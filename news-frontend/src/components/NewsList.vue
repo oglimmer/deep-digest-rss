@@ -2,8 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import NewsSection from './NewsSection.vue';
-
-const Authorization = `Basic ${btoa(__API_USER__+':'+__API_USER__)}`;
+import { fetchFeeds, fetchNews, fetchTagGroup } from '@/servies/remote.ts'
 
 interface NewsEntry {
   id: number
@@ -33,6 +32,7 @@ const daysAgo = ref(0)
 
 const cookies = useCookies()
 const excludeAds = ref(cookies.get('excludeAds') === true)
+const loading = ref(false)
 
 watch(excludeAds, (newValue) => {
   const expirationDate = new Date()
@@ -40,62 +40,37 @@ watch(excludeAds, (newValue) => {
   cookies.set('excludeAds', newValue, { expires: expirationDate })
 })
 
-const fetchFeeds = async () => {
-  try {
-    const response = await fetch(`${__API_URL__}/api/v1/feed`, {
-      headers: { Authorization }
-    })
-    if (response.ok) {
-      feedEntries.value = await response.json()
-    } else {
-      console.error('Failed to fetch news entries')
-    }
-  } catch (error) {
-    console.error('Error fetching news entries:', error)
-  }
-}
-
-watch(selectedFeed, () => {
-  fetchNews(daysAgo.value, selectedFeed.value)
+watch(selectedFeed, async () => {
+  newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
 })
 
-const fetchNews = async (daysAgo: number, feedId: number) => {
-  try {
-    const response = await fetch(`${__API_URL__}/api/v1/news?daysAgo=${daysAgo}&feedId=${feedId}`, {
-      headers: { Authorization }
-    })
-    if (response.ok) {
-      newsEntries.value = await response.json()
-    } else {
-      console.error('Failed to fetch news entries')
-    }
-  } catch (error) {
-    console.error('Error fetching news entries:', error)
-  }
-}
-
-const previousDay = () => {
+const previousDay = async () => {
   daysAgo.value += 1
-  fetchNews(daysAgo.value, selectedFeed.value)
-  fetchTagGroup(daysAgo.value)
+  newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
+  tagGroupData = await fetchTagGroup(daysAgoToDate())
+  tagGroupKeys.value = Object.keys(tagGroupData)
 }
 
-const nextDay = () => {
+const nextDay = async () => {
   if (daysAgo.value > 0) {
     daysAgo.value -= 1
-    fetchNews(daysAgo.value, selectedFeed.value)
-    fetchTagGroup(daysAgo.value)
+    newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
+    tagGroupData = await fetchTagGroup(daysAgoToDate())
+    tagGroupKeys.value = Object.keys(tagGroupData)
   }
 }
 
-onMounted(() => {
-  fetchNews(daysAgo.value, selectedFeed.value)
-  fetchFeeds()
-  fetchTagGroup(daysAgo.value)
+onMounted(async () => {
+  newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
+  feedEntries.value = await fetchFeeds();
+  tagGroupData = await fetchTagGroup(daysAgoToDate())
+  tagGroupKeys.value = Object.keys(tagGroupData)
 })
 
-const refreshNews = () => {
-  fetchNews(daysAgo.value, selectedFeed.value)
+const refreshNews = async () => {
+  loading.value = true
+  await fetchNews(daysAgoToDate(), selectedFeed.value)
+  loading.value = false
 }
 
 let tagGroupData: Record<string, string[]> = {}
@@ -110,7 +85,7 @@ const tagGroupCounts = computed(() => {
   }
   return counts;
 });
-  
+
 const filteredNewsByTagGroup = computed(() => {
   if (!selectedTagGroup.value) {
     return newsEntries.value.filter((entry) => !(excludeAds.value && entry.advertising))
@@ -118,22 +93,6 @@ const filteredNewsByTagGroup = computed(() => {
   const tags = tagGroupData[selectedTagGroup.value] || [];
   return newsEntries.value.filter((entry) => !(excludeAds.value && entry.advertising) && entry.tags.some((tag) => tags.includes(tag)))
 })
-
-const fetchTagGroup = async (daysAgo: number) => {
-  try {
-    const response = await fetch(`${__API_URL__}/api/v1/tag-group?daysAgo=${daysAgo}`, {
-      headers: { Authorization }
-    })
-    if (response.ok) {
-      tagGroupData = await response.json()
-      tagGroupKeys.value = Object.keys(tagGroupData)
-    } else {
-      console.error('Failed to fetch tag group data')
-    }
-  } catch (error) {
-    console.error('Error fetching tag group data:', error)
-  }
-};
 
 const morningNews = computed(() => {
   return filteredNewsByTagGroup.value.filter((entry) => {
@@ -157,10 +116,14 @@ const nightNews = computed(() => {
 })
 
 const formattedOldestNewsDate = computed(() => {
+  return daysAgoToDate().toLocaleDateString()
+});
+
+const daysAgoToDate = () : Date => {
   const date = new Date()
   date.setDate(date.getDate() - daysAgo.value)
-  return date.toLocaleDateString()
-});
+  return date
+};
 </script>
 
 <template>
@@ -172,10 +135,10 @@ const formattedOldestNewsDate = computed(() => {
     </select> &nbsp;
     <button @click="previousDay" :disabled="filteredNewsByTagGroup.length === 0">Previous Day</button> &nbsp;
     <button @click="nextDay" :disabled="daysAgo === 0">Next Day</button> &nbsp;
-    <button @click="refreshNews">Refresh</button> |
+    <button @click="refreshNews" :disabled="loading" :class="{ 'loading': loading }">Refresh</button> |
     <label>
       Exclude Ads
-      <input type="checkbox" v-model="excludeAds" />        
+      <input type="checkbox" v-model="excludeAds" />
     </label> |
     Filter
     <select v-model="selectedTagGroup">
@@ -196,5 +159,8 @@ const formattedOldestNewsDate = computed(() => {
 </template>
 
 <style scoped>
-
+.loading {
+  background-color: grey;
+  cursor: not-allowed;
+}
 </style>
