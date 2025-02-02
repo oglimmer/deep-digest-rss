@@ -1,25 +1,24 @@
 <script setup lang="ts">
-
-defineProps(["entry"])
-
+defineProps(['entry', 'feedTitle'])
 </script>
 
 <template>
-    <div>
-        <a :href="entry.url" target="_blank">[{{ entry.feedId }}]</a> 
-        <span class="ad" v-if="entry.advertising">AD</span> 
-        {{ entry.title }}
-        <div class="tags">
-          <span class="tag" v-for="tag in entry.tags">{{ tag }}</span>
-        </div>
-        <p>{{ entry.text }}</p>
+  <div>
+    <a :href="entry.url" target="_blank">[{{ feedTitle }}]</a>
+    <span class="ad" v-if="entry.advertising">AD</span>
+    {{ entry.title }}
+    <div class="tags">
+      <span class="tag" v-for="tag in entry.tags" :key="tag">{{ tag }}</span>
     </div>
+    <p>{{ entry.text }}</p>
+  </div>
 </template>
 
 <style scoped>
 .tags {
   margin-top: 9px;
 }
+
 .tag {
   display: inline-block;
   border: 1px solid #ccc;
@@ -30,6 +29,7 @@ defineProps(["entry"])
   font-size: 0.9em;
   color: #333;
 }
+
 .ad {
   display: inline-block;
   border: 1px solid #ff0000;
@@ -41,5 +41,4 @@ defineProps(["entry"])
   color: #ff0000;
   font-weight: bold;
 }
-
 </style>

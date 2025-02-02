@@ -3,24 +3,8 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import NewsSection from './NewsSection.vue';
 import { fetchFeeds, fetchNews, fetchTagGroup } from '@/servies/remote.ts'
+import type { FeedEntry, NewsEntry } from '@/interfaces.ts'
 
-interface NewsEntry {
-  id: number
-  feedId: number
-  createdOn: string
-  url: string
-  text: string
-  title: string
-  advertising: boolean
-  tags: string[]
-}
-
-interface FeedEntry {
-  id: number
-  url: string
-  title: string
-  createdOn: string
-}
 
 const feedEntries = ref<FeedEntry[]>([])
 const selectedFeed = ref(0)
@@ -149,9 +133,9 @@ const daysAgoToDate = () : Date => {
     </select> &nbsp;
     <div v-if="filteredNewsByTagGroup.length > 0">
 
-      <NewsSection :newsEntries="nightNews" sectionHeader="Night News" />
-      <NewsSection :newsEntries="afternoonNews" sectionHeader="Afternoon News" />
-      <NewsSection :newsEntries="morningNews" sectionHeader="Morning News" />
+      <NewsSection :newsEntries="nightNews" sectionHeader="Night News" :feedEntries="feedEntries" />
+      <NewsSection :newsEntries="afternoonNews" sectionHeader="Afternoon News" :feedEntries="feedEntries" />
+      <NewsSection :newsEntries="morningNews" sectionHeader="Morning News" :feedEntries="feedEntries" />
 
     </div>
     <p v-else>Keine Nachrichten für diesen Tag</p>
