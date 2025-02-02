@@ -45,10 +45,16 @@ const nextDay = async () => {
 }
 
 onMounted(async () => {
-  newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
-  feedEntries.value = await fetchFeeds();
-  tagGroupData = await fetchTagGroup(daysAgoToDate())
-  tagGroupKeys.value = Object.keys(tagGroupData)
+  fetchTagGroup(daysAgoToDate()).then((data) => {
+    tagGroupData = data
+    tagGroupKeys.value = Object.keys(tagGroupData)
+  })
+  fetchFeeds().then((data) => {
+    feedEntries.value = data
+  })
+  fetchNews(daysAgoToDate(), selectedFeed.value).then((news) => {
+    newsEntries.value = news
+  })
 })
 
 const refreshNews = async () => {
