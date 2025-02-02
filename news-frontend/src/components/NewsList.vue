@@ -5,7 +5,6 @@ import NewsSection from './NewsSection.vue';
 import { fetchFeeds, fetchNews, fetchTagGroup } from '@/servies/remote.ts'
 import type { FeedEntry, NewsEntry } from '@/interfaces.ts'
 
-
 const feedEntries = ref<FeedEntry[]>([])
 const selectedFeed = ref(0)
 const tagGroupKeys = ref<string[]>([])
@@ -123,7 +122,7 @@ const daysAgoToDate = () : Date => {
       <option value="0">Alle Feeds</option>
       <option v-for="feed in feedEntries" :key="feed.id" :value="feed.id">{{ feed.title }}</option>
     </select> &nbsp;
-    <button @click="previousDay" :disabled="filteredNewsByTagGroup.length === 0">Previous Day</button> &nbsp;
+    <button @click="previousDay">Previous Day</button> &nbsp;
     <button @click="nextDay" :disabled="daysAgo === 0">Next Day</button> &nbsp;
     <button @click="refreshNews" :disabled="loading" :class="{ 'loading': loading }">Refresh</button> |
     <label>

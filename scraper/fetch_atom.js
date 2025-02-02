@@ -120,7 +120,9 @@ async function processAtomFeed() {
     }      
   
     const currentDateTime = new Date().toLocaleString();
-    console.log('Done processing the Atom feed [%s] Added %d new entries. [%s]', ATOM_FEED_URL, filteredRefIds.length, currentDateTime);
+    if (filteredRefIds.length > 0) {
+      console.log('Done processing the Atom feed [%s] Added %d new entries. [%s]', ATOM_FEED_URL, filteredRefIds.length, currentDateTime);
+    }
   } catch (err) {
     console.error(`Error: ${err.message}`);
   }

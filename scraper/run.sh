@@ -78,14 +78,29 @@ if [ "$CMD" = "fetch" ]; then
         fi
         
         start_time=$(date +%s)
-        echo "********************************************************"
+        # echo "********************************************************"
 
-        echo "Fetching URL: $url with refId: $refId"
+        echo "Fetching URL: $url for feed: $feed_id"
 
-        curl -s "$url" \
-            -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
-            -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
-            --cookie "$cookie" > page.html
+        if echo "$cookie" | tr '[:upper:]' '[:lower:]' | grep -q "^# netscape http cookie file"; then
+            echo "$cookie" > cookies.txt
+            curl -L -s "$url" \
+              -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
+              -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+              -c "cookies.txt" -b "cookies.txt" > page.html
+
+            cookie=$(cat cookies.txt)
+            json_data=$(jq -n --arg cookie "$cookie" '{"cookie": $cookie}')
+            curl -s "${URL}/api/v1/feed/$feed_id" \
+              -H "Content-Type: application/json" \
+              -u "$USERNAME:$PASSWORD" -d "$json_data" \
+              -X PATCH
+        else
+            curl -s "$url" \
+              -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
+              -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+              --cookie "$cookie" > page.html
+        fi
 
         # Convert HTML to text based on the operating system
         if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -113,7 +128,7 @@ if [ "$CMD" = "fetch" ]; then
         node fetch_atom.js "$url" $id
       done
 
-      echo "No more items to process. Sleeping for 60 seconds."
+      # echo "No more items to process. Sleeping for 60 seconds."
       sleep 60
     else
       lastItemInProcess=

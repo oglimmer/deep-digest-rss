@@ -1,13 +1,12 @@
 package de.oglimmer.news.web;
 
+import de.oglimmer.news.db.Feed;
 import de.oglimmer.news.service.FeedService;
 import de.oglimmer.news.web.dto.FeedDto;
+import de.oglimmer.news.web.dto.PatchFeedDto;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,5 +28,10 @@ public class FeedController {
                 .collect(Collectors.toList());
     }
 
+    @PatchMapping("/{id}")
+    public FeedDto updateFeed(@PathVariable Long id, @RequestBody PatchFeedDto feedDto) {
+        Feed feed = feedService.updateFeed(id, feedDto);
+        return modelMapper.map(feed, FeedDto.class);
+    }
 
 }

@@ -16,7 +16,7 @@ process.stdin.on('data', function(chunk) {
 
 process.stdin.on('end', async () => {
   try {
-    console.log(systemContent);
+    // console.log(systemContent);
 
     if (!systemContent.trim()) {
       console.error('No content to push to db');
