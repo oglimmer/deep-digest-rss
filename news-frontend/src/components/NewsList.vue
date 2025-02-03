@@ -59,6 +59,7 @@ onMounted(async () => {
 const refreshNews = async () => {
   loading.value = true
   newsEntries.value = await fetchNews(daysAgoToDate(), selectedFeed.value)
+  tagGroupData = await fetchTagGroup(daysAgoToDate())
   loading.value = false
 }
 

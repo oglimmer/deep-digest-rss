@@ -83,18 +83,25 @@ if [ "$CMD" = "fetch" ]; then
         echo "Fetching URL: $url for feed: $feed_id"
 
         if echo "$cookie" | tr '[:upper:]' '[:lower:]' | grep -q "^# netscape http cookie file"; then
-            echo "$cookie" > cookies.txt
+            echo "$cookie" | tee cookies.txt
+            wc cookies.txt
             curl -L -s "$url" \
-              -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
-              -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
-              -c "cookies.txt" -b "cookies.txt" > page.html
+              --compressed -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
+              -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' \
+              -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' \
+              -H 'Sec-Fetch-Dest: document' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Site: none' -H 'Sec-Fetch-User: ?1' \
+              -H 'Priority: u=0, i' -H 'Pragma: no-cache' -H 'Cache-Control: no-cache' -H 'TE: trailers' \
+              --cookie "cookies.txt" --cookie-jar "cookies-saved.txt" -o page.html
+            wc cookies-saved.txt
 
-            cookie=$(cat cookies.txt)
+            cookie=$(cat cookies-saved.txt)
             json_data=$(jq -n --arg cookie "$cookie" '{"cookie": $cookie}')
-            curl -s "${URL}/api/v1/feed/$feed_id" \
+            curl -v -s "${URL}/api/v1/feed/$feed_id" \
               -H "Content-Type: application/json" \
               -u "$USERNAME:$PASSWORD" -d "$json_data" \
               -X PATCH
+            
+            wc page.html
         else
             curl -s "$url" \
               -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
