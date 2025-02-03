@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue'
 import NewsItem from './NewsItem.vue'
 import type { FeedEntry, NewsEntry } from '@/interfaces.ts'
 
