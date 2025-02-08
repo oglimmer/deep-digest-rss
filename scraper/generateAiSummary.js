@@ -155,20 +155,18 @@ const anthropic = async (systemContent) => {
   }
 };
 
-
-
 const ollamaHighMem = async (systemContent) => {
   
   const payload = {
     model: MODEL,
     messages: [
       {
-        role: 'system',
-        content: 'Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: ' + systemContent,
+        role: "system",
+        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: " + systemContent,
       },
       {
-        role: 'user',
-        content: 'Fasse den den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.',
+        role: "user",
+        content: "Fasse den Hauptartikel auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
       },
     ],
     stream: false,
@@ -215,10 +213,66 @@ const ollamaHighMem = async (systemContent) => {
   }
 
   const result = await response.json();
+  const summary = JSON.parse(result.message.content);
+
+  return summary;
+}
+
+const ollamaHighMemTags = async (systemContent) => {
+  
+  const payload = {
+    model: MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: 'Dies ist der Inhalt einer vollständigen HTML-Seite, die deine Kenntnisse definiert: ' + systemContent,
+      },
+      {
+        role: 'user',
+        content: "Wähle 5 der relevantesten tags aus dieser Liste: 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', 'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', 'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', 'Verkehr', 'Recht', 'Demokratie', 'Handel', 'Energie', 'Musik', 'Film', 'Literatur', 'Wissenschaft'.",
+      }
+    ],
+    stream: false,
+    options: {
+      num_ctx: 50024
+    },
+    "format": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+      },
+      "required": [
+        "tags"
+      ]
+    }
+  };
+
+  // console.error(payload)
+
+  const response = await fetch('http://localhost:11434/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (response.status != 200) {
+    // exit 1
+    console.error("Call ollama failed:", response);
+    process.exit(1);
+  }
+
+  const result = await response.json();
   const summary = result.message.content;
 
   return summary;
 }
+
 
 const ollamaLowMem = async (systemContent) => {
 
@@ -246,6 +300,8 @@ const ollamaLowMem = async (systemContent) => {
   return summary;
 }
 
+const command = process.argv[2];
+
 let systemContent = '';
 process.stdin.setEncoding('utf8');
 
@@ -256,25 +312,36 @@ process.stdin.on('data', function(chunk) {
 process.stdin.on('end', async () => {
     // systemContent = data.trim().replace(/[\n\r\t]/g, '').replace(/"/g, ' ').replace(/'/g, ' ');
 
-    switch (GENERATION_ENGINE) {
-      case 'ollama-low':
-        console.log(await ollamaLowMem(systemContent));
-        break;
-      case 'chatgpt':
-        console.log(await chatgpt(systemContent));
-        break;
-      case 'deepseek':
-        console.log(await deepseek(systemContent));
-        break;
-      case 'anthropic':
-        console.log(await anthropic(systemContent));
-        break;
-      case 'ollama-high':
-        console.log(await ollamaHighMem(systemContent));
-        break;
-      default:
-        console.log("Invalid generation engine specified");
-        process.exit(1);
+    if (!command || command === 'text') {
+      switch (GENERATION_ENGINE) {
+        case 'ollama-low':
+          console.log(await ollamaLowMem(systemContent));
+          break;
+        case 'chatgpt':
+          console.log(await chatgpt(systemContent));
+          break;
+        case 'deepseek':
+          console.log(await deepseek(systemContent));
+          break;
+        case 'anthropic':
+          console.log(await anthropic(systemContent));
+          break;
+        case 'ollama-high':
+          console.log(JSON.stringify(await ollamaHighMem(systemContent)));
+          break;
+        default:
+          console.log("Invalid generation engine specified");
+          process.exit(1);
+      }
+    } else if (command === 'tags') {
+      switch (GENERATION_ENGINE) {
+        case 'ollama-high':
+          console.log(await ollamaHighMemTags(systemContent));
+          break;
+        default:
+          console.log("Invalid generation engine specified");
+          process.exit(1);
+      }
     }
 
 });

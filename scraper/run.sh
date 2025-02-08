@@ -83,8 +83,7 @@ if [ "$CMD" = "fetch" ]; then
         echo "Fetching URL: $url for feed: $feed_id"
 
         if echo "$cookie" | tr '[:upper:]' '[:lower:]' | grep -q "^# netscape http cookie file"; then
-            echo "$cookie" | tee cookies.txt
-            wc cookies.txt
+            echo "$cookie" > cookies.txt
             curl -L -s "$url" \
               --compressed -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
               -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' \
@@ -92,16 +91,14 @@ if [ "$CMD" = "fetch" ]; then
               -H 'Sec-Fetch-Dest: document' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Site: none' -H 'Sec-Fetch-User: ?1' \
               -H 'Priority: u=0, i' -H 'Pragma: no-cache' -H 'Cache-Control: no-cache' -H 'TE: trailers' \
               --cookie "cookies.txt" --cookie-jar "cookies-saved.txt" -o page.html
-            wc cookies-saved.txt
 
             cookie=$(cat cookies-saved.txt)
             json_data=$(jq -n --arg cookie "$cookie" '{"cookie": $cookie}')
-            curl -v -s "${URL}/api/v1/feed/$feed_id" \
+            curl -s "${URL}/api/v1/feed/$feed_id" \
               -H "Content-Type: application/json" \
               -u "$USERNAME:$PASSWORD" -d "$json_data" \
               -X PATCH
             
-            wc page.html
         else
             curl -s "$url" \
               -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
@@ -135,8 +132,13 @@ if [ "$CMD" = "fetch" ]; then
         node fetch_atom.js "$url" $id
       done
 
-      # echo "No more items to process. Sleeping for 60 seconds."
-      sleep 60
+      hasNextItem=$(curl -s "${URL}/api/v1/feed-item-to-process/has-next" \
+        -u "$USERNAME:$PASSWORD")
+
+      if [ "$hasNextItem" = "0" ]; then
+        # echo "No more items to process. Sleeping for 60 seconds."
+        sleep 60
+      fi
     else
       lastItemInProcess=
       echo "An unexpected HTTP status code was returned: $responseBodyAndStatus"

@@ -20,24 +20,20 @@ public class NewsService {
     private final FeedItemToProcessRepository feedItemToProcessRepository;
     private final TagsRepository tagsRepository;
 
-    public List<News> getNews(long feedId, LocalDate date, TimeZone timeZone) {
+    public List<News> getNews(List<Long> feedIds, LocalDate date, TimeZone timeZone) {
         Instant start = date.atStartOfDay(timeZone.toZoneId()).toInstant();
         Instant end = start.plus(1, ChronoUnit.DAYS);
-        if (feedId == 0) {
+        if (feedIds.isEmpty()) {
             return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
         } else {
-            return newsRepository.findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(feedId, start, end);
+            return newsRepository.findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(feedIds, start, end);
         }
     }
 
-    public List<News> getNewsRollingWindow(long feedId, int daysAgo) {
+    public List<News> getNewsRollingWindow(int daysAgo) {
         Instant start = Instant.now().minus(daysAgo, ChronoUnit.DAYS);
         Instant end = start.plus(1, ChronoUnit.DAYS);
-        if (feedId == 0) {
-            return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
-        } else {
-            return newsRepository.findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(feedId, start, end);
-        }
+        return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
     }
 
     public News createNews(News news) {

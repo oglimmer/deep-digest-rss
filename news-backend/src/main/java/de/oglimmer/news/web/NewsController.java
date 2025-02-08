@@ -10,9 +10,11 @@ import org.springframework.cglib.core.Local;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CrossOrigin
 @RestController
@@ -26,10 +28,11 @@ public class NewsController {
 
     @GetMapping
     public List<NewsDto> getNews(@RequestParam(required = false, defaultValue = "") String date,
-                                 @RequestParam(required = false, defaultValue = "0") long feedId,
+                                 @RequestParam(required = false, defaultValue = "") String feedIdList,
                                  @RequestParam(required = false, defaultValue = "Europe/Berlin") String timeZone) {
         LocalDate dateAsLocalDate = date.isEmpty() ? LocalDate.now() : LocalDate.parse(date);
-        return newsService.getNews(feedId, dateAsLocalDate, TimeZone.getTimeZone(timeZone)).stream()
+        List<Long> feedIds = feedIdList.isEmpty() ? Collections.emptyList() : Stream.of(feedIdList.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        return newsService.getNews(feedIds, dateAsLocalDate, TimeZone.getTimeZone(timeZone)).stream()
                 .map(news -> modelMapper.map(news, NewsDto.class))
                 .collect(Collectors.toList());
     }

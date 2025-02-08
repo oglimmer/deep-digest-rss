@@ -34,7 +34,7 @@ public class RssFeedView extends AbstractRssFeedView {
     @Override
     protected List<Item> buildFeedItems(Map<String, Object> model,
                                         HttpServletRequest request, HttpServletResponse response) {
-        return newsService.getNewsRollingWindow(0, 1).stream().map(this::createItem).toList();
+        return newsService.getNewsRollingWindow(1).stream().map(this::createItem).toList();
     }
 
     private Item createItem(News news) {

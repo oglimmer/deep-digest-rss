@@ -20,7 +20,7 @@ public class FeedItemToProcessService {
 
     private FeedItemToProcessRepository feedItemToProcessRepository;
 
-    public FeedItemToProcess getFeedItemToProcess() {
+    public FeedItemToProcess getFeedItemToProcessAndMarkAsInProcess() {
         Optional<FeedItemToProcess> feedItemToProcess = feedItemToProcessRepository.findFirstByProcessStateOrderByCreatedOnAsc(ProcessState.NEW);
         if (feedItemToProcess.isPresent()) {
             FeedItemToProcess itemToProcess = feedItemToProcess.get();
@@ -30,6 +30,11 @@ public class FeedItemToProcessService {
             return itemToProcess;
         }
         return null;
+    }
+
+    public boolean getFeedItemToProcess() {
+        Optional<FeedItemToProcess> feedItemToProcess = feedItemToProcessRepository.findFirstByProcessStateOrderByCreatedOnAsc(ProcessState.NEW);
+        return feedItemToProcess.isPresent();
     }
 
     public FeedItemToProcess createFeedItemToProcess(FeedItemToProcess feedItemToProcess) {

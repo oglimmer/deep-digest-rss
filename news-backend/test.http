@@ -29,6 +29,10 @@ User-Agent: PostmanRuntime/7.26.8
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get next feed-item-to-process
+GET http://localhost:8888/api/v1/feed-item-to-process/has-next
+Authorization: Basic d3JpdGU6d3JpdGU=
+
+### get next feed-item-to-process
 POST http://localhost:8888/api/v1/feed-item-to-process/filter
 Accept: application/json
 Content-Type: application/json

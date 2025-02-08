@@ -25,11 +25,17 @@ public class FeedItemToProcessController {
 
     @GetMapping("/next")
     public ResponseEntity<?> getNextFeedItemToProcess() {
-        FeedItemToProcess feedItemToProcess = feedItemToProcessService.getFeedItemToProcess();
+        FeedItemToProcess feedItemToProcess = feedItemToProcessService.getFeedItemToProcessAndMarkAsInProcess();
         if (feedItemToProcess == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(modelMapper.map(feedItemToProcess, FeedItemToProcessDto.class));
+    }
+
+    @GetMapping("/has-next")
+    public Integer checkForAvailability() {
+        boolean hasNext = feedItemToProcessService.getFeedItemToProcess();
+        return hasNext ? 1 : 0;
     }
 
     @PostMapping("/filter")
