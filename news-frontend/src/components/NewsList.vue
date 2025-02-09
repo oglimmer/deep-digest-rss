@@ -207,7 +207,7 @@ const scrollToTop = () => {
 <template>
   <div>
     <h2 @click="refreshNews">
-      Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
+      DeepDigestRSS - Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
     </h2>
     <!-- Custom styled feed select with a typical arrow -->
     <div class="dropdown" @click.stop="toggleFeedDropdown">

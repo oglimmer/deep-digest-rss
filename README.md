@@ -1,6 +1,6 @@
-# a news overview generator using AI
+# deep-digest-rss - a news overview generator using AI pulling RSS
 
-Add a Chatgpt or Deepseek API key into docker-compose.yml and run `docker compose up --build`.
+Copy .env.example to .env and add a Chatgpt, Deepseek or Anthropic API key. Then run `docker compose up --build`.
 
 ## setup
 
@@ -42,9 +42,7 @@ npm run dev
 cd news-backend
 ./mvnw spring-boot:run
 
-# the scraper needs access the REST API, so wait for it to be started
 cd scraper
-# copy .env.exmaple to .env
 ```
 
 Access http://localhost:5173/ for the UI

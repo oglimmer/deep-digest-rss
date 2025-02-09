@@ -26,12 +26,12 @@ public class SwaggerConfig {
                                                 .scheme("basic")
                                 )
                 )
-                .info(new Info().title("News-Overview API")
-                        .description("News-Overview")
+                .info(new Info().title("DeepDigestRSS API")
+                        .description("DeepDigestRSS")
                         .version("v0.0.1")
                         .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("News-Overview")
-                        .url("???"));
+                        .description("DeepDigestRSS")
+                        .url("https://github.com/oglimmer/deep-digest-rss"));
     }
 }
