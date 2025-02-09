@@ -106,16 +106,14 @@ const dropdownExcludedLabel = computed(() => {
     : 'none'
 })
 
-// Global function to close both dropdowns
+// Global function to close all dropdowns
 const closeAllDropdowns = () => {
   dropdownOpen.value = false
   dropdownExcludedOpen.value = false
+  dropdownFeedOpen.value = false
 }
 
 // --- Filtering Logic ---
-// 1. Remove entries flagged as ads (if excludeAds is set).
-// 2. Filter news by selected feeds (client side) similar to tag selection.
-// 3. Process tag group inclusion and exclusion.
 const filteredNews = computed(() => {
   let filtered = newsEntries.value.filter(
     (entry) => !(excludeAds.value && entry.advertising)
@@ -180,7 +178,6 @@ const daysAgoToDate = (): Date => {
 const feedNewsCounts = computed(() => {
     const counts: Record<number, number> = {}
     for (const feed of feedEntries.value) {
-        // Count entries for this feed from the complete set of news entries
         counts[feed.id] = newsEntries.value.filter(entry => entry.feedId === feed.id).length
     }
     return counts
@@ -196,6 +193,14 @@ const dropdownFeedOpen = ref(false)
 const toggleFeedDropdown = (event: MouseEvent) => {
   event.stopPropagation()
   dropdownFeedOpen.value = !dropdownFeedOpen.value
+}
+
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 }
 </script>
 
@@ -253,6 +258,7 @@ const toggleFeedDropdown = (event: MouseEvent) => {
   <div class="control-wrapper">
       <button @click="previousDay" class="custom-button">Previous Day</button>
       <button @click="nextDay" :disabled="daysAgo === 0" class="custom-button">Next Day</button>
+      <button @click="scrollToTop" class="custom-button">Scroll to top</button>
     </div>
     <!-- Loading Spinner -->
     <div v-if="loading" class="loading-spinner">
@@ -392,5 +398,9 @@ const toggleFeedDropdown = (event: MouseEvent) => {
   100% {
     transform: rotate(360deg);
   }
+}
+
+h2 {
+  cursor: pointer;
 }
 </style>
