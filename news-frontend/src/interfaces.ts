@@ -8,6 +8,7 @@ export interface NewsEntry {
   title: string
   advertising: boolean
   tags: string[]
+  voted: boolean
 }
 
 export interface FeedEntry {

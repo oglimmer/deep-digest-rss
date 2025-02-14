@@ -1,83 +1,40 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 import NewsSection from './NewsSection.vue'
-import { fetchFeeds, fetchNews, fetchTagGroup } from '@/services/remote'
-import type { FeedEntry, NewsEntry } from '@/interfaces.ts'
+import LoginForm from './LoginForm.vue'
+import { useDataStore } from '@/stores/data'
+import { daysAgoToDate } from "@/services/temporal"
 
-const feedEntries = ref<FeedEntry[]>([])
-const selectedFeeds = ref<number[]>([])
-const tagGroupKeys = ref<string[]>([])
+const dataStore = useDataStore()
 
-// For including tag groups (only show news matching these, if any are selected)
-const selectedTagGroups = ref<string[]>([])
-// For excluding tag groups (hide news matching any of these)
-const excludedTagGroups = ref<string[]>([])
-
-const newsEntries = ref<NewsEntry[]>([])
-const daysAgo = ref(0)
-const excludeAds = ref(false)
+// const excludeAds = ref(dataStore.excludeAds)
 const loading = ref(false)
 
-let tagGroupData: Record<string, string[]> = {}
-
 const previousDay = async () => {
-  daysAgo.value += 1
-  newsEntries.value = await fetchNews(daysAgoToDate(), []) // fetch without server-side feed filtering
-  tagGroupData = await fetchTagGroup(daysAgoToDate())
-  tagGroupKeys.value = Object.keys(tagGroupData)
+  dataStore.daysAgo += 1
+  refreshNews()
 }
 
 const nextDay = async () => {
-  if (daysAgo.value > 0) {
-    daysAgo.value -= 1
-    newsEntries.value = await fetchNews(daysAgoToDate(), []) // fetch without server-side feed filtering
-    tagGroupData = await fetchTagGroup(daysAgoToDate())
-    tagGroupKeys.value = Object.keys(tagGroupData)
+  if (dataStore.daysAgo > 0) {
+    dataStore.daysAgo -= 1
+    refreshNews()
   }
 }
 
 const refreshNews = async () => {
   loading.value = true
-  newsEntries.value = await fetchNews(daysAgoToDate(), []) // fetch without server-side feed filtering
-  tagGroupData = await fetchTagGroup(daysAgoToDate())
+  await dataStore.fetchNews()
+  await dataStore.fetchTagGroup()
   loading.value = false
 }
 
 onMounted(async () => {
   // Fetch initial tag groups, feeds, and news
-  fetchTagGroup(daysAgoToDate()).then((data) => {
-    tagGroupData = data
-    tagGroupKeys.value = Object.keys(tagGroupData)
-  })
-  fetchFeeds().then((data) => {
-    feedEntries.value = data
-  })
-  fetchNews(daysAgoToDate(), selectedFeeds.value).then((data) => {
-    newsEntries.value = data
-  })
-
-  // Add a global click listener to close both dropdowns when clicking outside
-  document.addEventListener('click', closeAllDropdowns)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeAllDropdowns)
-})
-
-// --- Computed property for tag group counts ---
-const tagGroupCounts = computed(() => {
-  const counts: Record<string, number> = {}
-  const filteredNewsEntries = selectedFeeds.value.length > 0
-    ? newsEntries.value.filter(entry => selectedFeeds.value.includes(entry.feedId))
-    : newsEntries.value
-
-  for (const key of tagGroupKeys.value) {
-    const tags = tagGroupData[key] || []
-    counts[key] = filteredNewsEntries.filter((entry) =>
-      entry.tags.some((tag) => tags.includes(tag))
-    ).length
-  }
-  return counts
+  dataStore.fetchTagGroup()
+  dataStore.fetchFeeds()
+  dataStore.fetchNews()
 })
 
 // --- Dropdown for Including Tag Groups ---
@@ -88,8 +45,8 @@ const toggleDropdown = (event: MouseEvent) => {
 }
 
 const dropdownLabel = computed(() => {
-  return selectedTagGroups.value.length > 0
-    ? selectedTagGroups.value.join(', ')
+  return dataStore.selectedTagGroups.length > 0
+    ? dataStore.selectedTagGroups.join(', ')
     : 'none'
 })
 
@@ -101,8 +58,8 @@ const toggleExcludedDropdown = (event: MouseEvent) => {
 }
 
 const dropdownExcludedLabel = computed(() => {
-  return excludedTagGroups.value.length > 0
-    ? excludedTagGroups.value.join(', ')
+  return dataStore.excludedTagGroups.length > 0
+    ? dataStore.excludedTagGroups.join(', ')
     : 'none'
 })
 
@@ -113,79 +70,23 @@ const closeAllDropdowns = () => {
   dropdownFeedOpen.value = false
 }
 
-// --- Filtering Logic ---
-const filteredNews = computed(() => {
-  let filtered = newsEntries.value.filter(
-    (entry) => !(excludeAds.value && entry.advertising)
-  )
-  
-  // Client-side feed filtering
-  if (selectedFeeds.value.length > 0) {
-    filtered = filtered.filter(entry => selectedFeeds.value.includes(entry.feedId))
-  }
-
-  if (selectedTagGroups.value.length > 0) {
-    const allowedTags = new Set<string>()
-    selectedTagGroups.value.forEach(group => {
-      ;(tagGroupData[group] || []).forEach(tag => allowedTags.add(tag))
-    })
-    filtered = filtered.filter(entry => entry.tags.some(tag => allowedTags.has(tag)))
-  }
-
-  if (excludedTagGroups.value.length > 0) {
-    const excludedTags = new Set<string>()
-    excludedTagGroups.value.forEach(group => {
-      ;(tagGroupData[group] || []).forEach(tag => excludedTags.add(tag))
-    })
-    filtered = filtered.filter(entry => !entry.tags.some(tag => excludedTags.has(tag)))
-  }
-
-  return filtered
-})
-
-const morningNews = computed(() => {
-  return filteredNews.value.filter((entry) => {
-    const hour = new Date(entry.createdOn).getHours()
-    return hour >= 0 && hour < 12
-  })
-})
-
-const afternoonNews = computed(() => {
-  return filteredNews.value.filter((entry) => {
-    const hour = new Date(entry.createdOn).getHours()
-    return hour >= 12 && hour < 18
-  })
-})
-
-const nightNews = computed(() => {
-  return filteredNews.value.filter((entry) => {
-    const hour = new Date(entry.createdOn).getHours()
-    return hour >= 18 && hour < 24
-  })
-})
-
 const formattedOldestNewsDate = computed(() => {
-  return daysAgoToDate().toLocaleDateString()
+  return daysAgoToDate(dataStore.daysAgo).toLocaleDateString()
 })
 
-const daysAgoToDate = (): Date => {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo.value)
-  return date
-}
-
-// Updated computed property to calculate counts from total newsEntries
 const feedNewsCounts = computed(() => {
-    const counts: Record<number, number> = {}
-    for (const feed of feedEntries.value) {
-        counts[feed.id] = newsEntries.value.filter(entry => entry.feedId === feed.id).length
-    }
-    return counts
+  const counts: Record<number, number> = {}
+  for (const feed of dataStore.feedEntries) {
+    counts[feed.id] = dataStore.newsEntries.filter(entry => entry.feedId === feed.id).length
+  }
+  return counts
 })
 
 const feedDropdownLabel = computed(() => {
-  return selectedFeeds.value.length > 0
-    ? selectedFeeds.value.map(id => feedEntries.value.find(feed => feed.id === id)?.title).join(', ')
+  return dataStore.selectedFeeds.length > 0
+    ? dataStore.selectedFeeds.map(id =>
+        dataStore.feedEntries.find(feed => feed.id === id)?.title
+      ).join(', ')
     : 'Filter Feeds'
 })
 
@@ -195,20 +96,30 @@ const toggleFeedDropdown = (event: MouseEvent) => {
   dropdownFeedOpen.value = !dropdownFeedOpen.value
 }
 
-
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     behavior: 'smooth'
   })
 }
+
+// --- Modal for Login ---
+const showModal = ref(false)
+const toggleModal = () => {
+  showModal.value = !showModal.value
+}
+
+const container = ref<HTMLElement|null>(null)
+onClickOutside(container, closeAllDropdowns)
 </script>
 
 <template>
-  <div>
+  <div ref="container">
     <h2 @click="refreshNews">
-      DeepDigestRSS - Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
+      Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
     </h2>
+    <!-- Login Button -->
+    <button v-if="!dataStore.loggedIn" @click="toggleModal" class="login-button">L</button>
     <!-- Custom styled feed select with a typical arrow -->
     <div class="dropdown" @click.stop="toggleFeedDropdown">
       <div class="dropdown-header">
@@ -216,8 +127,8 @@ const scrollToTop = () => {
         <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
       </div>
       <div class="dropdown-menu" v-if="dropdownFeedOpen" @click.stop>
-        <label v-for="feed in feedEntries" :key="feed.id" class="dropdown-item">
-          <input type="checkbox" :value="feed.id" v-model="selectedFeeds" />
+        <label v-for="feed in dataStore.feedEntries" :key="feed.id" class="dropdown-item">
+          <input type="checkbox" :value="feed.id" v-model="dataStore.selectedFeeds" />
           {{ feed.title }} ({{ feedNewsCounts[feed.id] || 0 }})
         </label>
       </div>
@@ -229,9 +140,9 @@ const scrollToTop = () => {
         <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
       </div>
       <div class="dropdown-menu" v-if="dropdownOpen" @click.stop>
-        <label v-for="key in tagGroupKeys" :key="key" class="dropdown-item">
-          <input type="checkbox" :value="key" v-model="selectedTagGroups" />
-          {{ key }} ({{ tagGroupCounts[key] }})
+        <label v-for="key in dataStore.tagGroupKeys" :key="key" class="dropdown-item">
+          <input type="checkbox" :value="key" v-model="dataStore.selectedTagGroups" />
+          {{ key }} ({{ dataStore.tagGroupCounts[key] }})
         </label>
       </div>
     </div>
@@ -242,28 +153,36 @@ const scrollToTop = () => {
         <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
       </div>
       <div class="dropdown-menu" v-if="dropdownExcludedOpen" @click.stop>
-        <label v-for="key in tagGroupKeys" :key="key" class="dropdown-item">
-          <input type="checkbox" :value="key" v-model="excludedTagGroups" />
-          {{ key }} ({{ tagGroupCounts[key] }})
+        <label v-for="key in dataStore.tagGroupKeys" :key="key" class="dropdown-item">
+          <input type="checkbox" :value="key" v-model="dataStore.excludedTagGroups" />
+          {{ key }} ({{ dataStore.tagGroupCounts[key] }})
         </label>
       </div>
     </div>
-    <div v-if="filteredNews.length > 0">
-      <NewsSection :newsEntries="nightNews" sectionHeader="Night News" :feedEntries="feedEntries" />
-      <NewsSection :newsEntries="afternoonNews" sectionHeader="Afternoon News" :feedEntries="feedEntries" />
-      <NewsSection :newsEntries="morningNews" sectionHeader="Morning News" :feedEntries="feedEntries" />
-    </div>
-    <p v-else>Keine Nachrichten für diesen Tag</p>
   </div>
+  <div v-if="dataStore.filteredNews.length > 0">
+    <NewsSection :newsEntries="dataStore.nightNews" sectionHeader="Night News" :feedEntries="dataStore.feedEntries" />
+    <NewsSection :newsEntries="dataStore.afternoonNews" sectionHeader="Afternoon News" :feedEntries="dataStore.feedEntries" />
+    <NewsSection :newsEntries="dataStore.morningNews" sectionHeader="Morning News" :feedEntries="dataStore.feedEntries" />
+  </div>
+  <p v-else>Keine Nachrichten für diesen Tag</p>
+
   <div class="control-wrapper">
-      <button @click="previousDay" class="custom-button">Previous Day</button>
-      <button @click="nextDay" :disabled="daysAgo === 0" class="custom-button">Next Day</button>
-      <button @click="scrollToTop" class="custom-button">Scroll to top</button>
+    <button @click="previousDay" :disabled="loading" class="custom-button">Previous Day</button>
+    <button @click="nextDay" :disabled="loading || dataStore.daysAgo === 0" class="custom-button">Next Day</button>
+    <button @click="scrollToTop" class="custom-button">Scroll to top</button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div v-if="loading" class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+  <!-- Modal Overlay -->
+  <div v-if="showModal" class="modal-overlay" @click="toggleModal">
+    <div class="modal-content" @click.stop>
+      <LoginForm :closeModal="toggleModal" />
     </div>
-    <!-- Loading Spinner -->
-    <div v-if="loading" class="loading-spinner">
-      <div class="spinner"></div>
-    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -356,7 +275,7 @@ const scrollToTop = () => {
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
-  
+
   padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   max-height: 200px;
@@ -402,5 +321,61 @@ const scrollToTop = () => {
 
 h2 {
   cursor: pointer;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.close-button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+
+.login-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.login-button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
 }
 </style>

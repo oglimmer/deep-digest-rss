@@ -27,4 +27,6 @@ public class NewsDto {
 
     private String[] tags;
 
+    private boolean voted;
+
 }

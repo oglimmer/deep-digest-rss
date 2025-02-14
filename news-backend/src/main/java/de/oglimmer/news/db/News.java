@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @Entity(name = "news")
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "feed")
+@ToString(exclude = {"feed", "votes", "tags"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,6 +39,9 @@ public class News {
     @Column(nullable = false, length = 2_000_000)
     @NotNull
     private String text;
+
+    @OneToMany(mappedBy = "news", fetch = FetchType.LAZY)
+    private List<NewsVote> votes;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

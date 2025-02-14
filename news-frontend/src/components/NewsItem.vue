@@ -1,5 +1,16 @@
 <script setup lang="ts">
-defineProps(['entry', 'feedTitle'])
+import { useDataStore } from '@/stores/data';
+
+const dataStore = useDataStore();
+
+const props = defineProps(['entry', 'feedTitle'])
+
+const sendVoteUp = async () => {
+  dataStore.addVote(props.entry.id, true);
+};
+const sendVoteDown = async () => {
+  dataStore.addVote(props.entry.id, false);
+};
 </script>
 
 <template>
@@ -9,6 +20,12 @@ defineProps(['entry', 'feedTitle'])
     {{ entry.title }}
     <div class="tags">
       <span class="tag" v-for="tag in entry.tags" :key="tag">{{ tag }}</span>
+      <span v-if="dataStore.loggedIn && !entry.voted"> &nbsp;
+        <a href="#" @click.prevent="sendVoteUp">+1</a>
+      </span>
+      <span v-if="dataStore.loggedIn && entry.voted"> &nbsp;
+        <a href="#" @click.prevent="sendVoteDown">-1</a>
+      </span>
     </div>
     <p>{{ entry.text }}</p>
   </div>

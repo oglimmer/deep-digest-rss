@@ -88,6 +88,7 @@ public class ModelMapperConfig {
                 skip(destination.getCreatedOn());
                 skip(destination.getTitle());
                 skip(destination.getUrl());
+                skip(destination.getVotes());
                 using(feedConverter).map(source.getFeedId(), destination.getFeed());
                 using(feedItemToProcessConverter).map(source.getOriginalFeedItemId(), destination.getOriginalFeedItem());
                 using(tagsConverter).map(source.getTags(), destination.getTags());
@@ -96,6 +97,8 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<News, NewsDto>() {
             @Override
             protected void configure() {
+//                using(context -> !((News) context.getSource()).getVotes().isEmpty()).map(source, destination.isVoted());
+                skip(destination.isVoted());
                 using(tagsConverterBack).map(source.getTags(), destination.getTags());
             }
         });
