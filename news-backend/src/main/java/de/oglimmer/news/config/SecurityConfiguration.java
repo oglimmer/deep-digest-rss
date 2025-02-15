@@ -86,7 +86,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(POST, "/api/v1/news").hasRole("ADMIN")
                                 .requestMatchers(POST, "/api/v1/news/*/vote").hasRole("USER")
                                 .requestMatchers(PATCH, "/api/v1/tag-group").hasRole("ADMIN")
-                                .anyRequest().hasRole("READONLY")
+                                .requestMatchers("/api/v1/**").hasRole("READONLY")
+                                .anyRequest().permitAll() // always end with permitAll otherwise exceptions are always converted to 401
                 )
 //                .rememberMe((remember) -> remember
 //                        .rememberMeServices(rememberMeServices)
