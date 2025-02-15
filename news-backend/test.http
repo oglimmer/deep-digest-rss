@@ -235,3 +235,7 @@ Content-Type: application/json
   "email": "test@foo.com",
   "password": "test"
 }
+
+### get news for user
+GET http://localhost:8888/api/v1/user/me/voted-news
+Authorization: Basic dGVzdEBmb28uY29tOjY4NDk1NzA0MTgxOTM4MTg2NzY=

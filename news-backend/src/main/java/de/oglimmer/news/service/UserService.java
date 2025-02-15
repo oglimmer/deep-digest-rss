@@ -35,6 +35,9 @@ public class UserService {
     public User authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email).orElseThrow();
         if (passwordEncoder.matches(password, user.getPassword())) {
+            if (user.getAuthToken() != null && user.getAuthTokenValidUntil().isAfter(Instant.now())) {
+                return user;
+            }
             long token = new Random().nextLong();
             user.setAuthToken(Long.toString(token < 0 ? -token : token));
             user.setAuthTokenValidUntil(Instant.now().plusSeconds(365 * 24 * 60 * 60));

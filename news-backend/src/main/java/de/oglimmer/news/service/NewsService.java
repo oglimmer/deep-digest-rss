@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -94,5 +95,27 @@ public class NewsService {
             list.forEach(newsDto -> newsDto.setVoted(voteMap.getOrDefault(newsDto.getId(), false)));
         }
         return list;
+    }
+
+    public List<String> userNews(String id, String date, String email) {
+        User user;
+        if ("me".equals(id)) {
+            user = userRepository.findByEmail(email).orElseThrow();
+        } else {
+            user = userRepository.findById(Long.parseLong(id)).orElseThrow();
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(user.getTimezone());
+        LocalDate lDate;
+        if (date.isEmpty()) {
+            lDate = LocalDate.now();
+        } else {
+            lDate = LocalDate.parse(date);
+        }
+        Instant start = lDate.atStartOfDay(timeZone.toZoneId()).toInstant();
+        Instant end = start.plus(1, ChronoUnit.DAYS);
+        System.out.println("start = " + start);
+        System.out.println("end = " + end);
+        List<News> byVotesUserAndCreatedOnBetween = newsRepository.findByVotesUserAndCreatedOnBetween(user, start, end);
+        return byVotesUserAndCreatedOnBetween.stream().map(News::getTitle).toList();
     }
 }

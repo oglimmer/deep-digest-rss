@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface NewsRepository extends ListCrudRepository<News, Long> {
 
@@ -18,5 +20,7 @@ public interface NewsRepository extends ListCrudRepository<News, Long> {
     long countByTagsInAndCreatedOnBetween(Collection<Tags> tags, Instant start, Instant end);
 
     long countByTagsTextInAndCreatedOnBetween(Collection<String> tags, Instant start, Instant end);
+
+    List<News> findByVotesUserAndCreatedOnBetween(User user, Instant start, Instant end);
 }
 
