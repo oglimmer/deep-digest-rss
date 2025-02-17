@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,12 +64,21 @@ public class TagGroupService {
         // create new tags
         for (String tag : createTagGroupDto.getTags().keySet()) {
             String[] tags = createTagGroupDto.getTags().get(tag);
+            List<String> tagList = new ArrayList<>(Arrays.asList(tags));
+            tagList.removeIf(tagItem -> tagItem.equalsIgnoreCase("interessant"));
             TagGroup tagGroup = new TagGroup();
-            tagGroup.setTags(tagsRepository.findByTextIn(List.of(tags)));
+            tagGroup.setTags(tagsRepository.findByTextIn(tagList));
             tagGroup.setTitle(tag);
             tagGroup.setCreatedOn(LocalDate.now());
             tagGroupRepository.save(tagGroup);
         }
+
+        // create additional tagGroup for Interessant
+        TagGroup interessantTagGroup = new TagGroup();
+        interessantTagGroup.setTags(tagsRepository.findByTextIn(List.of("Interessant")));
+        interessantTagGroup.setTitle("Interessant");
+        interessantTagGroup.setCreatedOn(LocalDate.now());
+        tagGroupRepository.save(interessantTagGroup);
 
         return true;
     }
