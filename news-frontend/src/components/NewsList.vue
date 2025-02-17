@@ -109,19 +109,23 @@ const toggleModal = () => {
   showModal.value = !showModal.value
 }
 
-const container = ref<HTMLElement|null>(null)
-onClickOutside(container, closeAllDropdowns)
+const refContainerFeed = ref<HTMLElement|null>(null)
+onClickOutside(refContainerFeed, closeAllDropdowns)
+const refContainerIncludeTags = ref<HTMLElement|null>(null)
+onClickOutside(refContainerIncludeTags, closeAllDropdowns)
+const refContainerExcludeTags = ref<HTMLElement|null>(null)
+onClickOutside(refContainerExcludeTags, closeAllDropdowns)
 </script>
 
 <template>
-  <div ref="container">
+  <div>
     <h2 @click="refreshNews">
       Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
     </h2>
     <!-- Login Button -->
     <button v-if="!dataStore.loggedIn" @click="toggleModal" class="login-button">L</button>
     <!-- Custom styled feed select with a typical arrow -->
-    <div class="dropdown" @click.stop="toggleFeedDropdown">
+    <div class="dropdown" @click.stop="toggleFeedDropdown" ref="refContainerFeed">
       <div class="dropdown-header">
         <span>{{ feedDropdownLabel }}</span>
         <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
@@ -134,7 +138,7 @@ onClickOutside(container, closeAllDropdowns)
       </div>
     </div>
     <!-- Dropdown for including tag groups -->
-    <div class="dropdown" @click.stop="toggleDropdown">
+    <div class="dropdown" @click.stop="toggleDropdown" ref="refContainerIncludeTags">
       <div class="dropdown-header">
         <span>Must have: {{ dropdownLabel }}</span>
         <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
@@ -147,7 +151,7 @@ onClickOutside(container, closeAllDropdowns)
       </div>
     </div>
     <!-- Dropdown for excluding tag groups -->
-    <div class="dropdown" @click.stop="toggleExcludedDropdown">
+    <div class="dropdown" @click.stop="toggleExcludedDropdown" ref="refContainerExcludeTags">
       <div class="dropdown-header">
         <span>Must not: {{ dropdownExcludedLabel }}</span>
         <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
