@@ -1,6 +1,5 @@
 import type { FeedEntry, NewsEntry } from "@/interfaces";
 import { login, vote, fetchFeeds, fetchNews, fetchTagGroup } from "@/services/remote";
-import { daysAgoToDate } from "@/services/temporal";
 import { defineStore } from "pinia"
 
 
@@ -15,7 +14,7 @@ export const useDataStore = defineStore('data', {
     selectedTagGroups: [] as string[],
     excludedTagGroups: [] as string[],
     tagGroupKeys: [] as string[],
-    daysAgo: 0,
+    dateToShow: [new Date().getFullYear(), new Date().getMonth(), new Date().getDate()] as number[],
     excludeAds: false,
     tagGroupData: {} as Record<string, string[]>
   }),
@@ -57,13 +56,13 @@ export const useDataStore = defineStore('data', {
         return hour >= 0 && hour < 12
       })
     },
-    afternoonNews(): NewsEntry[]  {
+    afternoonNews(): NewsEntry[] {
       return this.filteredNews.filter((entry: NewsEntry) => {
         const hour = new Date(entry.createdOn).getHours()
         return hour >= 12 && hour < 18
       })
     },
-    nightNews(): NewsEntry[]  {
+    nightNews(): NewsEntry[] {
       return this.filteredNews.filter((entry: NewsEntry) => {
         const hour = new Date(entry.createdOn).getHours()
         return hour >= 18 && hour < 24
@@ -83,6 +82,16 @@ export const useDataStore = defineStore('data', {
         ).length
       }
       return counts
+    },
+    isDateToday: (state) => {
+      const today = new Date();
+      const dts = new Date(state.dateToShow[0], state.dateToShow[1], state.dateToShow[2]);
+      return dts.getDate() === today.getDate() &&
+        dts.getMonth() === today.getMonth() &&
+        dts.getFullYear() === today.getFullYear();
+    },
+    dateToShowAsDate: (state) => {
+      return new Date(state.dateToShow[0], state.dateToShow[1], state.dateToShow[2]);
     }
   },
   actions: {
@@ -104,14 +113,14 @@ export const useDataStore = defineStore('data', {
       }
     },
     async fetchNews() {
-      const date = daysAgoToDate(this.daysAgo);
+      const date = this.dateToShowAsDate;
       const response = await fetchNews(date, []);
       if (response) {
         this.newsEntries = response;
       }
     },
     async fetchTagGroup() {
-      const date = daysAgoToDate(this.daysAgo);
+      const date = this.dateToShowAsDate;
       const response = await fetchTagGroup(date);
       if (response) {
         this.tagGroupData = response;
@@ -127,6 +136,13 @@ export const useDataStore = defineStore('data', {
         return entry;
       });
     },
+    async changeDate(days: number) {
+      const d = new Date(this.dateToShow[0], this.dateToShow[1], this.dateToShow[2]);
+      d.setDate(d.getDate() + days);
+      this.dateToShow = [d.getFullYear(), d.getMonth(), d.getDate()];
+      await this.fetchNews();
+      await this.fetchTagGroup();
+    },
   },
-  persist: true,
+  persist: true
 })

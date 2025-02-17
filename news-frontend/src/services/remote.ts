@@ -35,7 +35,8 @@ export const fetchFeeds = async () => {
 
 export const fetchNews = async (date: Date, feedIdList: number[]) => {
   try {
-    const response = await fetch(`${__API_URL__}/api/v1/news?date=${dateToYearMonthDay(date)}&feedIdList=${feedIdList}`, {
+    const url = `${__API_URL__}/api/v1/news?date=${dateToYearMonthDay(date)}&feedIdList=${feedIdList}`
+    const response = await fetch(url, {
       headers: { Authorization: dataStore.get().authentizationHeader }
     })
     if (response.ok) {

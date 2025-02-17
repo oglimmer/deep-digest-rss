@@ -4,37 +4,23 @@ import { onClickOutside } from '@vueuse/core'
 import NewsSection from './NewsSection.vue'
 import LoginForm from './LoginForm.vue'
 import { useDataStore } from '@/stores/data'
-import { daysAgoToDate } from "@/services/temporal"
 
-const dataStore = useDataStore()
+const store = useDataStore()
 
 // const excludeAds = ref(dataStore.excludeAds)
 const loading = ref(false)
 
-const previousDay = async () => {
-  dataStore.daysAgo += 1
-  refreshNews()
-}
-
-const nextDay = async () => {
-  if (dataStore.daysAgo > 0) {
-    dataStore.daysAgo -= 1
-    refreshNews()
-  }
-}
-
-const refreshNews = async () => {
+const changeDate = async (days: number) => {
   loading.value = true
-  await dataStore.fetchNews()
-  await dataStore.fetchTagGroup()
+  await store.changeDate(days)
   loading.value = false
 }
 
 onMounted(async () => {
   // Fetch initial tag groups, feeds, and news
-  dataStore.fetchTagGroup()
-  dataStore.fetchFeeds()
-  dataStore.fetchNews()
+  store.fetchTagGroup()
+  store.fetchFeeds()
+  store.fetchNews()
 })
 
 // --- Dropdown for Including Tag Groups ---
@@ -45,8 +31,8 @@ const toggleDropdown = (event: MouseEvent) => {
 }
 
 const dropdownLabel = computed(() => {
-  return dataStore.selectedTagGroups.length > 0
-    ? dataStore.selectedTagGroups.join(', ')
+  return store.selectedTagGroups.length > 0
+    ? store.selectedTagGroups.join(', ')
     : 'none'
 })
 
@@ -58,8 +44,8 @@ const toggleExcludedDropdown = (event: MouseEvent) => {
 }
 
 const dropdownExcludedLabel = computed(() => {
-  return dataStore.excludedTagGroups.length > 0
-    ? dataStore.excludedTagGroups.join(', ')
+  return store.excludedTagGroups.length > 0
+    ? store.excludedTagGroups.join(', ')
     : 'none'
 })
 
@@ -70,22 +56,18 @@ const closeAllDropdowns = () => {
   dropdownFeedOpen.value = false
 }
 
-const formattedOldestNewsDate = computed(() => {
-  return daysAgoToDate(dataStore.daysAgo).toLocaleDateString()
-})
-
 const feedNewsCounts = computed(() => {
   const counts: Record<number, number> = {}
-  for (const feed of dataStore.feedEntries) {
-    counts[feed.id] = dataStore.newsEntries.filter(entry => entry.feedId === feed.id).length
+  for (const feed of store.feedEntries) {
+    counts[feed.id] = store.newsEntries.filter(entry => entry.feedId === feed.id).length
   }
   return counts
 })
 
 const feedDropdownLabel = computed(() => {
-  return dataStore.selectedFeeds.length > 0
-    ? dataStore.selectedFeeds.map(id =>
-        dataStore.feedEntries.find(feed => feed.id === id)?.title
+  return store.selectedFeeds.length > 0
+    ? store.selectedFeeds.map(id =>
+        store.feedEntries.find(feed => feed.id === id)?.title
       ).join(', ')
     : 'Filter Feeds'
 })
@@ -109,71 +91,70 @@ const toggleModal = () => {
   showModal.value = !showModal.value
 }
 
-const refContainerFeed = ref<HTMLElement|null>(null)
-onClickOutside(refContainerFeed, closeAllDropdowns)
-const refContainerIncludeTags = ref<HTMLElement|null>(null)
-onClickOutside(refContainerIncludeTags, closeAllDropdowns)
-const refContainerExcludeTags = ref<HTMLElement|null>(null)
-onClickOutside(refContainerExcludeTags, closeAllDropdowns)
+const refContainer = ref<HTMLElement|null>(null)
+onClickOutside(refContainer, closeAllDropdowns)
 </script>
 
 <template>
   <div>
-    <h2 @click="refreshNews">
-      Lesbare Nachrichten für den {{ formattedOldestNewsDate }}
+    <h2 @click="changeDate(0)">
+      Lesbare Nachrichten für den {{ store.dateToShowAsDate.toLocaleDateString() }}
     </h2>
     <!-- Login Button -->
-    <button v-if="!dataStore.loggedIn" @click="toggleModal" class="login-button">L</button>
+    <button v-if="!store.loggedIn" @click="toggleModal" class="login-button">L</button>
+
     <!-- Custom styled feed select with a typical arrow -->
-    <div class="dropdown" @click.stop="toggleFeedDropdown" ref="refContainerFeed">
-      <div class="dropdown-header">
-        <span>{{ feedDropdownLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
+    <span ref="refContainer">
+      <div class="dropdown" @click.stop="toggleFeedDropdown">
+        <div class="dropdown-header">
+          <span>{{ feedDropdownLabel }}</span>
+          <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
+        </div>
+        <div class="dropdown-menu" v-if="dropdownFeedOpen" @click.stop>
+          <label v-for="feed in store.feedEntries" :key="feed.id" class="dropdown-item">
+            <input type="checkbox" :value="feed.id" v-model="store.selectedFeeds" />
+            {{ feed.title }} ({{ feedNewsCounts[feed.id] || 0 }})
+          </label>
+        </div>
       </div>
-      <div class="dropdown-menu" v-if="dropdownFeedOpen" @click.stop>
-        <label v-for="feed in dataStore.feedEntries" :key="feed.id" class="dropdown-item">
-          <input type="checkbox" :value="feed.id" v-model="dataStore.selectedFeeds" />
-          {{ feed.title }} ({{ feedNewsCounts[feed.id] || 0 }})
-        </label>
+      <!-- Dropdown for including tag groups -->
+      <div class="dropdown" @click.stop="toggleDropdown">
+        <div class="dropdown-header">
+          <span>Must have: {{ dropdownLabel }}</span>
+          <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
+        </div>
+        <div class="dropdown-menu" v-if="dropdownOpen" @click.stop>
+          <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
+            <input type="checkbox" :value="key" v-model="store.selectedTagGroups" />
+            {{ key }} ({{ store.tagGroupCounts[key] }})
+          </label>
+        </div>
       </div>
-    </div>
-    <!-- Dropdown for including tag groups -->
-    <div class="dropdown" @click.stop="toggleDropdown" ref="refContainerIncludeTags">
-      <div class="dropdown-header">
-        <span>Must have: {{ dropdownLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
+      <!-- Dropdown for excluding tag groups -->
+      <div class="dropdown" @click.stop="toggleExcludedDropdown">
+        <div class="dropdown-header">
+          <span>Must not: {{ dropdownExcludedLabel }}</span>
+          <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
+        </div>
+        <div class="dropdown-menu" v-if="dropdownExcludedOpen" @click.stop>
+          <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
+            <input type="checkbox" :value="key" v-model="store.excludedTagGroups" />
+            {{ key }} ({{ store.tagGroupCounts[key] }})
+          </label>
+        </div>
       </div>
-      <div class="dropdown-menu" v-if="dropdownOpen" @click.stop>
-        <label v-for="key in dataStore.tagGroupKeys" :key="key" class="dropdown-item">
-          <input type="checkbox" :value="key" v-model="dataStore.selectedTagGroups" />
-          {{ key }} ({{ dataStore.tagGroupCounts[key] }})
-        </label>
-      </div>
-    </div>
-    <!-- Dropdown for excluding tag groups -->
-    <div class="dropdown" @click.stop="toggleExcludedDropdown" ref="refContainerExcludeTags">
-      <div class="dropdown-header">
-        <span>Must not: {{ dropdownExcludedLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
-      </div>
-      <div class="dropdown-menu" v-if="dropdownExcludedOpen" @click.stop>
-        <label v-for="key in dataStore.tagGroupKeys" :key="key" class="dropdown-item">
-          <input type="checkbox" :value="key" v-model="dataStore.excludedTagGroups" />
-          {{ key }} ({{ dataStore.tagGroupCounts[key] }})
-        </label>
-      </div>
-    </div>
+    </span>
   </div>
-  <div v-if="dataStore.filteredNews.length > 0">
-    <NewsSection :newsEntries="dataStore.nightNews" sectionHeader="Night News" :feedEntries="dataStore.feedEntries" />
-    <NewsSection :newsEntries="dataStore.afternoonNews" sectionHeader="Afternoon News" :feedEntries="dataStore.feedEntries" />
-    <NewsSection :newsEntries="dataStore.morningNews" sectionHeader="Morning News" :feedEntries="dataStore.feedEntries" />
+  <div v-if="store.filteredNews.length > 0">
+    <NewsSection :newsEntries="store.nightNews" sectionHeader="Night News" :feedEntries="store.feedEntries" />
+    <NewsSection :newsEntries="store.afternoonNews" sectionHeader="Afternoon News" :feedEntries="store.feedEntries" />
+    <NewsSection :newsEntries="store.morningNews" sectionHeader="Morning News" :feedEntries="store.feedEntries" />
   </div>
   <p v-else>Keine Nachrichten für diesen Tag</p>
 
   <div class="control-wrapper">
-    <button @click="previousDay" :disabled="loading" class="custom-button">Previous Day</button>
-    <button @click="nextDay" :disabled="loading || dataStore.daysAgo === 0" class="custom-button">Next Day</button>
+    <button @click="changeDate(-1)" :disabled="loading" class="custom-button">Previous Day</button>
+    <button @click="changeDate(1)" :disabled="store.isDateToday" class="custom-button">Next Day</button>
     <button @click="scrollToTop" class="custom-button">Scroll to top</button>
   </div>
 
