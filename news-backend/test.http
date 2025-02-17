@@ -237,5 +237,5 @@ Content-Type: application/json
 }
 
 ### get news for user
-GET http://localhost:8888/api/v1/user/me/voted-news
-Authorization: Basic dGVzdEBmb28uY29tOjY4NDk1NzA0MTgxOTM4MTg2NzY=
+GET http://localhost:8888/api/v1/user/me/voted-news?hours=100&max=50
+Authorization: Basic dGVzdEBmb28uY29tOjg0NDQwNjM4MTE1NTkwMjIzMjU=

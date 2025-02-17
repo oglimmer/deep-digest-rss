@@ -16,8 +16,12 @@ public class UserController {
     private final NewsService newsService;
 
     @GetMapping("/{id}/voted-news")
-    public List<String> voteNews(@PathVariable String id, @RequestParam(required = false, defaultValue = "") String date, Authentication authentication) {
+    public List<String> voteNews(@PathVariable String id,
+                                 @RequestParam(required = false, defaultValue = "") String date,
+                                 @RequestParam(required = false, defaultValue = "") String hours,
+                                 @RequestParam(required = false, defaultValue = "") String max,
+                                 Authentication authentication) {
         String email = authentication.getName();
-        return newsService.userNews(id, date, email);
+        return newsService.userNews(id, date, hours, max, email);
     }
 }

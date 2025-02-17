@@ -1,5 +1,6 @@
 package de.oglimmer.news.db;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
@@ -21,6 +22,8 @@ public interface NewsRepository extends ListCrudRepository<News, Long> {
 
     long countByTagsTextInAndCreatedOnBetween(Collection<String> tags, Instant start, Instant end);
 
-    List<News> findByVotesUserAndCreatedOnBetween(User user, Instant start, Instant end);
+    List<News> findByVotesUserAndCreatedOnBetweenOrderByCreatedOn(User user, Instant start, Instant end, Limit limit);
+
+    Optional<News> findByOriginalFeedItemId(Long id);
 }
 

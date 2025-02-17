@@ -2,10 +2,12 @@ package de.oglimmer.news.service;
 
 import de.oglimmer.news.db.*;
 import de.oglimmer.news.web.dto.NewsDto;
+import de.oglimmer.news.web.dto.PatchNewsDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Limit;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -97,25 +99,50 @@ public class NewsService {
         return list;
     }
 
-    public List<String> userNews(String id, String date, String email) {
+    public List<String> userNews(String id, String date, String hours, String max, String email) {
         User user;
         if ("me".equals(id)) {
             user = userRepository.findByEmail(email).orElseThrow();
         } else {
             user = userRepository.findById(Long.parseLong(id)).orElseThrow();
         }
-        TimeZone timeZone = TimeZone.getTimeZone(user.getTimezone());
-        LocalDate lDate;
-        if (date.isEmpty()) {
-            lDate = LocalDate.now();
+        int iMax = max.isEmpty() ? 50 : Integer.parseInt(max);
+        Instant start, end;
+        if (!date.isEmpty()) {
+            TimeZone timeZone = TimeZone.getTimeZone(user.getTimezone());
+            LocalDate lDate = LocalDate.parse(date);
+            start = lDate.atStartOfDay(timeZone.toZoneId()).toInstant();
+            end = start.plus(1, ChronoUnit.DAYS);
         } else {
-            lDate = LocalDate.parse(date);
+            long iHours = 24;
+            if (!hours.isEmpty()) {
+                iHours = Long.parseLong(hours);
+            }
+            start = Instant.now().minus(iHours, ChronoUnit.HOURS);
+            end = Instant.now();
         }
-        Instant start = lDate.atStartOfDay(timeZone.toZoneId()).toInstant();
-        Instant end = start.plus(1, ChronoUnit.DAYS);
-        System.out.println("start = " + start);
-        System.out.println("end = " + end);
-        List<News> byVotesUserAndCreatedOnBetween = newsRepository.findByVotesUserAndCreatedOnBetween(user, start, end);
+        List<News> byVotesUserAndCreatedOnBetween = newsRepository.findByVotesUserAndCreatedOnBetweenOrderByCreatedOn(user, start, end, Limit.of(iMax));
         return byVotesUserAndCreatedOnBetween.stream().map(News::getTitle).toList();
+    }
+
+    public News getNewsByFeedItemToProcessId(String id) {
+        return newsRepository.findByOriginalFeedItemId(Long.parseLong(id)).orElseThrow();
+    }
+
+    public News patch(Long id, PatchNewsDto patchNewsDto) {
+        News news = newsRepository.findById(id).orElseThrow();
+        List<Tags> tags = news.getTags();
+        String[] tagsToAdd = patchNewsDto.getTagsToAdd();
+        if (tagsToAdd != null) {
+            for (String tag : tagsToAdd) {
+                boolean tagExists = tags.stream().anyMatch(existingTag -> existingTag.getText().equalsIgnoreCase(tag));
+                if (!tagExists) {
+                    Tags newTag = Tags.builder().text(tag).build();
+                    tags.add(newTag);
+                }
+            }
+        }
+        tagsRepository.saveAll(tags);
+        return news;
     }
 }

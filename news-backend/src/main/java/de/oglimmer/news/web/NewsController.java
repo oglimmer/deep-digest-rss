@@ -4,6 +4,7 @@ import de.oglimmer.news.db.News;
 import de.oglimmer.news.service.NewsService;
 import de.oglimmer.news.web.dto.CreateNewsDto;
 import de.oglimmer.news.web.dto.NewsDto;
+import de.oglimmer.news.web.dto.PatchNewsDto;
 import de.oglimmer.news.web.dto.VoteDto;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -48,4 +49,15 @@ public class NewsController {
         newsService.vote(id, voteDto.isVote(), email);
     }
 
+    @GetMapping("/by-ref/{id}")
+    public NewsDto getFeedByRefId(@PathVariable String id) {
+        News news = newsService.getNewsByFeedItemToProcessId(id);
+        return modelMapper.map(news, NewsDto.class);
+    }
+
+    @PatchMapping("/{id}")
+    public NewsDto patch(@RequestBody PatchNewsDto patchNewsDto, @PathVariable Long id) {
+        News news = newsService.patch(id, patchNewsDto);
+        return modelMapper.map(news, NewsDto.class);
+    }
 }

@@ -24,6 +24,9 @@ public class FeedItemToProcess {
     @NotNull
     private Feed feed;
 
+    /**
+     * ID taken from RSS/Atom feed (e.g. guid)
+     */
     @Column(nullable = false, unique = true)
     @NotNull
     private String refId;
