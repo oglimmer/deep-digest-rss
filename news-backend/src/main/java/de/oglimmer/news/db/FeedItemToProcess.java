@@ -31,7 +31,8 @@ public class FeedItemToProcess {
     @NotNull
     private String refId;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(nullable = false, length = 4096)
     @NotNull
     private String url;
 

@@ -1,2 +1,13 @@
 node_modules
 .env
+
+
+url*
+page*
+fetch_atom.txt
+pushToDB.txt
+
+CACHEDIR.TAG
+bin/
+lib/
+pyvenv.cfg

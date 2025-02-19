@@ -137,9 +137,13 @@ export const useDataStore = defineStore('data', {
       });
     },
     async changeDate(days: number) {
-      const d = new Date(this.dateToShow[0], this.dateToShow[1], this.dateToShow[2]);
-      d.setDate(d.getDate() + days);
-      this.dateToShow = [d.getFullYear(), d.getMonth(), d.getDate()];
+      if (days === 0) {
+        this.dateToShow = [new Date().getFullYear(), new Date().getMonth(), new Date().getDate()];
+      } else {
+        const d = new Date(this.dateToShow[0], this.dateToShow[1], this.dateToShow[2]);
+        d.setDate(d.getDate() + days);
+        this.dateToShow = [d.getFullYear(), d.getMonth(), d.getDate()];
+      }
       await this.fetchNews();
       await this.fetchTagGroup();
     },

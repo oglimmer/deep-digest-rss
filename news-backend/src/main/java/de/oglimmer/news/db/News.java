@@ -29,7 +29,8 @@ public class News {
     @NotNull
     private FeedItemToProcess originalFeedItem;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(nullable = false, length = 4096)
     private String url;
 
     @Column(nullable = false)

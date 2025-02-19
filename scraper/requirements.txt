@@ -1,0 +1,9 @@
+readability-lxml
+lxml_html_clean
+requests
+xmltodict
+python-dotenv
+openai
+ollama
+beautifulsoup4
+newspaper3k

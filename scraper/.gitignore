@@ -4,3 +4,9 @@ page*
 fetch_atom.txt
 pushToDB.txt
 .env
+CACHEDIR.TAG
+bin/
+lib/
+pyvenv.cfg
+__pycache__
+.idea
