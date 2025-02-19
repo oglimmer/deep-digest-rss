@@ -11,8 +11,8 @@ def shrink_stub(input_data):
         capture_output=True
     )
     if result.returncode != 0:
-        print(result.stderr, file=sys.stderr)
-        print("Falling back to shrink.py", file=sys.stderr)
+        print(result.stderr, file=sys.stderr, flush=True)
+        print("Falling back to shrink.py", file=sys.stderr, flush=True)
         shrink_output = shrink.process(input_data)
         return shrink_output
     
@@ -25,7 +25,7 @@ def main() -> int:
 
     shrunk_html = shrink_stub(html)
     if shrunk_html:
-        print(shrunk_html, end='')
+        print(shrunk_html, end='', flush=True)
         return 0
     else:
         return 1

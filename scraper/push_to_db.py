@@ -20,6 +20,6 @@ def push_to_db(feed_id, item_id, parsed_content):
     try:
         response.raise_for_status()
     except requests.HTTPError:
-        sys.stderr.write(f"Call to news-api failed. {response.status_code}: {response.text}\n")
+        print(f"Call to news-api failed. {response.status_code}: {response.text}\n", file=sys.stderr, flush=True)
         sys.exit(1)
 

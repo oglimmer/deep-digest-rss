@@ -19,7 +19,7 @@ def download(feed_id, item_url, cookie):
     if cookie == "null" or cookie is None:
         cookie = ""
 
-    print(f"Fetching URL: {item_url} for feed: {feed_id}")
+    print(f"Fetching URL: {item_url} for feed: {feed_id}", flush=True)
     # Prepare common headers
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0',
@@ -52,7 +52,7 @@ def download_simple_cookie(cookie, headers, item_url):
         headers_with_cookie["Cookie"] = cookie
     r = requests.get(item_url, headers=headers_with_cookie)
     if r.status_code != 200:
-        print(f"Failed to retrieve the page. Status code: {r.status_code}")
+        print(f"Failed to retrieve the page. Status code: {r.status_code}", flush=True)
         raise Exception(f"Failed to retrieve the page. Status code: {r.status_code}")
     page_content = r.text
     return page_content
@@ -107,7 +107,7 @@ def main() -> int:
     feed_it = sys.argv[2] if len(sys.argv) > 2 else ""
     cookie = sys.argv[3] if len(sys.argv) > 3 else ""
 
-    print(download(feed_it, url, cookie))
+    print(download(feed_it, url, cookie), flush=True)
 
     return 0
 

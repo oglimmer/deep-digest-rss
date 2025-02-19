@@ -26,5 +26,5 @@ try:
     API_KEY = os.environ.get("API_KEY")
     GENERATION_ENGINE = os.environ.get("GENERATION_ENGINE")
 except KeyError as e:
-    print(f"Missing environment variable: {e}")
+    print(f"Missing environment variable: {e}", flush=True)
     sys.exit(1)

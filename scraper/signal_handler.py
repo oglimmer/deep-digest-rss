@@ -17,9 +17,9 @@ def set_status():
                 headers={"Content-Type": "application/json"},
                 auth=(config.USERNAME, config.PASSWORD)
             )
-            print(f"Reset process state for feed item {last_item_in_process}")
+            print(f"Reset process state for feed item {last_item_in_process}", flush=True)
         except Exception as e:
-            print(f"Error in set_status: {e}")
+            print(f"Error in set_status: {e}", flush=True)
         last_item_in_process = None
 
 

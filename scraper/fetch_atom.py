@@ -68,7 +68,7 @@ def normalize_entries(parsed_feed):
 def perform_request(method, url, payload):
     response = requests.request(method, url, auth=(config.USERNAME, config.PASSWORD), json=payload)
     if not response.ok:
-        sys.stderr.write(f"Request failed: {response.status_code} {response.reason}\n{response.text}\n")
+        print(f"Request failed: {response.status_code} {response.reason}\n{response.text}\n", flush=True, file=sys.stderr)
         sys.exit(1)
     return response.json()
 
