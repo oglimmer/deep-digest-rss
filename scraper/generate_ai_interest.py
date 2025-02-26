@@ -5,11 +5,12 @@ import json
 from openai import OpenAI
 import config
 from ollama import Options, Client, ChatResponse
+from loguru import logger
 
 def retrieve_news(feed_item_to_process_id):
     response = requests.get(f"{config.URL}/api/v1/news/by-ref/{feed_item_to_process_id}", auth=(config.USERNAME, config.PASSWORD))
     if response.status_code != 200:
-        print("Call to news-api failed.", response.text, flush=True)
+        logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         sys.exit(1)
     return response.json()
 
@@ -17,7 +18,7 @@ def retrieve_news(feed_item_to_process_id):
 def retrieve_relevant_top_headlines(user_id):
     response = requests.get(f"{config.URL}/api/v1/user/{user_id}/voted-news?hours=100&max=50", auth=(config.USERNAME, config.PASSWORD))
     if response.status_code != 200:
-        print("Call to news-api failed.", response.text, flush=True)
+        logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         sys.exit(1)
     return response.json()
 
@@ -26,7 +27,7 @@ def push_relevance_flag(news_id):
     data = {"tagsToAdd": ["Interessant"]}
     response = requests.patch(f"{config.URL}/api/v1/news/{news_id}", auth=(config.USERNAME, config.PASSWORD), json=data)
     if response.status_code != 200:
-        print("Call to news-api failed.", response.text, flush=True)
+        logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         sys.exit(1)
     return response.json()
 
@@ -101,9 +102,9 @@ def ask_ai_relevance_flag_chatgpt(text, title, top_headlines):
 def generate_interest(feed_item_to_process_id):
     news = retrieve_news(feed_item_to_process_id)
 
-    print(f">>>>>>>>>>Processing for intereset: {news.get('id')}", flush=True)
-    print(f"------{news.get('title')}------", flush=True)
-    print(news.get("text"), flush=True)
+    logger.info(f"Processing for interest: {news.get('id')}")
+    logger.info(news.get('title'))
+    logger.info(news.get("text"))
 
     top_headlines = retrieve_relevant_top_headlines("1")
     relevance_flag = ask_ai_relevance_flag(news.get("text"), news.get("title"), top_headlines)
@@ -111,10 +112,10 @@ def generate_interest(feed_item_to_process_id):
     try:
         relevance_flag_json = json.loads(relevance_flag)
     except json.JSONDecodeError as e:
-        print("Failed to parse relevance_flag as JSON:", e, file=sys.stderr, flush=True)
+        logger.error("Failed to parse relevance_flag as JSON", e)
         sys.exit(1)
 
-    print(f"<<<<<<<<Detected relevance: {relevance_flag_json.get('relevance')}", flush=True)
+    logger.info(f"<<<<<<<<Detected relevance: {relevance_flag_json.get('relevance')}")
 
     if relevance_flag_json.get("relevance", 0) > 0.5:
         push_relevance_flag(news.get("id"))

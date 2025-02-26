@@ -2,6 +2,7 @@
 import time
 import requests
 import config
+from loguru import logger
 
 def wait_until_http_status():
     """Poll the health endpoint until HTTP 200 is received or max attempts are exceeded."""
@@ -11,10 +12,10 @@ def wait_until_http_status():
         try:
             response_x = requests.get(f"{config.URL}/actuator/health", auth=(config.USERNAME, config.PASSWORD))
             if response_x.status_code == 200:
-                print(f"HTTP status code 200 received after {attempt+1} attempts", flush=True)
+                logger.info(f"HTTP status code 200 received after {attempt+1} attempts")
                 return
         except Exception:
             pass
-        print(f"Attempt {attempt+1}/{max_attempts}: Could not reach {config.URL}/actuator/health. Retrying in {sleep_time} seconds...", flush=True)
+        logger.warning(f"Attempt {attempt+1}/{max_attempts}: Could not reach {config.URL}/actuator/health. Retrying in {sleep_time} seconds...")
         time.sleep(sleep_time)
-    print(f"Maximum attempts exceeded. Could not reach {config.URL}/actuator/health", flush=True)
+    logger.error(f"Maximum attempts exceeded. Could not reach {config.URL}/actuator/health")

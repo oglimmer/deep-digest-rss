@@ -2,6 +2,7 @@ import sys
 import signal
 import requests
 import config
+from loguru import logger
 
 # Global variable for tracking the feed item being processed
 last_item_in_process = None
@@ -17,9 +18,9 @@ def set_status():
                 headers={"Content-Type": "application/json"},
                 auth=(config.USERNAME, config.PASSWORD)
             )
-            print(f"Reset process state for feed item {last_item_in_process}", flush=True)
+            logger.info(f"Reset process state for feed item {last_item_in_process}")
         except Exception as e:
-            print(f"Error in set_status: {e}", flush=True)
+            logger.error(f"Error in set_status: {e}")
         last_item_in_process = None
 
 

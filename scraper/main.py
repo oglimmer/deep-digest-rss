@@ -5,6 +5,7 @@ import time
 import json
 import requests
 import traceback
+from loguru import logger
 
 # needed to import modules from the same directory
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -33,7 +34,12 @@ def fetch_command_main():
                             auth=(config.USERNAME, config.PASSWORD))
 
     if response.status_code == 200:
-        data = response.json()
+        try:
+            data = response.json()
+        except json.JSONDecodeError:
+            logger.error(f"Failed to decode JSON response from /api/v1/feed-item-to-process/next: {response.text}")
+            return
+        logger.info(f"Processing next feed item {data}")
         item_id = data.get("id")
         feed = data.get("feed", {})
         feed_id = feed.get("id")
@@ -41,6 +47,7 @@ def fetch_command_main():
         item_url = data.get("url")
         process_next_feed_item(item_id, feed_id, item_url, cookie)
     elif response.status_code == 404:
+        logger.info("No feed-items to process. Will look for new rss items")
         signal_handler.last_item_in_process = None
         fetch_new_rss_items_from_origin()
         has_next_response = requests.get(f"{config.URL}/api/v1/feed-item-to-process/has-next",
@@ -49,7 +56,7 @@ def fetch_command_main():
             time.sleep(60)
     else:
         signal_handler.last_item_in_process = None
-        print(f"An unexpected HTTP status code was returned: {response.status_code}", flush=True)
+        logger.error(f"An unexpected HTTP status code was returned from /api/v1/feed-item-to-process/next: {response.status_code}")
 
 def process_next_feed_item(item_id, feed_id, item_url, cookie):
     signal_handler.last_item_in_process = item_id
@@ -72,7 +79,7 @@ def process_next_feed_item(item_id, feed_id, item_url, cookie):
     generate_ai_interest.generate_interest(item_id)
     end_time = time.time()
     total_time = int(end_time - start_time)
-    print(f"Fetching, text generation and upload completed in {total_time} seconds.", flush=True)
+    logger.info(f"Fetching, text generation and upload completed in {total_time} seconds.")
 
 def fetch_new_rss_items_from_origin():
     feeds_response = requests.get(f"{config.URL}/api/v1/feed",
@@ -83,6 +90,8 @@ def fetch_new_rss_items_from_origin():
             fid = item.get("id")
             furl = item.get("url")
             fetch_atom.process_atom_feed(furl, fid)
+    else:
+        logger.error(f"An unexpected HTTP status code was returned from /api/v1/feed: {feeds_response.status_code}")
 
 
 def main() -> int:
@@ -93,7 +102,7 @@ def main() -> int:
             try:
                 fetch_command_main()
             except Exception as e:
-                print(f"Error: {e}", flush=True)
+                logger.error(f"Error: {e}")
                 traceback.print_exc()
                 signal_handler.set_status()
                 continue

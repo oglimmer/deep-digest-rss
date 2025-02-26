@@ -4,7 +4,7 @@ from lxml.html import fromstring
 import sys
 import re
 from bs4 import BeautifulSoup, NavigableString, Tag
-
+from loguru import logger
 
 def limit_size(html):
     MAX_SIZE = 100 * 1024  # 100 KB in bytes

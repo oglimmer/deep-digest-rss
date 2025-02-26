@@ -2,6 +2,8 @@ from openai import OpenAI
 import config
 from ollama import Options, Client, ChatResponse
 import sys
+from loguru import logger
+import tiktoken
 
 def ollama(content):
     options = Options()
@@ -48,8 +50,23 @@ def ollama(content):
     )
     return response.message.content
 
+def shorten_string(s):
+    cut_length = int(len(s) * 0.1)  # Calculate 10% of the string length
+    return s[:-cut_length] if cut_length > 0 else s  # Remove from the end
+
+
+def count_tokens(full_prompt, max_size = 128000):
+    enc = tiktoken.encoding_for_model(config.MODEL)
+    token_count = len(enc.encode(full_prompt))
+    if token_count > max_size:
+        logger.warning(f"Token count {token_count} exceeds {max_size}")
+        return False
+    logger.info(f"Token count {token_count}")
+    return True
 
 def chatgpt(content):
+    while not count_tokens(content):
+        content = shorten_string(content)
     client = OpenAI(
         api_key=config.API_KEY,
     )

@@ -1,9 +1,9 @@
 
-import sys
+
 import requests
 import xmltodict
-from datetime import datetime
 import config
+from loguru import logger
 
 def fetch_atom_feed(url):
     response = requests.get(url)
@@ -68,8 +68,7 @@ def normalize_entries(parsed_feed):
 def perform_request(method, url, payload):
     response = requests.request(method, url, auth=(config.USERNAME, config.PASSWORD), json=payload)
     if not response.ok:
-        print(f"Request failed: {response.status_code} {response.reason}\n{response.text}\n", flush=True, file=sys.stderr)
-        sys.exit(1)
+        raise Exception(f"Request failed: {response.status_code} {response.reason}")
     return response.json()
 
 def filter_existing_entries(ref_ids):
@@ -95,6 +94,5 @@ def process_atom_feed(atom_feed_url, feed_id):
         if ref_id in entries:
             post_feed_item(ref_id, entries[ref_id], feed_id)
     if new_entries:
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Done processing the Atom feed [{atom_feed_url}]. Added {len(new_entries)} new entries. [{current_datetime}]", flush=True)
+        logger.info(f"Done processing the Atom feed [{atom_feed_url}]. Added {len(new_entries)} new entries.")
 

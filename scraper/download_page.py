@@ -5,6 +5,7 @@ import sys
 
 import requests
 import http.cookiejar
+from loguru import logger
 
 # needed to import modules from the same directory
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +20,7 @@ def download(feed_id, item_url, cookie):
     if cookie == "null" or cookie is None:
         cookie = ""
 
-    print(f"Fetching URL: {item_url} for feed: {feed_id}", flush=True)
+    logger.info(f"Fetching URL: {item_url} for feed: {feed_id}")
     # Prepare common headers
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0',
@@ -52,7 +53,7 @@ def download_simple_cookie(cookie, headers, item_url):
         headers_with_cookie["Cookie"] = cookie
     r = requests.get(item_url, headers=headers_with_cookie)
     if r.status_code != 200:
-        print(f"Failed to retrieve the page. Status code: {r.status_code}", flush=True)
+        logger.error(f"Failed to retrieve the page. Status code: {r.status_code}")
         raise Exception(f"Failed to retrieve the page. Status code: {r.status_code}")
     page_content = r.text
     return page_content

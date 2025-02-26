@@ -1,14 +1,14 @@
 ### get all feeds
-GET http://localhost:8888/api/v1/feed
+GET http://localhost:8080/api/v1/feed
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get today
-GET http://localhost:8888/api/v1/news?daysAgo=0&feedId=0
+GET http://localhost:8080/api/v1/news?daysAgo=0&feedId=0
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 
 ### create feed-item-to-process
-POST http://localhost:8888/api/v1/feed-item-to-process
+POST http://localhost:8080/api/v1/feed-item-to-process
 Accept: application/json
 Content-Type: application/json
 User-Agent: PostmanRuntime/7.26.8
@@ -22,18 +22,18 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 }
 
 ### get next feed-item-to-process
-GET http://localhost:8888/api/v1/feed-item-to-process/next
+GET http://localhost:8080/api/v1/feed-item-to-process/next
 Accept: application/json
 Content-Type: application/json
 User-Agent: PostmanRuntime/7.26.8
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get next feed-item-to-process
-GET http://localhost:8888/api/v1/feed-item-to-process/has-next
+GET http://localhost:8080/api/v1/feed-item-to-process/has-next
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get next feed-item-to-process
-POST http://localhost:8888/api/v1/feed-item-to-process/filter
+POST http://localhost:8080/api/v1/feed-item-to-process/filter
 Accept: application/json
 Content-Type: application/json
 User-Agent: PostmanRuntime/7.26.8
@@ -44,7 +44,7 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 }
 
 ### create news
-POST http://localhost:8888/api/v1/news
+POST http://localhost:8080/api/v1/news
 Accept: application/json
 Content-Type: application/json
 User-Agent: PostmanRuntime/7.26.8
@@ -59,15 +59,15 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 }
 
 ### get all tag gropus
-GET http://localhost:8888/api/v1/tag-group/raw
+GET http://localhost:8080/api/v1/tag-group/raw
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get all tag gropus
-GET http://localhost:8888/api/v1/tag-group
+GET http://localhost:8080/api/v1/tag-group
 Authorization: Basic d3JpdGU6d3JpdGU=
 
 ### get all tag gropus
-PATCH http://localhost:8888/api/v1/tag-group
+PATCH http://localhost:8080/api/v1/tag-group
 Content-Type: application/json
 Authorization: Basic d3JpdGU6d3JpdGU=
 
@@ -197,7 +197,7 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 }
 
 ### get all tag gropus
-PATCH http://localhost:8888/api/v1/tag-group
+PATCH http://localhost:8080/api/v1/tag-group
 Content-Type: application/json
 Authorization: Basic d3JpdGU6d3JpdGU=
 
@@ -219,7 +219,7 @@ Authorization: Basic d3JpdGU6d3JpdGU=
 }
 
 ### create user
-POST http://localhost:8888/api/v1/auth/register
+POST http://localhost:8080/api/v1/auth/register
 Content-Type: application/json
 
 {
@@ -228,7 +228,7 @@ Content-Type: application/json
 }
 
 ### auth user
-POST http://localhost:8888/api/v1/auth/login
+POST http://localhost:8080/api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -237,5 +237,5 @@ Content-Type: application/json
 }
 
 ### get news for user
-GET http://localhost:8888/api/v1/user/me/voted-news?hours=100&max=50
+GET http://localhost:8080/api/v1/user/me/voted-news?hours=100&max=50
 Authorization: Basic dGVzdEBmb28uY29tOjg0NDQwNjM4MTE1NTkwMjIzMjU=

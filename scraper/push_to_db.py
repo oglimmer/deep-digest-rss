@@ -1,6 +1,7 @@
 import sys
 import requests
 import config
+from loguru import logger
 
 def push_to_db(feed_id, item_id, parsed_content):
     payload = {
@@ -20,6 +21,6 @@ def push_to_db(feed_id, item_id, parsed_content):
     try:
         response.raise_for_status()
     except requests.HTTPError:
-        print(f"Call to news-api failed. {response.status_code}: {response.text}\n", file=sys.stderr, flush=True)
+        logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         sys.exit(1)
 

@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+from loguru import logger
 
 # Optionally use python-dotenv to load .env files
 try:
@@ -26,5 +27,5 @@ try:
     API_KEY = os.environ.get("API_KEY")
     GENERATION_ENGINE = os.environ.get("GENERATION_ENGINE")
 except KeyError as e:
-    print(f"Missing environment variable: {e}", flush=True)
+    logger.error(f"Missing environment variable: {e}")
     sys.exit(1)

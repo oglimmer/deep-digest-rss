@@ -4,13 +4,14 @@ import json
 import requests
 from openai import OpenAI
 import config
+from loguru import logger
 
 def create_tag_groups():
     # GET tag groups from /api/v1/tag-group/raw
     raw_url = f"{config.URL}/api/v1/tag-group/raw"
     response = requests.get(raw_url, auth=(config.USERNAME, config.PASSWORD))
     if response.status_code != 200:
-        print("Call to tag-group/raw failed.", response, file=sys.stderr, flush=True)
+        logger.error(f"An unexpected HTTP status code was returned from {raw_url}: {response.status_code}")
         sys.exit(1)
 
     tag_groups = response.json()  # Assuming this returns a list of tags
@@ -48,21 +49,21 @@ def create_tag_groups():
     )
     gen_result = response.choices[0].message.content
 
-    print(gen_result, flush=True)
+    logger.info(f"Generated tags: {gen_result}")
 
     # PATCH the /api/v1/tag-group endpoint with the processed tags
     patch_url = f"{config.URL}/api/v1/tag-group"
     try:
         tags_json = json.loads(gen_result)
     except json.JSONDecodeError as e:
-        print("Failed to parse gen_result as JSON:", e, file=sys.stderr, flush=True)
+        logger.error(f"Failed to parse gen_result as JSON: {e}")
         sys.exit(1)
 
     patch_payload = {"tags": tags_json}
     r_patch = requests.patch(patch_url, auth=(config.USERNAME, config.PASSWORD), json=patch_payload)
     if r_patch.status_code not in (200, 304):
-        print("Call to tag-group failed.", r_patch.status_code, r_patch.reason, file=sys.stderr, flush=True)
+        logger.error(f"An unexpected HTTP status code was returned from {patch_url}: {r_patch.status_code}")
         sys.exit(1)
 
-    print("Patch response status:", r_patch.status_code, flush=True)
+    logger.info(f"Patch response status: {r_patch.status_code}")
 

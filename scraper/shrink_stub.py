@@ -2,6 +2,7 @@ import subprocess
 import sys
 
 import shrink
+from loguru import logger
 
 def shrink_stub(input_data):
     result = subprocess.run(
@@ -11,8 +12,8 @@ def shrink_stub(input_data):
         capture_output=True
     )
     if result.returncode != 0:
-        print(result.stderr, file=sys.stderr, flush=True)
-        print("Falling back to shrink.py", file=sys.stderr, flush=True)
+        logger.error(result.stderr)
+        logger.error("Falling back to shrink.py")
         shrink_output = shrink.process(input_data)
         return shrink_output
     

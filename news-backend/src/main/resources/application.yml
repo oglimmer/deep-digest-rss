@@ -19,7 +19,7 @@ logging:
     # org.hibernate.orm.jdbc.bind: TRACE
     de.oglimmer: DEBUG
 server:
-  port: 8888
+  port: 8080
   address: 0.0.0.0
 
 # actuator config

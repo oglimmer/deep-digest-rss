@@ -7,3 +7,5 @@ openai
 ollama
 beautifulsoup4
 newspaper3k
+loguru
+tiktoken
