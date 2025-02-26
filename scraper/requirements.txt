@@ -9,3 +9,5 @@ beautifulsoup4
 newspaper3k
 loguru
 tiktoken
+zstandard
+brotli

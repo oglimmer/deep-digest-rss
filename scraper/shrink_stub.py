@@ -12,6 +12,9 @@ def shrink_stub(input_data):
         capture_output=True
     )
     if result.returncode != 0:
+        logger.error("Failed to run shrink.js with input data")
+        logger.error(input_data)
+        logger.error("Error message:")
         logger.error(result.stderr)
         logger.error("Falling back to shrink.py")
         shrink_output = shrink.process(input_data)

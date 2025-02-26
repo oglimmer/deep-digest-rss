@@ -1,8 +1,6 @@
 
 import os
 import sys
-
-
 import requests
 import http.cookiejar
 from loguru import logger

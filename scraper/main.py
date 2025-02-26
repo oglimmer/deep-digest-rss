@@ -7,6 +7,7 @@ import requests
 import traceback
 from loguru import logger
 
+
 # needed to import modules from the same directory
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,11 +37,12 @@ def fetch_command_main():
     if response.status_code == 200:
         try:
             data = response.json()
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             logger.error(f"Failed to decode JSON response from /api/v1/feed-item-to-process/next: {response.text}")
-            return
+            raise e
         logger.info(f"Processing next feed item {data}")
         item_id = data.get("id")
+        signal_handler.last_item_in_process = item_id # assign this as soon as possible, as we need to reset the state if an error occurs
         feed = data.get("feed", {})
         feed_id = feed.get("id")
         cookie = feed.get("cookie")
@@ -59,16 +61,18 @@ def fetch_command_main():
         logger.error(f"An unexpected HTTP status code was returned from /api/v1/feed-item-to-process/next: {response.status_code}")
 
 def process_next_feed_item(item_id, feed_id, item_url, cookie):
-    signal_handler.last_item_in_process = item_id
-
     start_time = time.time()
 
     page_content = download_page.download(feed_id, item_url, cookie)
 
+    logger.info(f"Downloaded page content for feed item {item_id}")
+
     # shrink_output = shrink.process(page_content)
     shrink_output = shrink_stub.shrink_stub(page_content)
     if not shrink_output:
-        raise Exception("shrink.process failed")
+        raise Exception("shrink.process failed to return a valid response")
+
+    logger.info(f"Shrink output for feed item {item_id}")
 
     summary_output = generate_ai_summary.generate_summary(shrink_output)
     summary_data = json.loads(summary_output)
@@ -79,7 +83,7 @@ def process_next_feed_item(item_id, feed_id, item_url, cookie):
     generate_ai_interest.generate_interest(item_id)
     end_time = time.time()
     total_time = int(end_time - start_time)
-    logger.info(f"Fetching, text generation and upload completed in {total_time} seconds.")
+    logger.info(f"Fetching, text generation and upload completed in {total_time} seconds for feed item {item_id}")
 
 def fetch_new_rss_items_from_origin():
     feeds_response = requests.get(f"{config.URL}/api/v1/feed",

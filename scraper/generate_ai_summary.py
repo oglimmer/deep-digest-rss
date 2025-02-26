@@ -104,11 +104,13 @@ def chatgpt(content):
 
 def generate_summary(content):
     if config.GENERATION_ENGINE == "chatgpt":
-        return chatgpt(content)
+        generate_summary_result = chatgpt(content)
     elif config.GENERATION_ENGINE == "ollama":
-        return ollama(content)
+        generate_summary_result = ollama(content)
     else:
         raise Exception("Invalid generation engine specified")
+    logger.info(f"Generated summary from {len(content)} to {len(generate_summary_result)}: {generate_summary_result}")
+    return generate_summary_result
 
 def main() -> int:
     html = sys.stdin.read()
