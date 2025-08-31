@@ -55,7 +55,7 @@ def shorten_string(s):
     return s[:-cut_length] if cut_length > 0 else s  # Remove from the end
 
 
-def count_tokens(full_prompt, max_size = 128000):
+def count_tokens(full_prompt, max_size = 118000):
     enc = tiktoken.encoding_for_model(config.MODEL)
     token_count = len(enc.encode(full_prompt))
     if token_count > max_size:
