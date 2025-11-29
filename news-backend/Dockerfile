@@ -13,7 +13,7 @@ COPY src ./src
 RUN MAVEN_OPTS=-XX:UseSVE=0 mvn package -DskipTests
 
 # Second stage: Create the runtime image
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-alpine
 
 # Set the working directory in the container
 WORKDIR /app
