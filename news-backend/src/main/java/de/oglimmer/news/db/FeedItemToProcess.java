@@ -53,4 +53,9 @@ public class FeedItemToProcess {
     @NotNull
     private Instant updatedOn;
 
+    @Column(nullable = false)
+    @NotNull
+    @Builder.Default
+    private Integer failureCount = 0;
+
 }

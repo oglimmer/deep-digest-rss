@@ -47,6 +47,7 @@ public class ModelMapperConfig {
                 skip(destination.getCreatedOn());
                 skip(destination.getUpdatedOn());
                 skip(destination.getProcessState());
+                skip(destination.getFailureCount());
                 using(feedConverter).map(source.getFeedId(), destination.getFeed());
             }
         });

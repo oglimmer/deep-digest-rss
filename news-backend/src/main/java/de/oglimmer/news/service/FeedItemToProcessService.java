@@ -56,10 +56,26 @@ public class FeedItemToProcessService {
             case ProcessState.NEW:
             case ProcessState.DONE:
             case ProcessState.ERROR:
+            case ProcessState.FAILED:
                 throw new IllegalArgumentException("Cannot change state of " + feedItemToProcess.getProcessState());
         }
         feedItemToProcess.setUpdatedOn(Instant.now());
-        feedItemToProcess.setProcessState(ProcessState.valueOf(patchFeedItemToProcessDto.getProcessState()));
+
+        // Handle failure counting
+        ProcessState newState = ProcessState.valueOf(patchFeedItemToProcessDto.getProcessState());
+        if (newState == ProcessState.ERROR || newState == ProcessState.NEW) {
+            feedItemToProcess.setFailureCount(feedItemToProcess.getFailureCount() + 1);
+
+            // If failure count reaches 5, set to FAILED instead
+            if (feedItemToProcess.getFailureCount() >= 5) {
+                feedItemToProcess.setProcessState(ProcessState.FAILED);
+            } else {
+                feedItemToProcess.setProcessState(newState);
+            }
+        } else {
+            feedItemToProcess.setProcessState(newState);
+        }
+
         return feedItemToProcessRepository.save(feedItemToProcess);
     }
 
