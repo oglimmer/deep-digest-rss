@@ -1,4 +1,4 @@
-# Gitleaks configuration for picz2
+# Gitleaks configuration for deep-digest-rss
 # Uses built-in rules and adds a small allowlist for benign placeholders
 
 [extend]
@@ -11,12 +11,20 @@
   regexes = [
     "(?i)your-secret-key",
     "(?i)your-secure-password",
-    "(?i)photoupload"
+    "(?i)dontcare",
+    "\\?\\?\\?",
+    # Demo/dev credentials from application.yml
+    "^news$",
+    "^actuator$",
+    "^doc$",
+    "^write$",
+    "^root$"
   ]
   # Ignore VCS and build output
   paths = [
     "(?i)^.git/",
     "(?i)^node_modules/",
     "(?i)^dist/",
-    "(?i)^build/"
+    "(?i)^build/",
+    "(?i)^target/"
   ]
