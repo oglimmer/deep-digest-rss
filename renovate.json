@@ -15,10 +15,15 @@
 
   "rebaseWhen": "behind-base-branch",
 
-  "automerge": false,
   "major": { "automerge": false },
-  "minor": { "automerge": true },
-  "patch": { "automerge": true },
+  "minor": {
+    "automerge": true,
+    "automergeType": "branch"
+  },
+  "patch": {
+    "automerge": true,
+    "automergeType": "branch"
+  },
 
   "lockFileMaintenance": {
     "enabled": true,
