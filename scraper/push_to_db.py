@@ -23,4 +23,3 @@ def push_to_db(feed_id, item_id, parsed_content):
     except requests.HTTPError:
         logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         sys.exit(1)
-

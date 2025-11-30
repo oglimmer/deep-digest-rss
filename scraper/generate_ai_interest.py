@@ -122,4 +122,3 @@ def generate_interest(feed_item_to_process_id):
     logger.info(f"Detected relevance: {relevance} for {news.get('id')}")
     if relevance > 0.8:
         push_relevance_flag(news.get("id"))
-

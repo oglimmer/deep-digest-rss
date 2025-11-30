@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web;
 
 import de.oglimmer.news.db.User;
@@ -14,24 +15,26 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class AuthController {
 
-    public static final String AUTH = "auth";
+  public static final String AUTH = "auth";
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthenticateUserDto authenticateUserDto) {
-        User user = userService.authenticateUser(authenticateUserDto.getEmail(), authenticateUserDto.getPassword());
-        if (user != null) {
-            AuthResponse authResponse = new AuthResponse();
-            authResponse.setAuthToken(user.getAuthToken());
-            return ResponseEntity.ok(authResponse);
-        }
-        return ResponseEntity.status(401).build();
+  @PostMapping("/login")
+  public ResponseEntity<AuthResponse> login(@RequestBody AuthenticateUserDto authenticateUserDto) {
+    User user =
+        userService.authenticateUser(
+            authenticateUserDto.getEmail(), authenticateUserDto.getPassword());
+    if (user != null) {
+      AuthResponse authResponse = new AuthResponse();
+      authResponse.setAuthToken(user.getAuthToken());
+      return ResponseEntity.ok(authResponse);
     }
+    return ResponseEntity.status(401).build();
+  }
 
-    @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody AuthenticateUserDto authenticateUserDto) {
-        userService.registerUser(authenticateUserDto.getEmail(), authenticateUserDto.getPassword());
-        return ResponseEntity.ok().build();
-    }
+  @PostMapping("/register")
+  public ResponseEntity<Void> register(@RequestBody AuthenticateUserDto authenticateUserDto) {
+    userService.registerUser(authenticateUserDto.getEmail(), authenticateUserDto.getPassword());
+    return ResponseEntity.ok().build();
+  }
 }

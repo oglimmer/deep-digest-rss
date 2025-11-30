@@ -1,0 +1,49 @@
+repos:
+  # Leaking credentials, secrets, tokens, passwords
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.29.0
+    hooks:
+      - id: gitleaks
+        name: gitleaks (secrets scan)
+        args: ["detect", "--staged", "--redact", "--config=.gitleaks.toml"]
+
+  # Leaking credentials, secrets, tokens, passwords
+  - repo: https://github.com/trufflesecurity/truffleHog
+    rev: v3.90.13
+    hooks:
+      - id: trufflehog
+        args: ['--no-update']
+
+  # Generic hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: forbid-submodules
+
+  # Java formatting
+  - repo: local
+    hooks:
+      - id: spotless-java
+        name: spotless (java)
+        entry: bash -c "cd news-backend && ./mvnw spotless:check"
+        files: ^news-backend/
+        language: system
+        types_or: [java]
+        pass_filenames: false
+
+  # Vue.js frontend - eslint + type checking
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint + type-check (news-frontend)
+        entry: bash -c "cd news-frontend && npm run lint && npm run type-check"
+        files: ^news-frontend/
+        language: system
+        pass_filenames: false

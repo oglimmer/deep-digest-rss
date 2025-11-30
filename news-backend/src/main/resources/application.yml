@@ -1,42 +1,39 @@
+---
 spring:
   config:
-    import: classpath:news-properties.yml
+    import: "classpath:news-properties.yml"
   application:
-    name: news
+    name: "news"
   datasource:
-    url: jdbc:mariadb://${DB_HOST:localhost}/news_prod?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
-    username: news
-    password: news
-    driver-class-name: org.mariadb.jdbc.Driver
+    url: "jdbc:mariadb://${DB_HOST:localhost}/news_prod?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true"
+    username: "news"
+    password: "news"
+    driver-class-name: "org.mariadb.jdbc.Driver"
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: "validate"
     open-in-view: true
 logging:
   level:
-    root: INFO
-    org.hibernate.SQL: DEBUG
-    # org.hibernate.orm.jdbc.bind: TRACE
-    de.oglimmer: DEBUG
+    root: "INFO"
+    org.hibernate.SQL: "DEBUG"
+    de.oglimmer: "DEBUG"
 server:
   port: 8080
-  address: 0.0.0.0
-
-# actuator config
+  address: "0.0.0.0"
 management:
   endpoints:
     web:
       exposure:
-        # expose all, but we have user/pass for access
         include: "*"
   endpoint:
     health:
-      show-components: when-authorized
-      show-details: when-authorized
-      roles: ADMIN
+      show-components: "when-authorized"
+      show-details: "when-authorized"
+      roles: "ADMIN"
   info:
     git:
-      mode: full
+      mode: "full"
       enabled: true
     java:
       enabled: true
@@ -46,11 +43,10 @@ management:
       enabled: true
     os:
       enabled: true
-
 auth:
-  actuator-user: actuator
-  actuator-password: actuator
-  swagger-user: doc
-  swagger-password: doc
-  write-user: write
-  write-password: write
+  actuator-user: "actuator"
+  actuator-password: "actuator"
+  swagger-user: "doc"
+  swagger-password: "doc"
+  write-user: "write"
+  write-password: "write"

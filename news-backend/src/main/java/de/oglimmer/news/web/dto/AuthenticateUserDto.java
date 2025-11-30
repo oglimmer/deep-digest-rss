@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web.dto;
 
 import lombok.Getter;
@@ -8,6 +9,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class AuthenticateUserDto {
-    private String email;
-    private String password;
+  private String email;
+  private String password;
 }

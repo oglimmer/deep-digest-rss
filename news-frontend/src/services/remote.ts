@@ -103,4 +103,3 @@ export const vote = async (newsId: number, up: boolean) => {
     console.error('Error:', error);
   }
 };
-

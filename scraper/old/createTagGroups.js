@@ -14,7 +14,7 @@ try {
           'Authorization': 'Basic ' + Buffer.from(USERNAME + ':' + PASSWORD).toString('base64')
         }
     });
-  
+
     if (response.status != 200) {
         console.error('Call to tag-group/raw failed. ', response);
         process.exit(1);
@@ -26,9 +26,9 @@ try {
     // const question = "look at all the words. cluster them into groups of related words. identify the largest groups. show the top 10 most important groups only. no explanations. return JSON with group name as attribute name and for each the top 10 words grouped into it as a string array."
     const question = "Given the following tags: " + context + ', please group them into  the following categories { "Technology": [ "Softwareentwicklung", "Algorithmen", "Datenanalyse", "IT-Sicherheit", "Künstliche Intelligenz", "Elektromobilität", "Technologie", "Innovation", "Cyberkriminalität" ], "Environment": [ "Klimaschutz", "Umwelt", "Nachhaltigkeit", "Energie" ], "Politics": [ "Politik", "Gesellschaft", "Demokratie", "Migration", "Konflikte", "Recht", "Sicherheit" ], "Economy": [ "Wirtschaft", "Verkehr", "Handel", "Infrastruktur" ], "Science": [ "Astronomie", "Forschung", "Weltraum", "Wissenschaft" ], "Culture": [ "Kunst", "Kultur", "Medien", "Bildung", "Geschichte", "Literatur", "Film", "Musik" ], "Health": [ "Gesundheit" ], "Sports": [ "Fußball", "Sport" ] }. Keep the categories and put all tags into an appropriate category. Return JSON with category name as attribute and for each category the top 15 tags grouped into it as a string array.'
 
-    let genResult;    
+    let genResult;
     if (GENERATION_ENGINE === 'chatgpt') {
-      
+
         const payload = {
             model: MODEL, // Replace with your desired model, e.g., "gpt-4" or "gpt-3.5-turbo"
             messages: [
@@ -70,7 +70,7 @@ try {
             throw error;
         }
     } else if (GENERATION_ENGINE === 'anthropic') {
-      
+
         const payload = {
             model: MODEL,
             messages: [
@@ -106,9 +106,9 @@ try {
             console.error("Error fetching anthropic response:", error);
             throw error;
         }
-        
+
     } else if (GENERATION_ENGINE === 'ollama-high') {
-      
+
         const payload = {
             model: MODEL,
             messages: [
@@ -145,8 +145,8 @@ try {
             console.error("Error fetching ollama response:", error);
             throw error;
         }
-        
-} else if (GENERATION_ENGINE === 'deepseek') {      
+
+} else if (GENERATION_ENGINE === 'deepseek') {
           const payload = {
               model: MODEL,
               messages: [
@@ -168,7 +168,7 @@ try {
 
           console.log(payload);
           // fs.writeFileSync('payload.json', JSON.stringify(payload));
-      
+
           const responseGpt = await fetch("https://api.deepseek.com/chat/completions", {
               method: "POST",
               headers: {
@@ -184,7 +184,7 @@ try {
               process.exit(1);
           }
           console.log(responseGpt.status, responseGpt.statusText);
-      
+
           try {
               const reponseBody = await responseGpt.text();
               console.log(reponseBody);
@@ -203,7 +203,7 @@ try {
         process.exit(1);
     }
 
-    
+
     console.log(genResult);
     // fs.writeFileSync('gen-res.json', genResult);
 

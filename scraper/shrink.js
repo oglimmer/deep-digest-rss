@@ -17,7 +17,7 @@ process.stdin.on('data', function(chunk) {
 });
 
 process.stdin.on('end', async () => {
-    const doc = new JSDOM(systemContent);    
+    const doc = new JSDOM(systemContent);
     const reader = new Readability(doc.window.document);
     const article = reader.parse();
     console.log(article.content);

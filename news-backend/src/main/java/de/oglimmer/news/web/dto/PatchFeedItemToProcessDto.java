@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web.dto;
 
 import lombok.Getter;
@@ -8,5 +9,5 @@ import lombok.ToString;
 @Setter
 @ToString
 public class PatchFeedItemToProcessDto {
-    private String processState;
+  private String processState;
 }

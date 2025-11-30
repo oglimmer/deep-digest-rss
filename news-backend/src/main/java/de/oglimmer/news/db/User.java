@@ -1,11 +1,10 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.db;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Instant;
 import java.util.List;
-
+import lombok.*;
 
 @Getter
 @Setter
@@ -17,23 +16,23 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(nullable = false)
+  private String password;
 
-    private String authToken;
+  private String authToken;
 
-    private Instant authTokenValidUntil;
+  private Instant authTokenValidUntil;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<NewsVote> votes;
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  private List<NewsVote> votes;
 
-    @Column(nullable = false)
-    private String timezone;
+  @Column(nullable = false)
+  private String timezone;
 }

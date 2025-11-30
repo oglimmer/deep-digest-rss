@@ -17,12 +17,12 @@ process.stdin.on('data', function(chunk) {
 });
 
 process.stdin.on('end', async () => {
-    const dom = new JSDOM(systemContent);    
+    const dom = new JSDOM(systemContent);
     const document = dom.window.document;
 
     function extractTextNodes(node) {
         let textContent = "";
-    
+
         if (node.nodeType === 3) { // Node.TEXT_NODE
             // If it's a text node, append its text content
             textContent += node.textContent.trim();
@@ -34,7 +34,7 @@ process.stdin.on('end', async () => {
                     textContent += extractTextNodes(childNode) + " ";
                 });
                 if (tagName === 'div' || tagName === 'p' || tagName === 'li') {
-                    textContent += '\n';    
+                    textContent += '\n';
                 }
             }
         }
@@ -45,7 +45,6 @@ process.stdin.on('end', async () => {
     const lines = extractTextNodes(document.body).split('\n');
     const seenLines = {};
     const uniqueLines = lines.filter(line => !seenLines[line] && (seenLines[line] = true));
-  
+
     console.log(uniqueLines.join('\n'));
 });
-

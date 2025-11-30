@@ -57,7 +57,7 @@ const retrieveRelevantTopHeadlines = async (userId) => {
 
 /*
  * send the relevant flag to the server
- * 
+ *
  */
 const pushRelevanceFlag = async (id) => {
   const responseFetchTopHeadlines = await fetch(URL + `/api/v1/news/${id}`, {

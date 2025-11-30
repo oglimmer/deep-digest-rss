@@ -38,4 +38,3 @@ create table tag_group_tags
     constraint FKhx1di0tc9w7cqdriua5qtykxm
         foreign key (tags_id) references tags (id)
 );
-

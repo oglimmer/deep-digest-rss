@@ -1,9 +1,9 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.db;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter
@@ -15,14 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 public class Tags {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    private List<News> news;
+  @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+  private List<News> news;
 
-    private String text;
-
-
+  private String text;
 }

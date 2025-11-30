@@ -109,11 +109,11 @@ const anthropic = async (systemContent) => {
     messages: [
       {
         role: "user",
-        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit " + 
-          " true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. " + 
-          "Gültige Tags sind 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', " + 
-          "'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', " + 
-          "'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', " + 
+        content: "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, zusätzlich entählt das attribut advertising mit " +
+          " true oder false ob es sich um eine Werbung handelt und das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. " +
+          "Gültige Tags sind 'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', 'Elektromobilität', 'Klimaschutz', " +
+          "'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', 'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', " +
+          "'Innovation', 'Technologie', 'Medien', 'Kunst', 'Kultur', 'Bildung', 'Geschichte', 'Konflikte', 'Umwelt', 'Nachhaltigkeit', 'Weltraum', 'Infrastruktur', " +
           "'Verkehr', 'Recht', 'Demokratie', 'Handel', 'Energie', 'Musik', 'Film', 'Literatur', 'Wissenschaft'. <content>" + systemContent + "</content>" +
           "Fasse den content auf der Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch.",
       },
@@ -156,7 +156,7 @@ const anthropic = async (systemContent) => {
 };
 
 const ollamaHighMem = async (systemContent) => {
-  
+
   const payload = {
     model: MODEL,
     messages: [
@@ -219,7 +219,7 @@ const ollamaHighMem = async (systemContent) => {
 }
 
 const ollamaHighMemTags = async (systemContent) => {
-  
+
   const payload = {
     model: MODEL,
     messages: [
@@ -281,10 +281,10 @@ const ollamaLowMem = async (systemContent) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 
-      model: MODEL, 
-      prompt: `Fasse den den Hauptartikel auf der folgenden Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch. ${systemContent}`, 
-      stream: false 
+    body: JSON.stringify({
+      model: MODEL,
+      prompt: `Fasse den den Hauptartikel auf der folgenden Seite zusammen. Starte deine Antwort nicht mit der Artikel. Kommentiere nur den Hauptartikel. Antworte journalistisch. ${systemContent}`,
+      stream: false
     }),
   });
 
@@ -345,4 +345,3 @@ process.stdin.on('end', async () => {
     }
 
 });
-

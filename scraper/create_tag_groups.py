@@ -66,4 +66,3 @@ def create_tag_groups():
         sys.exit(1)
 
     logger.info(f"Patch response status: {r_patch.status_code}")
-

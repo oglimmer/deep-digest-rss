@@ -1,0 +1,22 @@
+# Gitleaks configuration for picz2
+# Uses built-in rules and adds a small allowlist for benign placeholders
+
+[extend]
+  # Use the built-in gitleaks rules
+  useDefault = true
+
+[allowlist]
+  description = "Allow known placeholders and demo defaults"
+  # These are non-sensitive placeholders present in docs/dev configs
+  regexes = [
+    "(?i)your-secret-key",
+    "(?i)your-secure-password",
+    "(?i)photoupload"
+  ]
+  # Ignore VCS and build output
+  paths = [
+    "(?i)^.git/",
+    "(?i)^node_modules/",
+    "(?i)^dist/",
+    "(?i)^build/"
+  ]

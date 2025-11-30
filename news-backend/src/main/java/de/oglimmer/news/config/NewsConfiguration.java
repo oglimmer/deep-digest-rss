@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.config;
 
 import lombok.Getter;
@@ -11,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class NewsConfiguration {
 
-    private String externalDomain;
+  private String externalDomain;
 
-    private String tokenKey;
-
+  private String tokenKey;
 }

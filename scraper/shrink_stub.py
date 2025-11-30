@@ -19,7 +19,7 @@ def shrink_stub(input_data):
         logger.error("Falling back to shrink.py")
         shrink_output = shrink.process(input_data)
         return shrink_output
-    
+
     return result.stdout
 
 def main() -> int:

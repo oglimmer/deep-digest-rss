@@ -59,7 +59,7 @@ if [ "$CMD" = "fetch" ]; then
     responseBodyAndStatus=$(curl -s -w "%{http_code}" "${URL}/api/v1/feed-item-to-process/next" \
       -H "Content-Type: application/json" \
       -u "$USERNAME:$PASSWORD")
-    
+
     if [[ $responseBodyAndStatus == *200 ]]; then
         body=$(echo "$responseBodyAndStatus" | sed 's/...$//')
 
@@ -76,7 +76,7 @@ if [ "$CMD" = "fetch" ]; then
         if [ "$cookie" = "null" ]; then
           cookie=""
         fi
-        
+
         start_time=$(date +%s)
         # echo "********************************************************"
 
@@ -98,7 +98,7 @@ if [ "$CMD" = "fetch" ]; then
               -H "Content-Type: application/json" \
               -u "$USERNAME:$PASSWORD" -d "$json_data" \
               -X PATCH
-            
+
         else
             curl -s "$url" \
               -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0' \
@@ -125,7 +125,7 @@ if [ "$CMD" = "fetch" ]; then
         echo "Fetching, text generation and upload completed in $total_time seconds."
     elif [ "$responseBodyAndStatus" = "404" ]; then
       lastItemInProcess=
-      
+
       responseAllFeeds=$(curl -s "${URL}/api/v1/feed" -H "Content-Type: application/json" -u "$USERNAME:$PASSWORD")
       # we need to remove the cookie from the response because it contains " and it will break the jq command when retrieving id/url
       echo "$responseAllFeeds" | jq -c 'del(.[].cookie) | .[]' | while read item; do
@@ -146,7 +146,7 @@ if [ "$CMD" = "fetch" ]; then
       echo "An unexpected HTTP status code was returned: $responseBodyAndStatus"
     fi
   done
-    
+
 elif [ "$CMD" = "taggroups" ]; then
 
   while true; do

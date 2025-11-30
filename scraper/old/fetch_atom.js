@@ -44,12 +44,12 @@ function convertXmlToUnifiedDataStructure(parsedFeed, refIds, unifiedEntries) {
   } else if (parsedFeed.rss && parsedFeed.rss.channel) {
     for (const channel of parsedFeed.rss.channel) {
       const items = channel.item;
-  
+
       for (const item of items) {
         const id = item.guid[0]['_'] ? item.guid[0]['_'] : item.guid[0];
         const link = item.link[0];
         const title = item.title[0];
-  
+
         unifiedEntries[id] = { link, title };
         refIds.push(id);
       }
@@ -117,8 +117,8 @@ async function processAtomFeed() {
 
     for (const refId of filteredRefIds) {
       await postFeedItem(refId, unifiedEntries[refId]);
-    }      
-  
+    }
+
     const currentDateTime = new Date().toLocaleString();
     if (filteredRefIds.length > 0) {
       console.log('Done processing the Atom feed [%s] Added %d new entries. [%s]', ATOM_FEED_URL, filteredRefIds.length, currentDateTime);

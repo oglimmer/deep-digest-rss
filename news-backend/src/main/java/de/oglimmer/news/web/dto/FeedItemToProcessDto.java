@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web.dto;
 
 import lombok.Getter;
@@ -9,19 +10,19 @@ import lombok.ToString;
 @ToString
 public class FeedItemToProcessDto {
 
-    private Long id;
+  private Long id;
 
-    private FeedDto feed;
+  private FeedDto feed;
 
-    private String refId;
+  private String refId;
 
-    private String url;
+  private String url;
 
-    private String title;
+  private String title;
 
-    private String processState;
+  private String processState;
 
-    private String createdOn;
+  private String createdOn;
 
-    private String updatedOn;
+  private String updatedOn;
 }

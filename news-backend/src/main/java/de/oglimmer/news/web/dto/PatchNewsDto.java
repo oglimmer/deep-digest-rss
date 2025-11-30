@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web.dto;
 
 import lombok.Getter;
@@ -9,6 +10,5 @@ import lombok.ToString;
 @ToString
 public class PatchNewsDto {
 
-    private String[] tagsToAdd;
-
+  private String[] tagsToAdd;
 }

@@ -19,7 +19,7 @@ process.stdin.on('end', () => {
 
         const wordsToRemove = ['der', 'die', 'das', 'dem', 'den', 'des', 'dessen', 'deren'];
         // Create a regular expression that matches any of the words, with word boundaries
-        const regex = new RegExp(`\\b(${wordsToRemove.join('|')})\\b`, 'gi');    
+        const regex = new RegExp(`\\b(${wordsToRemove.join('|')})\\b`, 'gi');
         // Replace the words with an empty string
         const cleanedString = data.replace(regex, '').replace(/\s+/g, ' ').trim();
 
@@ -30,7 +30,7 @@ process.stdin.on('end', () => {
         } else {
             output = cleanedString;
         }
-        
+
         process.stdout.write(output);
     }
 });

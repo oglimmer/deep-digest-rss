@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.web;
 
 import de.oglimmer.news.rss.RssFeedView;
@@ -10,10 +11,10 @@ import org.springframework.web.servlet.View;
 @AllArgsConstructor
 public class RssFeedController {
 
-    private RssFeedView view;
+  private RssFeedView view;
 
-    @GetMapping("/rss")
-    public View getFeed() {
-        return view;
-    }
+  @GetMapping("/rss")
+  public View getFeed() {
+    return view;
+  }
 }

@@ -1,3 +1,4 @@
+/* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.config;
 
 import io.swagger.v3.oas.models.Components;
@@ -12,26 +13,31 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-    @Bean
-    public OpenAPI springShopOpenAPI() {
-        final String securitySchemeName1 = "basicAuth";
-        return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName1))
-                .components(
-                        new Components()
-                                .addSecuritySchemes(securitySchemeName1,
-                                        new SecurityScheme()
-                                                .name(securitySchemeName1)
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("basic")
-                                )
-                )
-                .info(new Info().title("DeepDigestRSS API")
-                        .description("DeepDigestRSS")
-                        .version("v0.0.1")
-                        .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")))
-                .externalDocs(new ExternalDocumentation()
-                        .description("DeepDigestRSS")
-                        .url("https://github.com/oglimmer/deep-digest-rss"));
-    }
+  @Bean
+  public OpenAPI springShopOpenAPI() {
+    final String securitySchemeName1 = "basicAuth";
+    return new OpenAPI()
+        .addSecurityItem(new SecurityRequirement().addList(securitySchemeName1))
+        .components(
+            new Components()
+                .addSecuritySchemes(
+                    securitySchemeName1,
+                    new SecurityScheme()
+                        .name(securitySchemeName1)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("basic")))
+        .info(
+            new Info()
+                .title("DeepDigestRSS API")
+                .description("DeepDigestRSS")
+                .version("v0.0.1")
+                .license(
+                    new License()
+                        .name("Apache 2.0")
+                        .url("https://www.apache.org/licenses/LICENSE-2.0")))
+        .externalDocs(
+            new ExternalDocumentation()
+                .description("DeepDigestRSS")
+                .url("https://github.com/oglimmer/deep-digest-rss"));
+  }
 }

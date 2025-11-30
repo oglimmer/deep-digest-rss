@@ -95,4 +95,3 @@ def process_atom_feed(atom_feed_url, feed_id):
             post_feed_item(ref_id, entries[ref_id], feed_id)
     if new_entries:
         logger.info(f"Done processing the Atom feed [{atom_feed_url}]. Added {len(new_entries)} new entries.")
-
