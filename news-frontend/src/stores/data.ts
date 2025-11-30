@@ -14,7 +14,7 @@ export const useDataStore = defineStore('data', {
     selectedTagGroups: [] as string[],
     excludedTagGroups: [] as string[],
     tagGroupKeys: [] as string[],
-    dateToShow: [new Date().getFullYear(), new Date().getMonth(), new Date().getDate()] as number[],
+    dateToShow: [new Date().getFullYear(), new Date().getMonth(), new Date().getDate()] as [number, number, number],
     excludeAds: false,
     tagGroupData: {} as Record<string, string[]>
   }),
