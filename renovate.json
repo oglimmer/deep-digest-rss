@@ -2,82 +2,41 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":enableVulnerabilityAlerts",
-    ":dependencyDashboard"
+    ":enableVulnerabilityAlerts"
   ],
 
   "timezone": "Europe/Berlin",
   "prHourlyLimit": 30,
   "prConcurrentLimit": 30,
-  "rangeStrategy": "auto",
+  "rebaseWhen": "behind-base-branch",
 
   "schedule": ["before 5am on monday"],
 
-  "rebaseWhen": "behind-base-branch",
-
+  "automergeType": "branch",
   "major": { "automerge": false },
-  "minor": {
-    "automerge": true,
-    "automergeType": "branch"
-  },
-  "patch": {
-    "automerge": true,
-    "automergeType": "branch"
-  },
+  "minor": { "automerge": true },
+  "patch": { "automerge": true },
 
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
-    "automergeType": "branch",
     "schedule": ["before 5am on monday"]
   },
 
   "packageRules": [
     {
       "matchDatasources": ["maven"],
-      "matchFileNames": ["news-backend/**"],
-      "groupName": "maven dependencies",
-      "automerge": true,
-      "automergeType": "branch"
+      "groupName": "maven dependencies"
     },
     {
       "matchManagers": ["npm"],
-      "matchFileNames": ["news-frontend/**"],
-      "groupName": "frontend dependencies",
-      "automerge": true,
-      "automergeType": "branch"
+      "groupName": "npm dependencies"
     },
     {
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
-      "matchFileNames": ["news-frontend/**"],
-      "groupName": "frontend dev dependencies",
-      "automerge": true,
-      "automergeType": "branch"
+      "groupName": "frontend dev dependencies"
     },
-    {
-      "matchManagers": ["npm"],
-      "matchFileNames": ["scraper/**"],
-      "groupName": "scraper dependencies",
-      "automerge": true,
-      "automergeType": "branch"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchFileNames": ["auth/**"],
-      "groupName": "auth dependencies",
-      "automerge": true,
-      "automergeType": "branch"
-    },
-
-    /* General rule: automerge minor/patch for everything (subject to platform checks) */
-    {
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "automergeType": "branch"
-    },
-
-    /* Override for pre-1.0 packages: DO NOT automerge */
     {
       "matchCurrentVersion": "/^0\\./",
       "automerge": false
