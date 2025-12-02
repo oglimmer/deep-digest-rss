@@ -46,9 +46,14 @@ public class TagGroupService {
     List<String> tagsInRest =
         createTagGroupDto.getTags().values().stream().flatMap(Arrays::stream).toList();
 
-    long numberTagsInDB = newsRepository.countByTagsInAndCreatedOnBetween(tagsInDB, start, end);
+    long numberTagsInDB =
+        tagsInDB.isEmpty()
+            ? 0
+            : newsRepository.countByTagsInAndCreatedOnBetween(tagsInDB, start, end);
     long numberTagsinRest =
-        newsRepository.countByTagsTextInAndCreatedOnBetween(tagsInRest, start, end);
+        tagsInRest.isEmpty()
+            ? 0
+            : newsRepository.countByTagsTextInAndCreatedOnBetween(tagsInRest, start, end);
 
     if (numberTagsInDB > numberTagsinRest) {
       log.info(
