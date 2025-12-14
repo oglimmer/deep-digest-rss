@@ -11,8 +11,11 @@
   "rebaseWhen": "behind-base-branch",
 
   "schedule": ["before 5am on monday"],
+  "automergeSchedule": ["before 5am on monday"],
 
   "automergeType": "branch",
+  "ignoreTests": true,
+
   "major": { "automerge": false },
   "minor": { "automerge": true },
   "patch": { "automerge": true },
