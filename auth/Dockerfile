@@ -1,5 +1,5 @@
 # Build stage
-FROM node:24-slim AS builder
+FROM node:24.12.0-slim AS builder
 
 WORKDIR /build
 
@@ -13,7 +13,7 @@ RUN npm ci --only=production
 COPY main.js ./
 
 # Production stage
-FROM node:24-slim
+FROM node:24.12.0-slim
 
 WORKDIR /app
 
