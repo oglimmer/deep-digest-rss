@@ -2,43 +2,78 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":enableVulnerabilityAlerts"
+    ":enableVulnerabilityAlerts",
+    ":dependencyDashboard",
+    ":semanticCommits"
   ],
-
   "timezone": "Europe/Berlin",
-  "prHourlyLimit": 30,
-  "prConcurrentLimit": 30,
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 20,
   "rebaseWhen": "behind-base-branch",
-
+  "rangeStrategy": "bump",
   "automergeType": "branch",
-  "ignoreTests": true,
-
-  "major": { "automerge": false },
-  "minor": { "automerge": true },
-  "patch": { "automerge": true },
-
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
-  },
-
   "packageRules": [
     {
-      "matchDatasources": ["maven"],
-      "groupName": "maven dependencies"
-    },
-    {
-      "matchManagers": ["npm"],
-      "groupName": "npm dependencies"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "groupName": "frontend dev dependencies"
+      "automerge": true,
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
     },
     {
       "matchCurrentVersion": "/^0\\./",
       "automerge": false
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "groupName": "npm dependencies"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "groupName": "Docker dependencies"
+    },
+    {
+      "matchManagers": [
+        "maven"
+      ],
+      "groupName": "Maven dependencies"
+    },
+    {
+      "matchManagers": [
+        "pip_requirements",
+        "pip_setup",
+        "pipenv"
+      ],
+      "groupName": "pip dependencies"
+    },
+    {
+      "matchManagers": [
+        "helmv3",
+        "helmfile"
+      ],
+      "groupName": "Helm dependencies"
     }
-  ]
+  ],
+  "ignoreTests": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": true
+  },
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ],
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": true
+  }
 }
