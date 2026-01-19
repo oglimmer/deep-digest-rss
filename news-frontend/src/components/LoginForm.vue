@@ -40,10 +40,10 @@ const loginHandler = async () => {
 .login-form {
   max-width: 400px;
   padding: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-primary);
+  box-shadow: 0 2px 10px var(--shadow-color);
 }
 
 .login-form form {
@@ -54,14 +54,26 @@ const loginHandler = async () => {
 .login-form h3 {
   margin-top: 0;
   margin-bottom: 10px;
+  color: var(--text-primary);
 }
 
 .login-form input {
   margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.login-form input::placeholder {
+  color: var(--text-muted);
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 /* Fancy error message styling */
@@ -71,10 +83,10 @@ const loginHandler = async () => {
   gap: 8px;
   padding: 10px 15px;
   margin-bottom: 10px;
-  border: 1px solid #cc0000;
+  border: 1px solid var(--error-border);
   border-radius: 4px;
-  background-color: #ffe6e6;
-  color: #cc0000;
+  background-color: var(--error-bg);
+  color: var(--error-color);
   font-weight: bold;
   font-size: 0.9rem;
 }
@@ -94,7 +106,7 @@ const loginHandler = async () => {
   padding: 10px;
   border: none;
   border-radius: 4px;
-  background-color: #007bff;
+  background-color: var(--primary-color);
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
@@ -102,14 +114,14 @@ const loginHandler = async () => {
 }
 
 .login-form button:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-hover);
 }
 
 .close-button {
-  background-color: #6c757d;
+  background-color: var(--secondary-color);
 }
 
 .close-button:hover {
-  background-color: #5a6268;
+  background-color: var(--secondary-hover);
 }
 </style>

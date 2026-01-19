@@ -16,7 +16,10 @@ export const useDataStore = defineStore('data', {
     tagGroupKeys: [] as string[],
     dateToShow: [new Date().getFullYear(), new Date().getMonth(), new Date().getDate()] as [number, number, number],
     excludeAds: false,
-    tagGroupData: {} as Record<string, string[]>
+    tagGroupData: {} as Record<string, string[]>,
+    darkMode: false,
+    fontFamily: 'system' as 'system' | 'georgia' | 'palatino' | 'charter' | 'verdana',
+    fontSize: 16
   }),
   getters: {
     authentizationHeader(state) {
@@ -147,6 +150,26 @@ export const useDataStore = defineStore('data', {
       await this.fetchNews();
       await this.fetchTagGroup();
     },
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode;
+      this.applyTheme();
+    },
+    setFontFamily(font: 'system' | 'georgia' | 'palatino' | 'charter' | 'verdana') {
+      this.fontFamily = font;
+      this.applyTheme();
+    },
+    setFontSize(size: number) {
+      this.fontSize = Math.min(Math.max(size, 12), 24);
+      this.applyTheme();
+    },
+    applyTheme() {
+      document.documentElement.setAttribute('data-theme', this.darkMode ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-font', this.fontFamily);
+      document.documentElement.style.setProperty('--font-size-base', `${this.fontSize}px`);
+    },
+    initTheme() {
+      this.applyTheme();
+    }
   },
   persist: true
 })

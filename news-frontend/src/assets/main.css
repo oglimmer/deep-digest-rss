@@ -1,0 +1,155 @@
+/* Theme CSS Variables */
+:root {
+  /* Light theme (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9f9f9;
+  --bg-tertiary: #f0f0f0;
+  --bg-hover: #f0f0f0;
+
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+
+  --border-color: #cccccc;
+  --border-hover: #bbbbbb;
+
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+
+  --secondary-color: #6c757d;
+  --secondary-hover: #5a6268;
+
+  --error-color: #cc0000;
+  --error-bg: #ffe6e6;
+  --error-border: #cc0000;
+
+  --ad-color: #ff0000;
+  --ad-bg: #ffcccc;
+  --ad-border: #ff0000;
+
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-strong: rgba(0, 0, 0, 0.15);
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+
+  --spinner-bg: rgba(0, 0, 0, 0.1);
+  --spinner-color: #000000;
+
+  --link-color: #007bff;
+  --link-visited: #0056b3;
+
+  /* Font settings */
+  --font-size-base: 16px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Font family variants - optimized for reading */
+[data-font="system"] {
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+[data-font="georgia"] {
+  --font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+[data-font="palatino"] {
+  --font-family: Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+}
+
+[data-font="charter"] {
+  --font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+}
+
+[data-font="verdana"] {
+  --font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --bg-hover: #0f3460;
+
+  --text-primary: #e8e8e8;
+  --text-secondary: #b8b8b8;
+  --text-muted: #888888;
+
+  --border-color: #3a3a5c;
+  --border-hover: #4a4a6c;
+
+  --primary-color: #4dabf7;
+  --primary-hover: #339af0;
+
+  --secondary-color: #868e96;
+  --secondary-hover: #adb5bd;
+
+  --error-color: #ff6b6b;
+  --error-bg: #3d1f1f;
+  --error-border: #ff6b6b;
+
+  --ad-color: #ff6b6b;
+  --ad-bg: #3d1f1f;
+  --ad-border: #ff6b6b;
+
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-strong: rgba(0, 0, 0, 0.4);
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+
+  --spinner-bg: rgba(255, 255, 255, 0.1);
+  --spinner-color: #ffffff;
+
+  --link-color: #4dabf7;
+  --link-visited: #339af0;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease, font-family 0.2s ease, font-size 0.2s ease;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+}
+
+/* Scrollbar styling for dark mode */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}

@@ -175,9 +175,10 @@ onClickOutside(refContainer, closeAllDropdowns)
 .custom-select {
   padding: 4px 8px;
   padding-right: 36px; /* Extra space for arrow */
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 1rem;
   min-width: 200px;
@@ -194,16 +195,17 @@ onClickOutside(refContainer, closeAllDropdowns)
   transition: background-color 0.2s, border-color 0.2s;
 }
 .custom-select:hover {
-  background-color: #f9f9f9;
-  border-color: #bbb;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-hover);
 }
 
 /* Custom button styling */
 .custom-button {
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 1rem;
   margin-right: 8px;
@@ -211,13 +213,13 @@ onClickOutside(refContainer, closeAllDropdowns)
   transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .custom-button:hover:not(:disabled) {
-  background-color: #f0f0f0;
-  border-color: #bbb;
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 .custom-button:disabled {
-  background-color: #f7f7f7;
-  border-color: #ddd;
-  color: #999;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
@@ -233,21 +235,23 @@ onClickOutside(refContainer, closeAllDropdowns)
   position: relative;
   margin: 0px 8px 4px 0px;
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   user-select: none;
-  min-width: 200px;
-  transition: border-color 0.2s;
+  min-width: 280px;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 .dropdown:hover {
-  border-color: #bbb;
+  border-color: var(--border-hover);
 }
 .dropdown-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  white-space: nowrap;
 }
 .dropdown-arrow {
   margin-left: 8px;
@@ -257,24 +261,24 @@ onClickOutside(refContainer, closeAllDropdowns)
   top: 100%;
   left: 0;
   z-index: 10;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-
   padding: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--shadow-strong);
   max-height: 200px;
   overflow-y: auto;
-  min-width: 200px;
+  min-width: 280px;
 }
 .dropdown-item {
   display: block;
   padding: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 .dropdown-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-hover);
 }
 
 /* Loading spinner styles */
@@ -287,8 +291,8 @@ onClickOutside(refContainer, closeAllDropdowns)
 }
 
 .spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-left-color: #000;
+  border: 4px solid var(--spinner-bg);
+  border-left-color: var(--spinner-color);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -315,7 +319,7 @@ h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,10 +327,10 @@ h2 {
 }
 
 .modal-content {
-  background-color: #fff;
+  background-color: var(--bg-primary);
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow-color);
   position: relative;
 }
 
@@ -335,32 +339,35 @@ h2 {
   top: 10px;
   right: 10px;
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.2s, border-color 0.2s;
 }
 .close-button:hover {
-  background-color: #f0f0f0;
-  border-color: #bbb;
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 .login-button {
-  position: absolute;
+  position: fixed;
   top: 10px;
-  right: 10px;
+  right: 240px;
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.2s, border-color 0.2s;
+  z-index: 100;
 }
 .login-button:hover {
-  background-color: #f0f0f0;
-  border-color: #bbb;
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 </style>

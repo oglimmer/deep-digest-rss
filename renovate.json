@@ -21,6 +21,19 @@
       ]
     },
     {
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
+    },
+    {
+      "matchManagers": [
+        "maven-wrapper",
+        "gradle-wrapper"
+      ],
+      "automerge": true
+    },
+    {
       "matchCurrentVersion": "/^0\\./",
       "automerge": false
     },
@@ -50,13 +63,6 @@
         "pipenv"
       ],
       "groupName": "pip dependencies"
-    },
-    {
-      "matchManagers": [
-        "helmv3",
-        "helmfile"
-      ],
-      "groupName": "Helm dependencies"
     }
   ],
   "ignoreTests": true,

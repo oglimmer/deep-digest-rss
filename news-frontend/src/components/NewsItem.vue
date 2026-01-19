@@ -38,24 +38,24 @@ const sendVoteDown = async () => {
 
 .tag {
   display: inline-block;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 3px;
   padding: 2px 5px;
   margin: 0 2px;
-  background-color: #f0f0f0;
+  background-color: var(--bg-tertiary);
   font-size: 0.9em;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .ad {
   display: inline-block;
-  border: 1px solid #ff0000;
+  border: 1px solid var(--ad-border);
   border-radius: 3px;
   padding: 2px 5px;
   margin: 0 2px;
-  background-color: #ffcccc;
+  background-color: var(--ad-bg);
   font-size: 0.9em;
-  color: #ff0000;
+  color: var(--ad-color);
   font-weight: bold;
 }
 </style>
