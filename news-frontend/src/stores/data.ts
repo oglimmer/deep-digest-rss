@@ -19,7 +19,8 @@ export const useDataStore = defineStore('data', {
     tagGroupData: {} as Record<string, string[]>,
     darkMode: false,
     fontFamily: 'system' as 'system' | 'georgia' | 'palatino' | 'charter' | 'verdana',
-    fontSize: 16
+    fontSize: 16,
+    singleNewsMode: false
   }),
   getters: {
     authentizationHeader(state) {
@@ -169,6 +170,9 @@ export const useDataStore = defineStore('data', {
     },
     initTheme() {
       this.applyTheme();
+    },
+    toggleSingleNewsMode() {
+      this.singleNewsMode = !this.singleNewsMode;
     }
   },
   persist: true

@@ -34,8 +34,8 @@ const increaseFontSize = () => {
       </option>
     </select>
 
-    <!-- Font size controls -->
-    <div class="font-size-controls">
+    <!-- Font size controls (hidden in single news mode) -->
+    <div v-if="!store.singleNewsMode" class="font-size-controls">
       <button
         class="size-btn"
         @click="decreaseFontSize"
@@ -63,6 +63,15 @@ const increaseFontSize = () => {
     >
       <span v-if="store.darkMode">&#9728;</span>
       <span v-else>&#9790;</span>
+    </button>
+
+    <!-- Single news mode toggle -->
+    <button
+      class="view-toggle"
+      @click="store.toggleSingleNewsMode()"
+      :title="store.singleNewsMode ? 'Switch to normal view' : 'Switch to single article view'"
+    >
+      {{ store.singleNewsMode ? '☰' : '▢' }}
     </button>
   </div>
 </template>
@@ -149,6 +158,22 @@ const increaseFontSize = () => {
 }
 
 .theme-toggle:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.view-toggle {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.view-toggle:hover {
   background-color: var(--bg-hover);
   border-color: var(--border-hover);
 }

@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import NewsSection from './NewsSection.vue'
 import LoginForm from './LoginForm.vue'
+import SingleNewsView from './SingleNewsView.vue'
 import { useDataStore } from '@/stores/data'
 
 const store = useDataStore()
@@ -145,14 +146,20 @@ onClickOutside(refContainer, closeAllDropdowns)
       </div>
     </span>
   </div>
-  <div v-if="store.filteredNews.length > 0">
-    <NewsSection :newsEntries="store.nightNews" sectionHeader="Night News" :feedEntries="store.feedEntries" />
-    <NewsSection :newsEntries="store.afternoonNews" sectionHeader="Afternoon News" :feedEntries="store.feedEntries" />
-    <NewsSection :newsEntries="store.morningNews" sectionHeader="Morning News" :feedEntries="store.feedEntries" />
-  </div>
-  <p v-else>Keine Nachrichten für diesen Tag</p>
+  <!-- Single News View Mode -->
+  <SingleNewsView v-if="store.singleNewsMode && store.filteredNews.length > 0" :newsEntries="store.filteredNews" />
 
-  <div class="control-wrapper">
+  <!-- Normal 3-section View -->
+  <template v-else>
+    <div v-if="store.filteredNews.length > 0">
+      <NewsSection :newsEntries="store.nightNews" sectionHeader="Night News" :feedEntries="store.feedEntries" />
+      <NewsSection :newsEntries="store.afternoonNews" sectionHeader="Afternoon News" :feedEntries="store.feedEntries" />
+      <NewsSection :newsEntries="store.morningNews" sectionHeader="Morning News" :feedEntries="store.feedEntries" />
+    </div>
+    <p v-else>Keine Nachrichten für diesen Tag</p>
+  </template>
+
+  <div v-if="!store.singleNewsMode" class="control-wrapper">
     <button @click="changeDate(-1)" :disabled="loading" class="custom-button">Previous Day</button>
     <button @click="changeDate(1)" :disabled="store.isDateToday" class="custom-button">Next Day</button>
     <button @click="scrollToTop" class="custom-button">Scroll to top</button>
