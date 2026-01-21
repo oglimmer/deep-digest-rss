@@ -15,12 +15,33 @@ const getFeedTitle = (feedId: number) => {
 </script>
 
 <template>
-  <div v-if="newsEntries && newsEntries.length > 0">
+  <section v-if="newsEntries && newsEntries.length > 0" class="news-section">
     <h3>{{ sectionHeader }}</h3>
-    <ul>
-      <li v-for="entry in newsEntries" :key="entry.id">
+    <div class="news-list">
+      <article v-for="entry in newsEntries" :key="entry.id" class="news-entry">
         <NewsItem :entry="entry" :feedTitle="getFeedTitle(entry.feedId)" />
-      </li>
-    </ul>
-  </div>
+      </article>
+    </div>
+  </section>
 </template>
+
+<style scoped>
+.news-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.news-list {
+  margin: 0;
+  padding: 0;
+}
+
+.news-entry {
+  margin: 0;
+  padding: 0;
+}
+</style>

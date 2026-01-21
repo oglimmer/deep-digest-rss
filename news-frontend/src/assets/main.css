@@ -153,3 +153,10 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
 }
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  body {
+    padding: 8px;
+  }
+}

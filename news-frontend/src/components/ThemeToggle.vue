@@ -18,6 +18,14 @@ const decreaseFontSize = () => {
 const increaseFontSize = () => {
   store.setFontSize(store.fontSize + 1);
 };
+
+const cycleFontSize = () => {
+  if (store.fontSize >= 24) {
+    store.setFontSize(12);
+  } else {
+    store.setFontSize(store.fontSize + 2);
+  }
+};
 </script>
 
 <template>
@@ -34,7 +42,7 @@ const increaseFontSize = () => {
       </option>
     </select>
 
-    <!-- Font size controls (hidden in single news mode) -->
+    <!-- Font size controls (desktop) -->
     <div v-if="!store.singleNewsMode" class="font-size-controls">
       <button
         class="size-btn"
@@ -54,6 +62,15 @@ const increaseFontSize = () => {
         A+
       </button>
     </div>
+
+    <!-- Font size cycle button (mobile only) -->
+    <button
+      class="font-size-cycle"
+      @click="cycleFontSize"
+      title="Change font size"
+    >
+      A
+    </button>
 
     <!-- Dark mode toggle -->
     <button
@@ -78,23 +95,19 @@ const increaseFontSize = () => {
 
 <style scoped>
 .settings-bar {
-  position: fixed;
-  top: 10px;
-  right: 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  z-index: 100;
+  gap: 0.375rem;
 }
 
 .font-select {
-  padding: 6px 8px;
+  padding: 0.25rem 0.375rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
@@ -111,21 +124,21 @@ const increaseFontSize = () => {
 .font-size-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
-  padding: 2px;
+  padding: 1px;
 }
 
 .size-btn {
-  padding: 4px 8px;
+  padding: 0.25rem 0.375rem;
   border: none;
   border-radius: 3px;
   background-color: transparent;
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-weight: 600;
   transition: background-color 0.2s;
 }
@@ -140,41 +153,57 @@ const increaseFontSize = () => {
 }
 
 .font-size-display {
-  min-width: 24px;
+  min-width: 1.25rem;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
 }
 
-.theme-toggle {
-  padding: 6px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.theme-toggle:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-hover);
-}
-
+.theme-toggle,
 .view-toggle {
-  padding: 6px 10px;
+  padding: 0.25rem 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 0.875rem;
+  line-height: 1;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
+.theme-toggle:hover,
 .view-toggle:hover {
   background-color: var(--bg-hover);
   border-color: var(--border-hover);
+}
+
+.font-size-cycle {
+  display: none;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.font-size-cycle:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+@media (max-width: 480px) {
+  .font-size-controls {
+    display: none;
+  }
+
+  .font-size-cycle {
+    display: block;
+  }
 }
 </style>

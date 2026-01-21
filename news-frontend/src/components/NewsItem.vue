@@ -79,7 +79,6 @@ const sendVoteDown = async () => {
 }
 
 p {
-  padding-left: 1em;
   margin-top: 0.75em;
   margin-bottom: 0;
   hyphens: auto;

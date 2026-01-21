@@ -31,10 +31,11 @@ const toggleDropdown = (event: MouseEvent) => {
   dropdownOpen.value = !dropdownOpen.value
 }
 
-const dropdownLabel = computed(() => {
-  return store.selectedTagGroups.length > 0
-    ? store.selectedTagGroups.join(', ')
-    : 'none'
+const dropdownShortLabel = computed(() => {
+  const count = store.selectedTagGroups.length
+  if (count === 0) return 'All'
+  if (count === 1) return store.selectedTagGroups[0]
+  return `${count} selected`
 })
 
 // --- Dropdown for Excluding Tag Groups ---
@@ -44,10 +45,11 @@ const toggleExcludedDropdown = (event: MouseEvent) => {
   dropdownExcludedOpen.value = !dropdownExcludedOpen.value
 }
 
-const dropdownExcludedLabel = computed(() => {
-  return store.excludedTagGroups.length > 0
-    ? store.excludedTagGroups.join(', ')
-    : 'none'
+const dropdownExcludedShortLabel = computed(() => {
+  const count = store.excludedTagGroups.length
+  if (count === 0) return 'None'
+  if (count === 1) return store.excludedTagGroups[0]
+  return `${count} selected`
 })
 
 // Global function to close all dropdowns
@@ -65,25 +67,20 @@ const feedNewsCounts = computed(() => {
   return counts
 })
 
-const feedDropdownLabel = computed(() => {
-  return store.selectedFeeds.length > 0
-    ? store.selectedFeeds.map(id =>
-        store.feedEntries.find(feed => feed.id === id)?.title
-      ).join(', ')
-    : 'Filter Feeds'
+const feedDropdownShortLabel = computed(() => {
+  const count = store.selectedFeeds.length
+  if (count === 0) return 'All'
+  if (count === 1) {
+    const feed = store.feedEntries.find(f => f.id === store.selectedFeeds[0])
+    return feed?.title || 'All'
+  }
+  return `${count} selected`
 })
 
 const dropdownFeedOpen = ref(false)
 const toggleFeedDropdown = (event: MouseEvent) => {
   event.stopPropagation()
   dropdownFeedOpen.value = !dropdownFeedOpen.value
-}
-
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
 }
 
 // --- Modal for Login ---
@@ -97,20 +94,34 @@ onClickOutside(refContainer, closeAllDropdowns)
 </script>
 
 <template>
-  <div>
-    <h2 @click="changeDate(0)">
-      Lesbare Nachrichten für den {{ store.dateToShowAsDate.toLocaleDateString() }}
-    </h2>
-    <!-- Login Button -->
-    <button v-if="!store.loggedIn" @click="toggleModal" class="login-button">L</button>
+  <div class="controls-bar" ref="refContainer">
+    <div class="date-nav">
+      <button
+        @click="changeDate(-1)"
+        :disabled="loading"
+        class="nav-btn"
+        title="Previous day"
+      >&larr;</button>
+      <span class="current-date" @click="changeDate(0)" title="Go to today">
+        {{ store.dateToShowAsDate.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' }) }}
+      </span>
+      <button
+        @click="changeDate(1)"
+        :disabled="store.isDateToday || loading"
+        class="nav-btn"
+        title="Next day"
+      >&rarr;</button>
+    </div>
 
-    <!-- Custom styled feed select with a typical arrow -->
-    <span ref="refContainer">
+    <div class="filters">
+      <button v-if="!store.loggedIn" @click="toggleModal" class="control-btn" title="Login">
+        Login
+      </button>
+
       <div class="dropdown" @click.stop="toggleFeedDropdown">
-        <div class="dropdown-header">
-          <span>{{ feedDropdownLabel }}</span>
-          <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
-        </div>
+        <span class="dropdown-label">Feeds</span>
+        <span class="dropdown-value">{{ feedDropdownShortLabel }}</span>
+        <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
         <div class="dropdown-menu" v-if="dropdownFeedOpen" @click.stop>
           <label v-for="feed in store.feedEntries" :key="feed.id" class="dropdown-item">
             <input type="checkbox" :value="feed.id" v-model="store.selectedFeeds" />
@@ -118,12 +129,11 @@ onClickOutside(refContainer, closeAllDropdowns)
           </label>
         </div>
       </div>
-      <!-- Dropdown for including tag groups -->
+
       <div class="dropdown" @click.stop="toggleDropdown">
-        <div class="dropdown-header">
-          <span>Must have: {{ dropdownLabel }}</span>
-          <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
-        </div>
+        <span class="dropdown-label">Include</span>
+        <span class="dropdown-value">{{ dropdownShortLabel }}</span>
+        <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
         <div class="dropdown-menu" v-if="dropdownOpen" @click.stop>
           <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
             <input type="checkbox" :value="key" v-model="store.selectedTagGroups" />
@@ -131,12 +141,11 @@ onClickOutside(refContainer, closeAllDropdowns)
           </label>
         </div>
       </div>
-      <!-- Dropdown for excluding tag groups -->
+
       <div class="dropdown" @click.stop="toggleExcludedDropdown">
-        <div class="dropdown-header">
-          <span>Must not: {{ dropdownExcludedLabel }}</span>
-          <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
-        </div>
+        <span class="dropdown-label">Exclude</span>
+        <span class="dropdown-value">{{ dropdownExcludedShortLabel }}</span>
+        <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
         <div class="dropdown-menu" v-if="dropdownExcludedOpen" @click.stop>
           <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
             <input type="checkbox" :value="key" v-model="store.excludedTagGroups" />
@@ -144,7 +153,7 @@ onClickOutside(refContainer, closeAllDropdowns)
           </label>
         </div>
       </div>
-    </span>
+    </div>
   </div>
   <!-- Single News View Mode -->
   <SingleNewsView v-if="store.singleNewsMode && store.filteredNews.length > 0" :newsEntries="store.filteredNews" />
@@ -159,11 +168,6 @@ onClickOutside(refContainer, closeAllDropdowns)
     <p v-else>Keine Nachrichten für diesen Tag</p>
   </template>
 
-  <div v-if="!store.singleNewsMode" class="control-wrapper">
-    <button @click="changeDate(-1)" :disabled="loading" class="custom-button">Previous Day</button>
-    <button @click="changeDate(1)" :disabled="store.isDateToday" class="custom-button">Next Day</button>
-    <button @click="scrollToTop" class="custom-button">Scroll to top</button>
-  </div>
 
   <!-- Loading Spinner -->
   <div v-if="loading" class="loading-spinner">
@@ -178,114 +182,160 @@ onClickOutside(refContainer, closeAllDropdowns)
 </template>
 
 <style scoped>
-/* Custom select styling similar to our dropdown look */
-.custom-select {
-  padding: 4px 8px;
-  padding-right: 36px; /* Extra space for arrow */
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 1rem;
-  min-width: 200px;
-  outline: none;
-  /* Remove default arrow */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  /* Add a background arrow icon */
-  background-image: url("data:image/svg+xml,%3Csvg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-.custom-select:hover {
-  background-color: var(--bg-secondary);
-  border-color: var(--border-hover);
+/* Controls Bar */
+.controls-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Custom button styling */
-.custom-button {
-  padding: 4px 8px;
+/* Date Navigation */
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-btn {
+  padding: 0.25rem 0.375rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   cursor: pointer;
-  font-size: 1rem;
-  margin-right: 8px;
-  min-width: 100px;
+  font-size: 0.75rem;
+  line-height: 1;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
-.custom-button:hover:not(:disabled) {
+
+.nav-btn:hover:not(:disabled) {
   background-color: var(--bg-hover);
   border-color: var(--border-hover);
-}
-.custom-button:disabled {
-  background-color: var(--bg-secondary);
-  border-color: var(--border-color);
-  color: var(--text-muted);
-  cursor: not-allowed;
+  color: var(--text-primary);
 }
 
-/* Wrapper for controls to add consistent spacing */
-.control-wrapper {
-  display: inline-block;
-  vertical-align: middle;
+.nav-btn:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.current-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem 0.375rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.current-date:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* Control button (Login) */
+.control-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.control-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 /* Dropdown styles */
 .dropdown {
-  display: inline-block;
   position: relative;
-  margin: 0px 8px 4px 0px;
-  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   cursor: pointer;
   user-select: none;
-  min-width: 280px;
+  font-size: 0.75rem;
   transition: border-color 0.2s, background-color 0.2s;
 }
+
 .dropdown:hover {
   border-color: var(--border-hover);
 }
-.dropdown-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
+.dropdown-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.dropdown-value {
+  color: var(--text-primary);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .dropdown-arrow {
-  margin-left: 8px;
+  font-size: 0.6rem;
+  color: var(--text-muted);
 }
+
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
   z-index: 10;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 8px;
-  box-shadow: 0 2px 8px var(--shadow-strong);
-  max-height: 200px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px var(--shadow-strong);
+  max-height: 240px;
   overflow-y: auto;
-  min-width: 280px;
+  min-width: 200px;
 }
+
 .dropdown-item {
-  display: block;
-  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  border-radius: 3px;
+  transition: background-color 0.15s;
   white-space: nowrap;
+  font-size: 0.9rem;
 }
+
 .dropdown-item:hover {
   background-color: var(--bg-hover);
+}
+
+.dropdown-item input[type="checkbox"] {
+  margin: 0;
 }
 
 /* Loading spinner styles */
@@ -298,25 +348,17 @@ onClickOutside(refContainer, closeAllDropdowns)
 }
 
 .spinner {
-  border: 4px solid var(--spinner-bg);
+  border: 3px solid var(--spinner-bg);
   border-left-color: var(--spinner-color);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
+  width: 32px;
+  height: 32px;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-h2 {
-  cursor: pointer;
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Modal styles */
@@ -359,22 +401,4 @@ h2 {
   border-color: var(--border-hover);
 }
 
-.login-button {
-  position: fixed;
-  top: 10px;
-  right: 240px;
-  padding: 4px 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s, border-color 0.2s;
-  z-index: 100;
-}
-.login-button:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-hover);
-}
 </style>
