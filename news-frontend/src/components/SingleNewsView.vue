@@ -22,6 +22,7 @@ defineProps<{
       <div class="article-content">
         <h2>{{ entry.title }}</h2>
         <p>{{ entry.text }}</p>
+        <a :href="entry.url" target="_blank" rel="noopener" class="article-link">Source</a>
       </div>
     </article>
   </div>
@@ -98,6 +99,20 @@ defineProps<{
   font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--text-secondary);
+}
+
+.article-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: calc(var(--font-size-base) * 0.8);
+  color: var(--text-secondary);
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.article-link:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 480px) {
