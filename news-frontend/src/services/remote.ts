@@ -87,6 +87,21 @@ export const login = async (email: string, password: string) => {
 };
 
 
+export const fetchNewsById = async (id: number) => {
+  try {
+    const response = await fetch(`${__API_URL__}/api/v1/news/${id}`, {
+      headers: { Authorization: dataStore.get().authentizationHeader }
+    })
+    if (response.ok) {
+      return await response.json()
+    } else {
+      console.error('Failed to fetch news entry')
+    }
+  } catch (error) {
+    console.error('Error fetching news entry:', error)
+  }
+}
+
 export const vote = async (newsId: number, up: boolean) => {
   try {
     await fetch(`${__API_URL__}/api/v1/news/${newsId}/vote`, {

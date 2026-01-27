@@ -1,5 +1,5 @@
 import type { FeedEntry, NewsEntry } from "@/interfaces";
-import { login, vote, fetchFeeds, fetchNews, fetchTagGroup } from "@/services/remote";
+import { login, vote, fetchFeeds, fetchNews, fetchNewsById, fetchTagGroup } from "@/services/remote";
 import { defineStore } from "pinia"
 
 
@@ -20,7 +20,9 @@ export const useDataStore = defineStore('data', {
     darkMode: false,
     fontFamily: 'system' as 'system' | 'georgia' | 'palatino' | 'charter' | 'verdana',
     fontSize: 16,
-    singleNewsMode: false
+    singleNewsMode: false,
+    deepLinkedNewsId: null as number | null,
+    deepLinkedNewsEntry: null as NewsEntry | null
   }),
   getters: {
     authentizationHeader(state) {
@@ -173,6 +175,17 @@ export const useDataStore = defineStore('data', {
     },
     toggleSingleNewsMode() {
       this.singleNewsMode = !this.singleNewsMode;
+      if (!this.singleNewsMode) {
+        this.deepLinkedNewsId = null
+        this.deepLinkedNewsEntry = null
+        window.location.hash = ''
+      }
+    },
+    async fetchSingleNews(id: number) {
+      const response = await fetchNewsById(id)
+      if (response) {
+        this.deepLinkedNewsEntry = response
+      }
     }
   },
   persist: true

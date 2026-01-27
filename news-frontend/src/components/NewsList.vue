@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import NewsSection from './NewsSection.vue'
 import LoginForm from './LoginForm.vue'
@@ -17,11 +17,37 @@ const changeDate = async (days: number) => {
   loading.value = false
 }
 
+const handleDeepLink = async (clearFilters: boolean) => {
+  const match = window.location.hash.match(/^#article\/(\d+)$/)
+  if (match) {
+    const id = parseInt(match[1]!, 10)
+    store.deepLinkedNewsId = id
+    if (clearFilters) {
+      store.selectedFeeds = []
+      store.selectedTagGroups = []
+      store.excludedTagGroups = []
+      store.excludeAds = false
+    }
+    await store.fetchSingleNews(id)
+    store.singleNewsMode = true
+  }
+}
+
+const onHashChange = () => {
+  handleDeepLink(false)
+}
+
 onMounted(async () => {
   // Fetch initial tag groups, feeds, and news
   store.fetchTagGroup()
   store.fetchFeeds()
   store.fetchNews()
+  await handleDeepLink(true)
+  window.addEventListener('hashchange', onHashChange)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('hashchange', onHashChange)
 })
 
 // --- Dropdown for Including Tag Groups ---
@@ -88,6 +114,15 @@ const showModal = ref(false)
 const toggleModal = () => {
   showModal.value = !showModal.value
 }
+
+const singleNewsViewEntries = computed(() => {
+  const entries = store.filteredNews
+  const deepEntry = store.deepLinkedNewsEntry
+  if (deepEntry && !entries.some(e => e.id === deepEntry.id)) {
+    return [deepEntry, ...entries]
+  }
+  return entries
+})
 
 const refContainer = ref<HTMLElement|null>(null)
 onClickOutside(refContainer, closeAllDropdowns)
@@ -156,7 +191,7 @@ onClickOutside(refContainer, closeAllDropdowns)
     </div>
   </div>
   <!-- Single News View Mode -->
-  <SingleNewsView v-if="store.singleNewsMode && store.filteredNews.length > 0" :newsEntries="store.filteredNews" />
+  <SingleNewsView v-if="store.singleNewsMode && (store.filteredNews.length > 0 || store.deepLinkedNewsEntry)" :newsEntries="singleNewsViewEntries" />
 
   <!-- Normal 3-section View -->
   <template v-else>

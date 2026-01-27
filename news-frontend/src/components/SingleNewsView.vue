@@ -1,16 +1,59 @@
 <script setup lang="ts">
 import type { NewsEntry } from '@/interfaces'
 import { useDataStore } from '@/stores/data'
+import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 
 const store = useDataStore()
+const containerRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
 defineProps<{
   newsEntries: NewsEntry[]
 }>()
+
+onMounted(async () => {
+  await nextTick()
+  const container = containerRef.value
+  if (!container) return
+
+  // Scroll to deep-linked article
+  if (store.deepLinkedNewsId) {
+    const el = container.querySelector(`[data-article-id="${store.deepLinkedNewsId}"]`)
+    if (el) {
+      el.scrollIntoView()
+    }
+  }
+
+  // Track visible article and update hash
+  observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const id = (entry.target as HTMLElement).dataset.articleId
+          if (id) {
+            window.location.hash = `#article/${id}`
+          }
+        }
+      }
+    },
+    { root: container, threshold: 0.5 }
+  )
+
+  container.querySelectorAll('[data-article-id]').forEach((el) => {
+    observer!.observe(el)
+  })
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+  if (!store.deepLinkedNewsId) {
+    window.location.hash = ''
+  }
+})
 </script>
 
 <template>
-  <div class="single-news-container">
+  <div class="single-news-container" ref="containerRef">
     <button
       class="exit-btn"
       @click="store.toggleSingleNewsMode()"
@@ -18,7 +61,7 @@ defineProps<{
     >
       ✕
     </button>
-    <article v-for="entry in newsEntries" :key="entry.id" class="single-article">
+    <article v-for="entry in newsEntries" :key="entry.id" class="single-article" :data-article-id="entry.id">
       <div class="article-content">
         <h2>{{ entry.title }}</h2>
         <p>{{ entry.text }}</p>
