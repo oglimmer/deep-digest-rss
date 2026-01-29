@@ -421,7 +421,7 @@ onClickOutside(refContainer, closeAllDropdowns)
 .close-button {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 20px;
   padding: 4px 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
