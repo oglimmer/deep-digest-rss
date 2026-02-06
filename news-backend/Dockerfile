@@ -13,7 +13,7 @@ COPY src ./src
 RUN MAVEN_OPTS=-XX:UseSVE=0 mvn package -DskipTests
 
 # Second stage: Create the runtime image
-FROM eclipse-temurin:25.0.1_8-jre-alpine
+FROM eclipse-temurin:25.0.2_10-jre-alpine
 
 # Set the working directory in the container
 WORKDIR /app
