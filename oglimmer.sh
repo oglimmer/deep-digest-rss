@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Default configuration
 REGISTRY="${REGISTRY:-registry.oglimmer.com}"
-API_URL="${API_URL:-https://api-news.oglimmer.com}"
+API_URL="${API_URL:-https://news.oglimmer.com}"
 TAG="${TAG:-latest}"
 VERBOSE="${VERBOSE:-false}"
 DRY_RUN="${DRY_RUN:-false}"
@@ -75,7 +75,7 @@ OPTIONS:
   -p, --push-only     Only push images, skip building
   -t, --tag TAG       Set image tag (default: latest)
   -r, --registry URL  Set registry URL (default: registry.oglimmer.com)
-  -a, --api-url URL   Set API URL for frontend build (default: https://api-news.oglimmer.com)
+  -a, --api-url URL   Set API URL for frontend build (default: https://news.oglimmer.com)
   --all               Build/push all components (same as specifying all component names)
 
 COMPONENTS:
