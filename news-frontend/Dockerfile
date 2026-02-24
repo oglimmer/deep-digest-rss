@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:24.13.1-alpine
+FROM node:24.14.0-alpine
 
 # make REST API URL configurable via environment variable
 ARG API_URL
