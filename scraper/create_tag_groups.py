@@ -1,5 +1,4 @@
 
-import sys
 import json
 import requests
 from openai import OpenAI
@@ -11,8 +10,7 @@ def create_tag_groups():
     raw_url = f"{config.URL}/api/v1/tag-group/raw"
     response = requests.get(raw_url, auth=(config.USERNAME, config.PASSWORD))
     if response.status_code != 200:
-        logger.error(f"An unexpected HTTP status code was returned from {raw_url}: {response.status_code}")
-        sys.exit(1)
+        raise RuntimeError(f"An unexpected HTTP status code was returned from {raw_url}: {response.status_code}")
 
     tag_groups = response.json()  # Assuming this returns a list of tags
     context = "'" + "','".join(tag_groups) + "'"
@@ -56,13 +54,11 @@ def create_tag_groups():
     try:
         tags_json = json.loads(gen_result)
     except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse gen_result as JSON: {e}")
-        sys.exit(1)
+        raise RuntimeError(f"Failed to parse gen_result as JSON: {e}")
 
     patch_payload = {"tags": tags_json}
     r_patch = requests.patch(patch_url, auth=(config.USERNAME, config.PASSWORD), json=patch_payload)
     if r_patch.status_code not in (200, 304):
-        logger.error(f"An unexpected HTTP status code was returned from {patch_url}: {r_patch.status_code}")
-        sys.exit(1)
+        raise RuntimeError(f"An unexpected HTTP status code was returned from {patch_url}: {r_patch.status_code}")
 
     logger.info(f"Patch response status: {r_patch.status_code}")

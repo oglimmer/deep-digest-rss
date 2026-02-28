@@ -112,8 +112,11 @@ def main() -> int:
                 continue
     elif cmd == "taggroups":
         while True:
-            # Directly call the createTagGroups module.
-            create_tag_groups.create_tag_groups()
+            try:
+                create_tag_groups.create_tag_groups()
+            except Exception as e:
+                logger.error(f"Error in taggroups: {e}")
+                traceback.print_exc()
             time.sleep(600)
 
     return 0
