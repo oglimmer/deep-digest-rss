@@ -8,7 +8,7 @@ from ollama import Options, Client, ChatResponse
 from loguru import logger
 
 def retrieve_news(feed_item_to_process_id):
-    response = requests.get(f"{config.URL}/api/v1/news/by-ref/{feed_item_to_process_id}", auth=(config.USERNAME, config.PASSWORD))
+    response = requests.get(f"{config.URL}/api/v1/news/by-ref/{feed_item_to_process_id}", auth=(config.USERNAME, config.PASSWORD), timeout=30)
     if response.status_code != 200:
         logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         raise Exception(f"Call to news-api failed. {response.status_code}: {response.text}")
@@ -16,7 +16,7 @@ def retrieve_news(feed_item_to_process_id):
 
 
 def retrieve_relevant_top_headlines(user_id):
-    response = requests.get(f"{config.URL}/api/v1/user/{user_id}/voted-news?hours=1344&max=7", auth=(config.USERNAME, config.PASSWORD))
+    response = requests.get(f"{config.URL}/api/v1/user/{user_id}/voted-news?hours=1344&max=7", auth=(config.USERNAME, config.PASSWORD), timeout=30)
     if response.status_code != 200:
         logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         raise Exception(f"Call to news-api failed. {response.status_code}: {response.text}")
@@ -25,7 +25,7 @@ def retrieve_relevant_top_headlines(user_id):
 
 def push_relevance_flag(news_id):
     data = {"tagsToAdd": ["Interessant"]}
-    response = requests.patch(f"{config.URL}/api/v1/news/{news_id}", auth=(config.USERNAME, config.PASSWORD), json=data)
+    response = requests.patch(f"{config.URL}/api/v1/news/{news_id}", auth=(config.USERNAME, config.PASSWORD), json=data, timeout=30)
     if response.status_code != 200:
         logger.error(f"Call to news-api failed. {response.status_code}: {response.text}")
         raise Exception(f"Call to news-api failed. {response.status_code}: {response.text}")

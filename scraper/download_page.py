@@ -49,7 +49,7 @@ def download_simple_cookie(cookie, headers, item_url):
     headers_with_cookie = headers.copy()
     if cookie:
         headers_with_cookie["Cookie"] = cookie
-    r = requests.get(item_url, headers=headers_with_cookie)
+    r = requests.get(item_url, headers=headers_with_cookie, timeout=30)
     if r.status_code != 200:
         logger.error(f"Failed to retrieve the page. Status code: {r.status_code}")
         raise Exception(f"Failed to retrieve the page. Status code: {r.status_code}")
@@ -83,7 +83,7 @@ def download_netscape_cookie(cookie, feed_id, headers, item_url):
                 ))
     session = requests.Session()
     session.cookies = jar
-    r = session.get(item_url, headers=headers)
+    r = session.get(item_url, headers=headers, timeout=30)
     page_content = r.text
     # Re-serialize the cookie jar into Netscape format in memory.
     new_cookie_lines = ["# Netscape HTTP Cookie File"]
@@ -97,7 +97,8 @@ def download_netscape_cookie(cookie, feed_id, headers, item_url):
     requests.patch(
         patch_url,
         json={"cookie": new_cookie},
-        auth=(config.USERNAME, config.PASSWORD)
+        auth=(config.USERNAME, config.PASSWORD),
+        timeout=30
     )
     return page_content
 

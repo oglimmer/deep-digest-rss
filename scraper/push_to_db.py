@@ -17,7 +17,8 @@ def push_to_db(feed_id, item_id, parsed_content, max_retries=3):
             f"{config.URL}/api/v1/news",
             json=payload,
             auth=(config.USERNAME, config.PASSWORD),
-            headers={'Content-Type': 'application/json'}
+            headers={'Content-Type': 'application/json'},
+            timeout=30
         )
         try:
             response.raise_for_status()

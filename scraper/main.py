@@ -32,7 +32,7 @@ status_check.wait_until_http_status()
 def fetch_command_main():
     # Request the next feed item to process
     response = requests.get(f"{config.URL}/api/v1/feed-item-to-process/next",
-                            auth=(config.USERNAME, config.PASSWORD))
+                            auth=(config.USERNAME, config.PASSWORD), timeout=30)
 
     if response.status_code == 200:
         try:
@@ -53,7 +53,7 @@ def fetch_command_main():
         signal_handler.last_item_in_process = None
         fetch_new_rss_items_from_origin()
         has_next_response = requests.get(f"{config.URL}/api/v1/feed-item-to-process/has-next",
-                                         auth=(config.USERNAME, config.PASSWORD))
+                                         auth=(config.USERNAME, config.PASSWORD), timeout=30)
         if has_next_response.text.strip() == "0":
             time.sleep(60)
     else:
@@ -87,7 +87,7 @@ def process_next_feed_item(item_id, feed_id, item_url, cookie):
 
 def fetch_new_rss_items_from_origin():
     feeds_response = requests.get(f"{config.URL}/api/v1/feed",
-                                  auth=(config.USERNAME, config.PASSWORD))
+                                  auth=(config.USERNAME, config.PASSWORD), timeout=30)
     if feeds_response.status_code == 200:
         feeds = feeds_response.json()
         for item in feeds:

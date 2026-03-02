@@ -6,7 +6,7 @@ import config
 from loguru import logger
 
 def fetch_atom_feed(url):
-    response = requests.get(url)
+    response = requests.get(url, timeout=30)
     if not response.ok:
         raise Exception(f"Failed to fetch the Atom feed: {response.reason}")
     return response.text
@@ -66,7 +66,7 @@ def normalize_entries(parsed_feed):
 
 
 def perform_request(method, url, payload):
-    response = requests.request(method, url, auth=(config.USERNAME, config.PASSWORD), json=payload)
+    response = requests.request(method, url, auth=(config.USERNAME, config.PASSWORD), json=payload, timeout=30)
     if not response.ok:
         raise Exception(f"Request failed: {response.status_code} {response.reason}")
     return response.json()

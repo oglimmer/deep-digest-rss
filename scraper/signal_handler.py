@@ -16,7 +16,8 @@ def set_status():
                 f"{config.URL}/api/v1/feed-item-to-process/{last_item_in_process}",
                 json={"processState": "NEW"},
                 headers={"Content-Type": "application/json"},
-                auth=(config.USERNAME, config.PASSWORD)
+                auth=(config.USERNAME, config.PASSWORD),
+                timeout=10
             )
             logger.info(f"Reset process state for feed item {last_item_in_process}")
         except Exception as e:

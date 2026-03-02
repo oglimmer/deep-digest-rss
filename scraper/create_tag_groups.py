@@ -8,7 +8,7 @@ from loguru import logger
 def create_tag_groups():
     # GET tag groups from /api/v1/tag-group/raw
     raw_url = f"{config.URL}/api/v1/tag-group/raw"
-    response = requests.get(raw_url, auth=(config.USERNAME, config.PASSWORD))
+    response = requests.get(raw_url, auth=(config.USERNAME, config.PASSWORD), timeout=30)
     if response.status_code != 200:
         raise RuntimeError(f"An unexpected HTTP status code was returned from {raw_url}: {response.status_code}")
 
@@ -57,7 +57,7 @@ def create_tag_groups():
         raise RuntimeError(f"Failed to parse gen_result as JSON: {e}")
 
     patch_payload = {"tags": tags_json}
-    r_patch = requests.patch(patch_url, auth=(config.USERNAME, config.PASSWORD), json=patch_payload)
+    r_patch = requests.patch(patch_url, auth=(config.USERNAME, config.PASSWORD), json=patch_payload, timeout=30)
     if r_patch.status_code not in (200, 304):
         raise RuntimeError(f"An unexpected HTTP status code was returned from {patch_url}: {r_patch.status_code}")
 

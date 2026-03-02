@@ -10,7 +10,7 @@ def wait_until_http_status():
     sleep_time = 5
     for attempt in range(max_attempts):
         try:
-            response_x = requests.get(f"{config.URL}/actuator/health", auth=(config.USERNAME, config.PASSWORD))
+            response_x = requests.get(f"{config.URL}/actuator/health", auth=(config.USERNAME, config.PASSWORD), timeout=10)
             if response_x.status_code == 200:
                 logger.info(f"HTTP status code 200 received after {attempt+1} attempts")
                 return
