@@ -23,16 +23,20 @@ public class DailyDigestService {
 
   @Scheduled(cron = "0 0 19 * * *", zone = "Europe/Berlin")
   public void generateAndPostDailyDigest() {
-    log.info("Starting daily digest generation");
+    generateDigest(24, true);
+  }
+
+  public String generateDigest(int hours, boolean postToDiscord) {
+    log.info("Starting digest generation for the last {} hours", hours);
 
     Instant end = Instant.now();
-    Instant start = end.minus(24, ChronoUnit.HOURS);
+    Instant start = end.minus(hours, ChronoUnit.HOURS);
 
     List<News> newsList = newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
 
     if (newsList.isEmpty()) {
-      log.info("No news found in the last 24 hours, skipping digest");
-      return;
+      log.info("No news found in the last {} hours, skipping digest", hours);
+      return "No news found in the last " + hours + " hours.";
     }
 
     String newsContent =
@@ -44,8 +48,12 @@ public class DailyDigestService {
     String summary = aiSummarizationService.summarize(newsContent);
 
     String message = "**Daily News Digest**\n\n" + summary;
-    discordService.postMessage(message);
 
-    log.info("Daily digest completed with {} articles", newsList.size());
+    if (postToDiscord) {
+      discordService.postMessage(message);
+    }
+
+    log.info("Digest completed with {} articles", newsList.size());
+    return message;
   }
 }

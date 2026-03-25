@@ -103,6 +103,8 @@ public class SecurityConfiguration {
                     .hasRole("ADMIN")
                     .requestMatchers(POST, "/api/v1/news")
                     .hasRole("ADMIN")
+                    .requestMatchers(POST, "/api/v1/daily-digest")
+                    .hasRole("ADMIN")
                     .requestMatchers(POST, "/api/v1/news/*/vote")
                     .hasRole("USER")
                     .requestMatchers(PATCH, "/api/v1/tag-group")
