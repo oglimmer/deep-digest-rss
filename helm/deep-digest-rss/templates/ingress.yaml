@@ -1,0 +1,75 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: custom-news-auth
+  labels:
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  forwardAuth:
+    address: "http://news-auth-service.{{ .Release.Namespace }}.svc.cluster.local:3000"
+    addAuthCookiesToResponse:
+      - auth
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: news-backend-ingressroute
+  labels:
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
+    - match: Host(`{{ .Values.domain }}`) && PathPrefix(`/rss`)
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
+    - match: Host(`{{ .Values.domain }}`) && PathPrefix(`/actuator`)
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
+    - match: Host(`{{ .Values.domain }}`) && PathPrefix(`/swagger-ui`)
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
+    - match: Host(`{{ .Values.domain }}`) && PathPrefix(`/v3`)
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
+  tls:
+    secretName: {{ .Values.ingress.tls.secretName }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: news-frontend-ingress
+  labels:
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certManager.clusterIssuer | quote }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-custom-news-auth@kubernetescrd
+spec:
+  tls:
+    - secretName: {{ .Values.ingress.tls.secretName }}
+      hosts:
+        - {{ .Values.domain | quote }}
+  rules:
+    - host: {{ .Values.domain | quote }}
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: news-frontend-service
+                port:
+                  number: 80

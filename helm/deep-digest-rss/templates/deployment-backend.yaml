@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-backend
+  labels:
+    run: news-backend
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      run: news-backend
+  template:
+    metadata:
+      labels:
+        run: news-backend
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: news-backend
+          image: {{ .Values.image.registry }}/{{ .Values.backend.image }}:{{ .Values.backend.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xmx1500m"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: DB_HOST
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: SERVER_PORT
+            - name: AUTH_ACTUATOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_ACTUATOR_PASSWORD
+            - name: AUTH_SWAGGER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_SWAGGER_PASSWORD
+            - name: AUTH_WRITE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_WRITE_PASSWORD
+            - name: APP_EXTERNAL_DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: APP_EXTERNAL_DOMAIN
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: DISCORD_WEBHOOK_URL
+            - name: MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: MODEL
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: API_KEY
+            - name: GENERATION_ENGINE
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: GENERATION_ENGINE
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              httpHeaders:
+                - name: Authorization
+                  value: Basic YWN0dWF0b3I6Z3pXZTdobTg4QVhCaXdDRg==
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}

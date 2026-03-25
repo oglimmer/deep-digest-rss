@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: news-config
+  labels:
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+data:
+  DB_HOST: {{ .Values.config.dbHost | quote }}
+  SERVER_PORT: {{ .Values.config.serverPort | quote }}
+  APP_EXTERNAL_DOMAIN: {{ .Values.config.externalDomain | quote }}
+  API_URL: {{ .Values.config.apiUrl | quote }}
+  NO_ENV_FILE: {{ .Values.config.noEnvFile | quote }}
+  USERNAME: {{ .Values.config.username | quote }}
+  MODEL: {{ .Values.config.model | quote }}
+  GENERATION_ENGINE: {{ .Values.config.generationEngine | quote }}

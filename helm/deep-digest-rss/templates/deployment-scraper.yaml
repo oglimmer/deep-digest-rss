@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-scraper
+  labels:
+    run: news-scraper
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.scraper.replicas }}
+  selector:
+    matchLabels:
+      run: news-scraper
+  template:
+    metadata:
+      labels:
+        run: news-scraper
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: news-scraper
+          image: {{ .Values.image.registry }}/{{ .Values.scraper.image }}:{{ .Values.scraper.tag }}
+          imagePullPolicy: Always
+          resources:
+            {{- toYaml .Values.scraper.resources | nindent 12 }}
+          env:
+            - name: NO_ENV_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: NO_ENV_FILE
+            - name: USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: USERNAME
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_WRITE_PASSWORD
+            - name: URL
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: API_URL
+            - name: MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: MODEL
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: API_KEY
+            - name: GENERATION_ENGINE
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: GENERATION_ENGINE
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}

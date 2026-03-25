@@ -1,0 +1,85 @@
+image:
+  registry: registry.oglimmer.com
+  pullSecret: oglimmerregistrykey
+
+nodeSelector:
+  dedicated: news-system
+
+domain: news.oglimmer.com
+
+backend:
+  image: news-backend
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "25m"
+    limits:
+      memory: "2000Mi"
+      cpu: "1"
+
+frontend:
+  image: news-frontend
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "25m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+scraper:
+  image: news-scraper
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "25m"
+    limits:
+      memory: "712Mi"
+      cpu: "250m"
+
+taggroupper:
+  image: news-scraper
+  tag: latest
+  replicas: 1
+  command: ["./run.sh", "taggroups"]
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "25m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+auth:
+  image: auth-module
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "25m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+config:
+  dbHost: mariadb
+  serverPort: "8080"
+  externalDomain: https://news.oglimmer.com
+  apiUrl: https://news.oglimmer.com
+  noEnvFile: "true"
+  username: write
+  model: gpt-4o-mini
+  generationEngine: chatgpt
+
+ingress:
+  tls:
+    secretName: tls-news-frontend-ingress-dns
+  certManager:
+    clusterIssuer: oglimmer-com-dns

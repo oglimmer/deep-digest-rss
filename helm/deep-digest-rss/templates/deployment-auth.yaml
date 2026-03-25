@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-auth
+  labels:
+    run: news-auth
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.auth.replicas }}
+  selector:
+    matchLabels:
+      run: news-auth
+  template:
+    metadata:
+      labels:
+        run: news-auth
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: news-auth
+          image: {{ .Values.image.registry }}/{{ .Values.auth.image }}:{{ .Values.auth.tag }}
+          imagePullPolicy: Always
+          resources:
+            {{- toYaml .Values.auth.resources | nindent 12 }}
+          env:
+            - name: REDIS_URL
+              value: redis-service
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: AUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_USERNAME
+            - name: AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: AUTH_PASSWORD
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}

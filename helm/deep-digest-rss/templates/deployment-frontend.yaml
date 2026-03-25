@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-frontend
+  labels:
+    run: news-frontend
+    {{- include "deep-digest-rss.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      run: news-frontend
+  template:
+    metadata:
+      labels:
+        run: news-frontend
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: news-frontend
+          image: {{ .Values.image.registry }}/{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}

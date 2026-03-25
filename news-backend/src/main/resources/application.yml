@@ -50,3 +50,8 @@ auth:
   swagger-password: "doc"
   write-user: "write"
   write-password: "write"
+daily-digest:
+  discord-webhook-url: "${DISCORD_WEBHOOK_URL:}"
+  model: "${MODEL:}"
+  api-key: "${API_KEY:}"
+  generation-engine: "${GENERATION_ENGINE:}"
