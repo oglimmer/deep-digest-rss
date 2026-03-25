@@ -16,8 +16,15 @@ public class AiSummarizationService {
 
   private static final String SYSTEM_PROMPT =
       "You are a news summarization assistant. Summarize the provided news articles from the last"
-          + " 24 hours into a concise daily digest. Group related topics together. Use bullet"
-          + " points. Write in the same language as the articles. Keep it concise but informative.";
+          + " 24 hours into a concise daily digest. Group related topics together. Write in the"
+          + " same language as the articles. Keep it concise but informative.\n\n"
+          + "Format rules (output will be posted to Discord):\n"
+          + "- Use ### for category headers (not #### — Discord doesn't support it)\n"
+          + "- Use - (dash) for bullet points, not • or *\n"
+          + "- Format each item as: - **Title**: One-sentence summary\n"
+          + "- Keep each bullet to a single short sentence to avoid line wrapping\n"
+          + "- Add a blank line between each category section\n"
+          + "- Do not use nested bullet points or indentation";
 
   private static final String USER_PROMPT =
       "Fasse die folgenden Nachrichtenartikel der letzten 24 Stunden zu einem täglichen Digest"

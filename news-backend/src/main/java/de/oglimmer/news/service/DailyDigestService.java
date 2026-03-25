@@ -47,7 +47,7 @@ public class DailyDigestService {
     log.info("Summarizing {} news articles", newsList.size());
     String summary = aiSummarizationService.summarize(newsContent);
 
-    String message = "**Daily News Digest**\n\n" + summary;
+    String message = "# Täglicher News-Digest\n\n" + summary;
 
     if (postToDiscord) {
       discordService.postMessage(message);
