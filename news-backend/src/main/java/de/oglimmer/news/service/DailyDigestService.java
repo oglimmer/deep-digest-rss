@@ -6,7 +6,6 @@ import de.oglimmer.news.db.NewsRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,13 +38,11 @@ public class DailyDigestService {
       return "No news found in the last " + hours + " hours.";
     }
 
-    String newsContent =
-        newsList.stream()
-            .map(news -> "**" + news.getTitle() + "**\n" + news.getText())
-            .collect(Collectors.joining("\n\n---\n\n"));
+    List<String> articles =
+        newsList.stream().map(news -> "**" + news.getTitle() + "**\n" + news.getText()).toList();
 
     log.info("Summarizing {} news articles", newsList.size());
-    String summary = aiSummarizationService.summarize(newsContent);
+    String summary = aiSummarizationService.summarize(articles);
 
     String message = "# Täglicher News-Digest\n\n" + summary;
 
