@@ -4,7 +4,6 @@ requests
 xmltodict
 python-dotenv
 openai
-ollama
 beautifulsoup4
 newspaper3k
 loguru

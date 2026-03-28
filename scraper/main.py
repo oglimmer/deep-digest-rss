@@ -77,6 +77,24 @@ def process_next_feed_item(item_id, feed_id, item_url, cookie):
     summary_output = generate_ai_summary.generate_summary(shrink_output)
     summary_data = json.loads(summary_output)
 
+    if not summary_data.get('summary'):
+        raise Exception("AI response missing required field 'summary'")
+
+    VALID_IMPACT_SCOPES = {"global", "international", "europa", "deutschland", "regional", "branche"}
+    impact_scope = summary_data.get('impact_scope')
+    if impact_scope:
+        impact_scope_lower = impact_scope.strip().lower()
+        if impact_scope_lower not in VALID_IMPACT_SCOPES:
+            logger.warning(f"Invalid impact_scope '{impact_scope}' from AI, setting to None")
+            summary_data['impact_scope'] = None
+        else:
+            summary_data['impact_scope'] = impact_scope_lower
+
+    if summary_data.get('timely') is None:
+        logger.warning("AI response missing field 'timely'")
+    if summary_data.get('impact_scope') is None:
+        logger.warning("AI response missing field 'impact_scope'")
+
     push_to_db.push_to_db(feed_id, item_id, summary_data)
     signal_handler.last_item_in_process = None
 

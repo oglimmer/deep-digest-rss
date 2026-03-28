@@ -23,6 +23,12 @@ public class AiSummarizationService {
           + " stories. Ignore minor updates, routine announcements, repetitive follow-ups, and"
           + " low-importance items. Group related topics together. Write in the same language as the"
           + " articles. Keep it concise but informative.\n\n"
+          + "Each article has metadata tags: [Aktuell: Ja/Nein] indicates whether it covers a"
+          + " current event, and [Reichweite: ...] indicates the impact scope (global,"
+          + " international, europa, deutschland, regional, branche). Use this metadata to:\n"
+          + "- Prioritize current events (Aktuell: Ja) over background/opinion pieces\n"
+          + "- Lead with global/international stories, then narrow to deutschland/regional\n"
+          + "- You may skip non-timely articles with limited scope if space is tight\n\n"
           + "Format rules (output will be posted to Discord):\n"
           + "- Use ### for category headers (not #### — Discord doesn't support it)\n"
           + "- Use - (dash) for bullet points, not • or *\n"
@@ -36,14 +42,18 @@ public class AiSummarizationService {
           + " bullet-point list. Focus only on the most significant and impactful stories. Ignore"
           + " minor updates, routine announcements, repetitive follow-ups, and low-importance items."
           + " Group related topics together. Write in the same language as the articles. For each"
-          + " item write: **Title**: One-sentence summary.";
+          + " item write: **Title**: One-sentence summary.\n\n"
+          + "Each article has metadata tags: [Aktuell: Ja/Nein] indicates whether it covers a"
+          + " current event, and [Reichweite: ...] indicates the impact scope. Prioritize current"
+          + " events and broader-scope stories.";
 
   private static final String MERGE_SYSTEM_PROMPT =
       "You are a news summarization assistant. Merge the following partial news summaries into one"
           + " cohesive daily digest. Remove duplicates, group related topics together. Keep only the"
           + " most significant and impactful stories — drop minor updates, routine announcements,"
           + " and low-importance items. Write in the same language as the summaries. Keep it concise"
-          + " but informative.\n\n"
+          + " but informative. Lead with global/international stories, then narrow to"
+          + " deutschland/regional.\n\n"
           + "Format rules (output will be posted to Discord):\n"
           + "- Use ### for category headers (not #### — Discord doesn't support it)\n"
           + "- Use - (dash) for bullet points, not • or *\n"

@@ -1,54 +1,8 @@
 from openai import OpenAI
 import config
-from ollama import Options, Client, ChatResponse
 import sys
 from loguru import logger
 import tiktoken
-
-def ollama(content):
-    options = Options()
-    options.num_ctx = 50024
-    client = Client()
-    response: ChatResponse = client.chat(
-        model=config.MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a news article summarization assistant. Your task is to read the provided news article and produce a profound summary that covers all relevant aspects, including any problems, conclusions, or critical points discussed in the article. Please output your answer strictly as a valid JSON object with a key \"summary\", also create up to 3 tags from the list of available tags. For example:"
-                    "{"
-                      "\"summary\": \"Your comprehensive summary here.\""
-                      "\"advertising\": \"Your assessment if this is an advertisement or not goes here as true or false\""
-                      "\"tags\": [\"Softwareentwicklung\", \"Algorithmen\", \"Datenanalyse\", \"IT-Sicherheit\", \"Künstliche Intelligenz\", \"Elektromobilität\", \"Klimaschutz\", \"Migration\", \"Politik\", \"Gesellschaft\", \"Wirtschaft\", \"Fußball\", \"Sport\", \"Astronomie\", \"Forschung\", \"Gesundheit\", \"Cyberkriminalität\", \"Sicherheit\", \"Innovation\", \"Technologie\", \"Medien\", \"Kunst\", \"Kultur\", \"Bildung\", \"Geschichte\", \"Konflikte\", \"Umwelt\", \"Nachhaltigkeit\", \"Weltraum\", \"Infrastruktur\", \"Verkehr\", \"Recht\", \"Demokratie\", \"Handel\", \"Energie\", \"Musik\", \"Film\", \"Literatur\", \"Wissenschaft\"]"
-                    "}"
-                    "Ensure that no extra text or formatting is included outside of the JSON structure. Please provide your answer in the German language."
-                )
-            },
-            {
-                "role": "user",
-                "content": (
-                    "Please analyze the following news article and produce a profound summary covering all relevant aspects, problems, or conclusions."
-                    "Text: " + content
-                )
-            }
-        ],
-        options=options,
-        stream=False,
-        format={
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "type": "object",
-            "properties": {
-                "summary": {"type": "string"},
-                "tags": {
-                    "type": "array",
-                    "items": {"type": "string"}
-                },
-                "advertising": {"type": "boolean"}
-            },
-            "required": ["summary", "tags", "advertising"]
-        },
-    )
-    return response.message.content
 
 def shorten_string(s):
     cut_length = int(len(s) * 0.1)  # Calculate 10% of the string length
@@ -76,9 +30,15 @@ def chatgpt(content):
             {
                 "role": "system",
                 "content": (
-                        "Erzeuge JSON, die antwort muss im attribut summary die eigentliche Zusammenfassung enthalten, "
-                        "zusätzlich entählt das attribut advertising mit true oder false ob es sich um eine Werbung handelt und "
-                        "das Attribut tags ist ein Arary von Strings mit Tags die du im Artikel identifiziert hast. Gültige Tags sind "
+                        "Erzeuge JSON, die Antwort muss folgende Attribute enthalten: "
+                        "\"summary\": die eigentliche Zusammenfassung. "
+                        "\"advertising\": true oder false, ob es sich um eine Werbung handelt. "
+                        "\"tags\": ein Array von Strings mit bis zu 3 Tags die du im Artikel identifiziert hast. "
+                        "\"timely\": true wenn der Artikel ein aktuelles, kürzlich eingetretenes Ereignis behandelt, false wenn es sich um einen zeitlosen Hintergrundartikel, Meinungsbeitrag oder Ratgeber ohne aktuellen Bezug handelt. "
+                        "\"impact_scope\": die geografische oder gesellschaftliche Reichweite der Auswirkungen, einer von: "
+                        "\"global\" (weltweite Relevanz), \"international\" (mehrere Länder, Außenpolitik), \"europa\" (europäischer Rahmen), "
+                        "\"deutschland\" (primär relevant für Deutschland), \"regional\" (eine bestimmte Region oder Stadt), \"branche\" (branchenspezifisch, geringe breitere Wirkung). "
+                        "Gültige Tags sind "
                         "'Softwareentwicklung', 'Algorithmen', 'Datenanalyse', 'IT-Sicherheit', 'Künstliche Intelligenz', "
                         "'Elektromobilität', 'Klimaschutz', 'Migration', 'Politik', 'Gesellschaft', 'Wirtschaft', 'Fußball', 'Sport', "
                         "'Astronomie', 'Forschung', 'Gesundheit', 'Cyberkriminalität', 'Sicherheit', 'Innovation', 'Technologie', "
@@ -96,7 +56,31 @@ def chatgpt(content):
             }
         ],
         stream=False,
-        response_format={"type": "json_object"},
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "news_summary",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "summary": {"type": "string"},
+                        "tags": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        },
+                        "advertising": {"type": "boolean"},
+                        "timely": {"type": "boolean"},
+                        "impact_scope": {
+                            "type": "string",
+                            "enum": ["global", "international", "europa", "deutschland", "regional", "branche"]
+                        }
+                    },
+                    "required": ["summary", "tags", "advertising", "timely", "impact_scope"],
+                    "additionalProperties": False
+                }
+            }
+        },
     )
     summary = response.choices[0].message.content
     return summary
@@ -105,10 +89,8 @@ def chatgpt(content):
 def generate_summary(content):
     if config.GENERATION_ENGINE == "chatgpt":
         generate_summary_result = chatgpt(content)
-    elif config.GENERATION_ENGINE == "ollama":
-        generate_summary_result = ollama(content)
     else:
-        raise Exception("Invalid generation engine specified")
+        raise Exception(f"Invalid generation engine specified: {config.GENERATION_ENGINE}")
     logger.info(f"Generated summary from {len(content)} to {len(generate_summary_result)}: {generate_summary_result}")
     return generate_summary_result
 

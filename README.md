@@ -1,6 +1,6 @@
 # deep-digest-rss - a news overview generator using AI pulling RSS
 
-Copy .env.example to .env and add a Chatgpt, Deepseek or Anthropic API key. Then run `docker compose up --build`.
+Copy .env.example to .env and add a ChatGPT API key. Then run `docker compose up --build`.
 
 ## setup
 
@@ -16,11 +16,9 @@ docker run -d --name mariadb \
 ```
 ## requirements
 
-The scraper needs either Ollama or a ChatGPT API key.
+The scraper needs a ChatGPT API key.
 
-When using ollama you can choose betwee a high memory setup which needs at least 32 GB RAM or a low memory setup, which runs with 8 GB of RAM.
-
-Check the configuration in scrapter/.env.example
+Check the configuration in scraper/.env.example
 
 ## usage
 

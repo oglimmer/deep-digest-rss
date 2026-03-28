@@ -41,7 +41,7 @@ public class NewsController {
   }
 
   @PostMapping
-  public NewsDto createNews(@RequestBody CreateNewsDto newsDto) {
+  public NewsDto createNews(@RequestBody @jakarta.validation.Valid CreateNewsDto newsDto) {
     News dataFromUser = modelMapper.map(newsDto, News.class);
     News dataAfterPersist = newsService.createNews(dataFromUser);
     return modelMapper.map(dataAfterPersist, NewsDto.class);

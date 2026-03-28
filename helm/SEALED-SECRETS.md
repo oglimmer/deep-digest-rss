@@ -12,7 +12,7 @@ This secret is managed via [Sealed Secrets](https://github.com/bitnami-labs/seal
 | `AUTH_ACTUATOR_PASSWORD` | backend | Password for `/actuator` endpoint |
 | `AUTH_SWAGGER_PASSWORD` | backend | Password for Swagger UI |
 | `AUTH_WRITE_PASSWORD` | backend, scraper, taggroupper | Password for write API access |
-| `API_KEY` | backend, scraper, taggroupper | AI provider API key (OpenAI / Anthropic) |
+| `API_KEY` | backend, scraper, taggroupper | OpenAI API key |
 | `AUTH_USERNAME` | auth | Username for frontend basic auth |
 | `AUTH_PASSWORD` | auth | Password for frontend basic auth |
 | `DISCORD_WEBHOOK_URLS` | backend | Comma-separated Discord webhook URLs for daily digest notifications |

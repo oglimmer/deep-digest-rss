@@ -27,5 +27,9 @@ public class NewsDto {
 
   private String[] tags;
 
+  private Boolean timely;
+
+  private String impactScope;
+
   private boolean voted;
 }

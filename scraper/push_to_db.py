@@ -9,7 +9,9 @@ def push_to_db(feed_id, item_id, parsed_content, max_retries=3):
         'originalFeedItemId': item_id,
         'text': parsed_content.get('summary'),
         'tags': parsed_content.get('tags'),
-        'advertising': parsed_content.get('advertising')
+        'advertising': parsed_content.get('advertising'),
+        'timely': parsed_content.get('timely'),
+        'impactScope': parsed_content.get('impact_scope')
     }
 
     for attempt in range(1, max_retries + 1):

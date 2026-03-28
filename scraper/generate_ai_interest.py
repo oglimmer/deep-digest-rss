@@ -4,7 +4,6 @@ import requests
 import json
 from openai import OpenAI
 import config
-from ollama import Options, Client, ChatResponse
 from loguru import logger
 
 def retrieve_news(feed_item_to_process_id):
@@ -34,43 +33,8 @@ def push_relevance_flag(news_id):
 def ask_ai_relevance_flag(text, title, top_headlines):
     if config.GENERATION_ENGINE == "chatgpt":
         return ask_ai_relevance_flag_chatgpt(text, title, top_headlines)
-    elif config.GENERATION_ENGINE == "ollama":
-        return ask_ai_relevance_flag_ollama(text, title, top_headlines)
     else:
-        raise Exception("Invalid generation engine specified")
-
-def ask_ai_relevance_flag_ollama(text, title, top_headlines):
-    options = Options()
-    options.num_ctx = 50024
-    client = Client()
-    response: ChatResponse = client.chat(
-        model=config.MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "Erzeuge JSON, die antwort muss im attribut relevance mit einem float zwischen 0 und 1 stehen, "
-                    "wobei 0 für absolut nicht relevant und 1 für perfekt relevant steht. Hier die Liste der interessanten Nachrichten: "
-                    + " ".join(top_headlines)
-                )
-            },
-            {
-                "role": "user",
-                "content": f"Bewerte wie hoch die folgende Nachricht interessant ist {title}. {text}"
-            }
-        ],
-        options=options,
-        stream=False,
-        format={
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "type": "object",
-            "properties": {
-                "relevance": {"type": "number"}
-            },
-            "required": ["relevance"]
-        },
-    )
-    return response.message.content
+        raise Exception(f"Invalid generation engine specified: {config.GENERATION_ENGINE}")
 
 def ask_ai_relevance_flag_chatgpt(text, title, top_headlines):
     client = OpenAI(

@@ -39,7 +39,21 @@ public class DailyDigestService {
     }
 
     List<String> articles =
-        newsList.stream().map(news -> "**" + news.getTitle() + "**\n" + news.getText()).toList();
+        newsList.stream()
+            .map(
+                news -> {
+                  StringBuilder sb = new StringBuilder();
+                  sb.append("**").append(news.getTitle()).append("**\n");
+                  sb.append(news.getText());
+                  if (news.getTimely() != null) {
+                    sb.append("\n[Aktuell: ").append(news.getTimely() ? "Ja" : "Nein").append("]");
+                  }
+                  if (news.getImpactScope() != null) {
+                    sb.append(" [Reichweite: ").append(news.getImpactScope()).append("]");
+                  }
+                  return sb.toString();
+                })
+            .toList();
 
     log.info("Summarizing {} news articles", newsList.size());
     String summary = aiSummarizationService.summarize(articles);

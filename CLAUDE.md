@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Deep-Digest-RSS is a news aggregation platform with AI-powered summarization. It pulls RSS feeds and uses AI engines (ChatGPT, DeepSeek, Anthropic, Ollama) to generate interest scores and summaries. Monorepo with four services.
+Deep-Digest-RSS is a news aggregation platform with AI-powered summarization. It pulls RSS feeds and uses AI engines (ChatGPT) to generate interest scores and summaries. Monorepo with four services.
 
 ## Build & Development Commands
 

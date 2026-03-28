@@ -53,6 +53,11 @@ public class News {
 
   private Boolean advertising;
 
+  private Boolean timely;
+
+  @Column(length = 20)
+  private String impactScope;
+
   @Column(nullable = false)
   @NotNull
   private Instant createdOn;
