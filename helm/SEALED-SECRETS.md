@@ -15,7 +15,7 @@ This secret is managed via [Sealed Secrets](https://github.com/bitnami-labs/seal
 | `API_KEY` | backend, scraper, taggroupper | AI provider API key (OpenAI / Anthropic) |
 | `AUTH_USERNAME` | auth | Username for frontend basic auth |
 | `AUTH_PASSWORD` | auth | Password for frontend basic auth |
-| `DISCORD_WEBHOOK_URL` | backend | Discord webhook for daily digest notifications |
+| `DISCORD_WEBHOOK_URLS` | backend | Comma-separated Discord webhook URLs for daily digest notifications |
 
 ## Creating the SealedSecret
 
@@ -34,7 +34,7 @@ kubectl create secret generic news-secrets \
   --from-literal=AUTH_USERNAME='<your-auth-username>' \
   --from-literal=AUTH_PASSWORD='<your-auth-password>' \
   --from-literal=API_KEY='<your-ai-api-key>' \
-  --from-literal=DISCORD_WEBHOOK_URL='<your-discord-webhook-url>' \
+  --from-literal=DISCORD_WEBHOOK_URLS='<webhook-url-1>,<webhook-url-2>' \
   > news-secrets-plain.yaml
 ```
 

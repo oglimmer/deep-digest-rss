@@ -20,23 +20,33 @@ public class DiscordService {
   private final DailyDigestProperties properties;
 
   public void postMessage(String message) {
-    String webhookUrl = properties.getDiscordWebhookUrl();
-    if (webhookUrl == null || webhookUrl.isBlank()) {
-      log.warn("Discord webhook URL is not configured, skipping message");
+    List<String> webhookUrls =
+        properties.getDiscordWebhookUrls().stream()
+            .filter(url -> url != null && !url.isBlank())
+            .toList();
+    if (webhookUrls.isEmpty()) {
+      log.warn("No Discord webhook URLs configured, skipping message");
       return;
     }
 
     RestClient restClient = RestClient.create();
-    for (String chunk : splitMessage(message)) {
-      restClient
-          .post()
-          .uri(webhookUrl)
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(Map.of("content", chunk))
-          .retrieve()
-          .toBodilessEntity();
+    List<String> chunks = splitMessage(message);
+    for (String webhookUrl : webhookUrls) {
+      try {
+        for (String chunk : chunks) {
+          restClient
+              .post()
+              .uri(webhookUrl)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(Map.of("content", chunk))
+              .retrieve()
+              .toBodilessEntity();
+        }
+        log.info("Daily digest posted to Discord webhook");
+      } catch (Exception e) {
+        log.error("Failed to post to Discord webhook: {}", webhookUrl, e);
+      }
     }
-    log.info("Daily digest posted to Discord");
   }
 
   private List<String> splitMessage(String message) {

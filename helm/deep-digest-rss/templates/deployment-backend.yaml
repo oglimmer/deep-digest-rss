@@ -68,11 +68,11 @@ spec:
                 configMapKeyRef:
                   name: news-config
                   key: APP_EXTERNAL_DOMAIN
-            - name: DISCORD_WEBHOOK_URL
+            - name: DISCORD_WEBHOOK_URLS
               valueFrom:
                 secretKeyRef:
                   name: news-secrets
-                  key: DISCORD_WEBHOOK_URL
+                  key: DISCORD_WEBHOOK_URLS
             - name: MODEL
               valueFrom:
                 configMapKeyRef:

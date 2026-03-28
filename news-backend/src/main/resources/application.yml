@@ -51,7 +51,7 @@ auth:
   write-user: "write"
   write-password: "write"
 daily-digest:
-  discord-webhook-url: "${DISCORD_WEBHOOK_URL:}"
+  discord-webhook-urls: "${DISCORD_WEBHOOK_URLS:}"
   model: "${MODEL:}"
   api-key: "${API_KEY:}"
   generation-engine: "${GENERATION_ENGINE:}"
