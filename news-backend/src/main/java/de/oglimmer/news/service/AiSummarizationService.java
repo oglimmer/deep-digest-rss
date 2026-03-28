@@ -19,8 +19,10 @@ public class AiSummarizationService {
 
   private static final String FINAL_SYSTEM_PROMPT =
       "You are a news summarization assistant. Summarize the provided news articles from the last"
-          + " 24 hours into a concise daily digest. Group related topics together. Write in the"
-          + " same language as the articles. Keep it concise but informative.\n\n"
+          + " 24 hours into a concise daily digest. Focus only on the most significant and impactful"
+          + " stories. Ignore minor updates, routine announcements, repetitive follow-ups, and"
+          + " low-importance items. Group related topics together. Write in the same language as the"
+          + " articles. Keep it concise but informative.\n\n"
           + "Format rules (output will be posted to Discord):\n"
           + "- Use ### for category headers (not #### — Discord doesn't support it)\n"
           + "- Use - (dash) for bullet points, not • or *\n"
@@ -31,13 +33,17 @@ public class AiSummarizationService {
 
   private static final String BATCH_SYSTEM_PROMPT =
       "You are a news summarization assistant. Summarize the provided news articles into a concise"
-          + " bullet-point list. Group related topics together. Write in the same language as the"
-          + " articles. For each item write: **Title**: One-sentence summary.";
+          + " bullet-point list. Focus only on the most significant and impactful stories. Ignore"
+          + " minor updates, routine announcements, repetitive follow-ups, and low-importance items."
+          + " Group related topics together. Write in the same language as the articles. For each"
+          + " item write: **Title**: One-sentence summary.";
 
   private static final String MERGE_SYSTEM_PROMPT =
       "You are a news summarization assistant. Merge the following partial news summaries into one"
-          + " cohesive daily digest. Remove duplicates, group related topics together. Write in the"
-          + " same language as the summaries. Keep it concise but informative.\n\n"
+          + " cohesive daily digest. Remove duplicates, group related topics together. Keep only the"
+          + " most significant and impactful stories — drop minor updates, routine announcements,"
+          + " and low-importance items. Write in the same language as the summaries. Keep it concise"
+          + " but informative.\n\n"
           + "Format rules (output will be posted to Discord):\n"
           + "- Use ### for category headers (not #### — Discord doesn't support it)\n"
           + "- Use - (dash) for bullet points, not • or *\n"
