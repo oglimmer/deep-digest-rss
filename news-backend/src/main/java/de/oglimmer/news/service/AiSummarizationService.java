@@ -35,7 +35,13 @@ public class AiSummarizationService {
           + "- Format each item as: - **Title**: One-sentence summary\n"
           + "- Keep each bullet to a single short sentence to avoid line wrapping\n"
           + "- Add a blank line between each category section\n"
-          + "- Do not use nested bullet points or indentation";
+          + "- Do not use nested bullet points or indentation\n\n"
+          + "Additionally, end the digest with a special section:\n"
+          + "### Kuriosität des Tages\n"
+          + "Pick one article that is the most unusual, surprising, or quirky story of the day —"
+          + " something that stands out as a curiosity. Present it as a single bullet point with a"
+          + " fun, light tone. If no article qualifies as truly unusual, pick the most unexpected or"
+          + " entertaining one.";
 
   private static final String BATCH_SYSTEM_PROMPT =
       "You are a news summarization assistant. Summarize the provided news articles into a concise"
@@ -45,7 +51,8 @@ public class AiSummarizationService {
           + " item write: **Title**: One-sentence summary.\n\n"
           + "Each article has metadata tags: [Aktuell: Ja/Nein] indicates whether it covers a"
           + " current event, and [Reichweite: ...] indicates the impact scope. Prioritize current"
-          + " events and broader-scope stories.";
+          + " events and broader-scope stories. Also flag any article that is unusually quirky,"
+          + " surprising, or curious — mark it with [Kuriosität] so the final merge can pick it up.";
 
   private static final String MERGE_SYSTEM_PROMPT =
       "You are a news summarization assistant. Merge the following partial news summaries into one"
@@ -60,7 +67,13 @@ public class AiSummarizationService {
           + "- Format each item as: - **Title**: One-sentence summary\n"
           + "- Keep each bullet to a single short sentence to avoid line wrapping\n"
           + "- Add a blank line between each category section\n"
-          + "- Do not use nested bullet points or indentation";
+          + "- Do not use nested bullet points or indentation\n\n"
+          + "Additionally, end the digest with a special section:\n"
+          + "### Kuriosität des Tages\n"
+          + "Pick one article that is the most unusual, surprising, or quirky story of the day —"
+          + " something that stands out as a curiosity (look for items marked [Kuriosität] in the"
+          + " partial summaries). Present it as a single bullet point with a fun, light tone. If no"
+          + " article qualifies as truly unusual, pick the most unexpected or entertaining one.";
 
   private static final String USER_PROMPT =
       "Fasse die folgenden Nachrichtenartikel der letzten 24 Stunden zu einem täglichen Digest"
