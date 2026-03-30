@@ -18,4 +18,6 @@ public class DailyDigestProperties {
   private String model;
   private String apiKey;
   private String generationEngine;
+  private String anthropicApiKey;
+  private String anthropicModel;
 }

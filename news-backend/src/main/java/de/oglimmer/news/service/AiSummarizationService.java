@@ -93,9 +93,9 @@ public class AiSummarizationService {
   private final DailyDigestProperties properties;
 
   public String summarize(List<String> articles) {
-    String apiKey = properties.getApiKey();
+    String apiKey = properties.getAnthropicApiKey();
     if (apiKey == null || apiKey.isBlank()) {
-      log.warn("API key is not configured, returning raw content");
+      log.warn("Anthropic API key is not configured, returning raw content");
       return String.join("\n\n", articles);
     }
 
@@ -145,48 +145,14 @@ public class AiSummarizationService {
   }
 
   private String callAi(String systemPrompt, String userContent) {
-    return switch (properties.getGenerationEngine()) {
-      case "chatgpt" -> callOpenAi(systemPrompt, userContent);
-      case "anthropic" -> callAnthropic(systemPrompt, userContent);
-      default ->
-          throw new IllegalStateException(
-              "Unsupported generation engine: " + properties.getGenerationEngine());
-    };
-  }
-
-  private String callOpenAi(String systemPrompt, String userContent) {
-    Map<String, Object> request =
-        Map.of(
-            "model",
-            properties.getModel(),
-            "messages",
-            List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userContent)));
-
-    RestClient restClient = RestClient.create();
-    Map<?, ?> response =
-        restClient
-            .post()
-            .uri("https://api.openai.com/v1/chat/completions")
-            .header("Authorization", "Bearer " + properties.getApiKey())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(request)
-            .retrieve()
-            .body(Map.class);
-
-    @SuppressWarnings("unchecked")
-    List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-    @SuppressWarnings("unchecked")
-    Map<String, String> message = (Map<String, String>) choices.getFirst().get("message");
-    return message.get("content");
+    return callAnthropic(systemPrompt, userContent);
   }
 
   private String callAnthropic(String systemPrompt, String userContent) {
     Map<String, Object> request =
         Map.of(
             "model",
-            properties.getModel(),
+            properties.getAnthropicModel(),
             "max_tokens",
             4096,
             "system",
@@ -199,7 +165,7 @@ public class AiSummarizationService {
         restClient
             .post()
             .uri("https://api.anthropic.com/v1/messages")
-            .header("x-api-key", properties.getApiKey())
+            .header("x-api-key", properties.getAnthropicApiKey())
             .header("anthropic-version", "2023-06-01")
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
