@@ -22,15 +22,24 @@ const loginHandler = async () => {
 
 <template>
   <div class="login-form">
-    <h3>Login @ DeepDigestRSS</h3>
+    <div class="login-header">
+      <h3>Login</h3>
+      <span class="login-brand">DeepDigestRSS</span>
+    </div>
     <form @submit.prevent="loginHandler">
-      <input type="email" v-model="email" placeholder="Email" required />
-      <input type="password" v-model="password" placeholder="Password" required />
+      <div class="input-group">
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" v-model="email" placeholder="you@example.com" required />
+      </div>
+      <div class="input-group">
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" v-model="password" placeholder="Enter password" required />
+      </div>
       <!-- Display error message if any -->
       <div v-if="error" class="error-message">{{ error }}</div>
       <div class="button-group">
-        <button type="submit">Login</button>
-        <button type="button" @click="props.closeModal" class="close-button">Close</button>
+        <button type="submit" class="btn-primary">Login</button>
+        <button type="button" @click="props.closeModal" class="btn-secondary">Cancel</button>
       </div>
     </form>
   </div>
@@ -38,90 +47,146 @@ const loginHandler = async () => {
 
 <style scoped>
 .login-form {
-  max-width: 400px;
-  padding: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--bg-primary);
-  box-shadow: 0 2px 10px var(--shadow-color);
+  width: 360px;
+  max-width: 90vw;
+  padding: 2rem;
+}
+
+.login-header {
+  margin-bottom: 1.5rem;
+}
+
+.login-header h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary);
+}
+
+.login-brand {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .login-form form {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
-.login-form h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: var(--text-primary);
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.input-group label {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .login-form input {
-  margin-bottom: 10px;
-  padding: 10px;
+  padding: 0.65rem 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: var(--bg-primary);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 .login-form input::placeholder {
   color: var(--text-muted);
+  font-weight: 400;
 }
 
 .login-form input:focus {
   outline: none;
   border-color: var(--primary-color);
+  background-color: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(184, 76, 46, 0.08);
 }
 
-/* Fancy error message styling */
+[data-theme="dark"] .login-form input:focus {
+  box-shadow: 0 0 0 3px rgba(224, 122, 82, 0.12);
+}
+
+/* Error message styling */
 .error-message {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 15px;
-  margin-bottom: 10px;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid var(--error-border);
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: var(--error-bg);
   color: var(--error-color);
-  font-weight: bold;
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 0.8rem;
 }
 .error-message::before {
-  content: "⚠";
-  font-size: 1.2rem;
+  content: "!";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background-color: var(--error-color);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .button-group {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
 }
 
-.login-form button {
+.btn-primary,
+.btn-secondary {
   flex: 1;
-  padding: 10px;
+  padding: 0.65rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary {
   background-color: var(--primary-color);
   color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.login-form button:hover {
+.btn-primary:hover {
   background-color: var(--primary-hover);
 }
 
-.close-button {
-  background-color: var(--secondary-color);
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
-.close-button:hover {
-  background-color: var(--secondary-hover);
+.btn-secondary:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 </style>

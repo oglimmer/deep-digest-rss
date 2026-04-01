@@ -34,20 +34,23 @@ onMounted(() => {
 <template>
   <main>
     <header class="app-header">
-      <h1 class="site-title">Lesbare Nachrichten</h1>
+      <div class="header-title-area">
+        <h1 class="site-title">Lesbare Nachrichten</h1>
+        <span class="site-subtitle">Kuratiert & zusammengefasst</span>
+      </div>
       <div class="header-right">
         <div v-if="store.loggedIn" class="apps-menu">
           <button class="apps-btn" @click="toggleApps" title="Switch app">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <rect x="1" y="1" width="4" height="4" rx="0.5" />
-              <rect x="6" y="1" width="4" height="4" rx="0.5" />
-              <rect x="11" y="1" width="4" height="4" rx="0.5" />
-              <rect x="1" y="6" width="4" height="4" rx="0.5" />
-              <rect x="6" y="6" width="4" height="4" rx="0.5" />
-              <rect x="11" y="6" width="4" height="4" rx="0.5" />
-              <rect x="1" y="11" width="4" height="4" rx="0.5" />
-              <rect x="6" y="11" width="4" height="4" rx="0.5" />
-              <rect x="11" y="11" width="4" height="4" rx="0.5" />
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="3" cy="3" r="1.5" />
+              <circle cx="8" cy="3" r="1.5" />
+              <circle cx="13" cy="3" r="1.5" />
+              <circle cx="3" cy="8" r="1.5" />
+              <circle cx="8" cy="8" r="1.5" />
+              <circle cx="13" cy="8" r="1.5" />
+              <circle cx="3" cy="13" r="1.5" />
+              <circle cx="8" cy="13" r="1.5" />
+              <circle cx="13" cy="13" r="1.5" />
             </svg>
           </button>
           <div v-if="appsOpen" class="apps-dropdown">
@@ -68,30 +71,56 @@ onMounted(() => {
         <ThemeToggle />
       </div>
     </header>
+    <div class="header-rule"></div>
     <NewsList />
   </main>
 </template>
 
 <style scoped>
 main {
-  max-width: 720px;
+  max-width: 740px;
   margin: 0 auto;
 }
 
 .app-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
+.header-title-area {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
 .site-title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
   margin: 0;
   color: var(--text-primary);
   white-space: nowrap;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.site-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.header-rule {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-line), var(--accent-line) 30%, var(--border-color) 30%, var(--border-color));
+  margin-bottom: 1.25rem;
+  border-radius: 1px;
 }
 
 .header-right {
@@ -108,46 +137,63 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem 0.5rem;
+  padding: 0.35rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .apps-btn:hover {
   background-color: var(--bg-hover);
   border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .apps-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   right: 0;
-  min-width: 140px;
+  min-width: 150px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px var(--shadow-strong), 0 2px 8px var(--shadow-color);
   z-index: 100;
-  padding: 0.25rem 0;
+  padding: 0.375rem;
+  animation: dropdownReveal 0.15s ease;
+}
+
+@keyframes dropdownReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .app-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.625rem;
   color: var(--text-primary);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 5px;
   transition: background-color 0.15s;
 }
 
 .app-link:hover {
   background-color: var(--bg-hover);
+  text-decoration: none;
 }
 
 .app-current {
@@ -155,14 +201,25 @@ main {
 }
 
 .current-badge {
-  font-size: 0.625rem;
-  color: var(--text-muted);
+  font-size: 0.575rem;
+  color: var(--primary-color);
   margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 @media (max-width: 480px) {
   .site-title {
-    font-size: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .site-subtitle {
+    display: none;
+  }
+
+  .header-title-area {
+    gap: 0.5rem;
   }
 }
 </style>

@@ -136,7 +136,11 @@ onClickOutside(refContainer, closeAllDropdowns)
         :disabled="loading"
         class="nav-btn"
         title="Previous day"
-      >&larr;</button>
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M7.5 2.5L4 6L7.5 9.5" />
+        </svg>
+      </button>
       <span class="current-date" @click="changeDate(0)" title="Go to today">
         {{ store.dateToShowAsDate.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' }) }}
       </span>
@@ -145,7 +149,11 @@ onClickOutside(refContainer, closeAllDropdowns)
         :disabled="store.isDateToday || loading"
         class="nav-btn"
         title="Next day"
-      >&rarr;</button>
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M4.5 2.5L8 6L4.5 9.5" />
+        </svg>
+      </button>
     </div>
 
     <div class="filters">
@@ -156,11 +164,12 @@ onClickOutside(refContainer, closeAllDropdowns)
       <div class="dropdown" @click.stop="toggleFeedDropdown">
         <span class="dropdown-label">Feeds</span>
         <span class="dropdown-value">{{ feedDropdownShortLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownFeedOpen ? '▲' : '▼' }}</span>
+        <svg class="dropdown-chevron" :class="{ open: dropdownFeedOpen }" width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 2.5L4 5.5L7 2.5" /></svg>
         <div class="dropdown-menu" v-if="dropdownFeedOpen" @click.stop>
           <label v-for="feed in store.feedEntries" :key="feed.id" class="dropdown-item">
             <input type="checkbox" :value="feed.id" v-model="store.selectedFeeds" />
-            {{ feed.title }} ({{ feedNewsCounts[feed.id] || 0 }})
+            <span class="dropdown-item-text">{{ feed.title }}</span>
+            <span class="dropdown-item-count">{{ feedNewsCounts[feed.id] || 0 }}</span>
           </label>
         </div>
       </div>
@@ -168,11 +177,12 @@ onClickOutside(refContainer, closeAllDropdowns)
       <div class="dropdown" @click.stop="toggleDropdown">
         <span class="dropdown-label">Include</span>
         <span class="dropdown-value">{{ dropdownShortLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
+        <svg class="dropdown-chevron" :class="{ open: dropdownOpen }" width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 2.5L4 5.5L7 2.5" /></svg>
         <div class="dropdown-menu" v-if="dropdownOpen" @click.stop>
           <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
             <input type="checkbox" :value="key" v-model="store.selectedTagGroups" />
-            {{ key }} ({{ store.tagGroupCounts[key] }})
+            <span class="dropdown-item-text">{{ key }}</span>
+            <span class="dropdown-item-count">{{ store.tagGroupCounts[key] }}</span>
           </label>
         </div>
       </div>
@@ -180,11 +190,12 @@ onClickOutside(refContainer, closeAllDropdowns)
       <div class="dropdown" @click.stop="toggleExcludedDropdown">
         <span class="dropdown-label">Exclude</span>
         <span class="dropdown-value">{{ dropdownExcludedShortLabel }}</span>
-        <span class="dropdown-arrow">{{ dropdownExcludedOpen ? '▲' : '▼' }}</span>
+        <svg class="dropdown-chevron" :class="{ open: dropdownExcludedOpen }" width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 2.5L4 5.5L7 2.5" /></svg>
         <div class="dropdown-menu" v-if="dropdownExcludedOpen" @click.stop>
           <label v-for="key in store.tagGroupKeys" :key="key" class="dropdown-item">
             <input type="checkbox" :value="key" v-model="store.excludedTagGroups" />
-            {{ key }} ({{ store.tagGroupCounts[key] }})
+            <span class="dropdown-item-text">{{ key }}</span>
+            <span class="dropdown-item-count">{{ store.tagGroupCounts[key] }}</span>
           </label>
         </div>
       </div>
@@ -200,7 +211,7 @@ onClickOutside(refContainer, closeAllDropdowns)
       <NewsSection :newsEntries="store.afternoonNews" sectionHeader="Afternoon News" :feedEntries="store.feedEntries" />
       <NewsSection :newsEntries="store.morningNews" sectionHeader="Morning News" :feedEntries="store.feedEntries" />
     </div>
-    <p v-else>Keine Nachrichten für diesen Tag</p>
+    <p v-else class="empty-state">Keine Nachrichten f&uuml;r diesen Tag</p>
   </template>
 
 
@@ -223,28 +234,29 @@ onClickOutside(refContainer, closeAllDropdowns)
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
 }
 
 /* Date Navigation */
 .date-nav {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.125rem;
 }
 
 .nav-btn {
-  padding: 0.25rem 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-secondary);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.75rem;
-  line-height: 1;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .nav-btn:hover:not(:disabled) {
@@ -256,20 +268,24 @@ onClickOutside(refContainer, closeAllDropdowns)
 .nav-btn:disabled {
   color: var(--text-muted);
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .current-date {
+  font-family: var(--font-ui);
   font-size: 0.75rem;
+  font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 0.25rem 0.375rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  padding: 0.35rem 0.625rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
 }
 
 .current-date:hover {
   background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* Filters */
@@ -282,20 +298,22 @@ onClickOutside(refContainer, closeAllDropdowns)
 
 /* Control button (Login) */
 .control-btn {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-secondary);
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--primary-color);
   cursor: pointer;
-  font-size: 0.75rem;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  transition: all 0.2s ease;
 }
 
 .control-btn:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
+  background-color: var(--primary-color);
+  color: #fff;
 }
 
 /* Dropdown styles */
@@ -303,66 +321,89 @@ onClickOutside(refContainer, closeAllDropdowns)
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
+  border-radius: 6px;
+  background-color: transparent;
   color: var(--text-primary);
   cursor: pointer;
   user-select: none;
-  font-size: 0.75rem;
-  transition: border-color 0.2s, background-color 0.2s;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
 }
 
 .dropdown:hover {
   border-color: var(--border-hover);
+  background-color: var(--bg-hover);
 }
 
 .dropdown-label {
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
+  font-size: 0.6rem;
+  font-weight: 600;
 }
 
 .dropdown-value {
-  color: var(--text-primary);
+  color: var(--text-secondary);
   max-width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 
-.dropdown-arrow {
-  font-size: 0.6rem;
+.dropdown-chevron {
   color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dropdown-chevron.open {
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   z-index: 10;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0.5rem;
-  box-shadow: 0 4px 12px var(--shadow-strong);
-  max-height: 240px;
+  border-radius: 8px;
+  padding: 0.375rem;
+  box-shadow: 0 8px 24px var(--shadow-strong), 0 2px 8px var(--shadow-color);
+  max-height: 260px;
   overflow-y: auto;
-  min-width: 200px;
+  min-width: 220px;
+  animation: dropdownReveal 0.15s ease;
+}
+
+@keyframes dropdownReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 0.5rem;
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 5px;
   transition: background-color 0.15s;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .dropdown-item:hover {
@@ -371,6 +412,27 @@ onClickOutside(refContainer, closeAllDropdowns)
 
 .dropdown-item input[type="checkbox"] {
   margin: 0;
+  accent-color: var(--primary-color);
+}
+
+.dropdown-item-text {
+  flex: 1;
+}
+
+.dropdown-item-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 3rem 1rem;
+  font-style: italic;
 }
 
 /* Loading spinner styles */
@@ -383,17 +445,12 @@ onClickOutside(refContainer, closeAllDropdowns)
 }
 
 .spinner {
-  border: 3px solid var(--spinner-bg);
+  border: 2px solid var(--spinner-bg);
   border-left-color: var(--spinner-color);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 /* Modal styles */
@@ -408,32 +465,28 @@ onClickOutside(refContainer, closeAllDropdowns)
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-content {
   background-color: var(--bg-primary);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px var(--shadow-color);
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px var(--shadow-strong);
   position: relative;
+  animation: modalReveal 0.2s ease;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  padding: 4px 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-.close-button:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-hover);
+@keyframes modalReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 </style>
