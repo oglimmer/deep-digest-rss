@@ -8,9 +8,11 @@ import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -47,10 +49,32 @@ public class NewsService {
     }
   }
 
-  public List<News> getNewsRollingWindow(int daysAgo) {
-    Instant start = Instant.now().minus(daysAgo, ChronoUnit.DAYS);
-    Instant end = start.plus(1, ChronoUnit.DAYS);
-    return newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
+  public List<News> getNewsRollingWindow(
+      List<Long> feedIds, List<String> includeTags, List<String> excludeTags) {
+    Instant start = Instant.now().minus(24, ChronoUnit.HOURS);
+    Instant end = Instant.now();
+    List<News> news;
+    if (feedIds.isEmpty()) {
+      news = newsRepository.findByCreatedOnBetweenOrderByCreatedOnDesc(start, end);
+    } else {
+      news =
+          newsRepository.findByFeedIdAndCreatedOnBetweenOrderByCreatedOnDesc(feedIds, start, end);
+    }
+    if (!includeTags.isEmpty()) {
+      Set<String> includeSet = new HashSet<>(includeTags);
+      news =
+          news.stream()
+              .filter(n -> n.getTags().stream().anyMatch(t -> includeSet.contains(t.getText())))
+              .toList();
+    }
+    if (!excludeTags.isEmpty()) {
+      Set<String> excludeSet = new HashSet<>(excludeTags);
+      news =
+          news.stream()
+              .filter(n -> n.getTags().stream().noneMatch(t -> excludeSet.contains(t.getText())))
+              .toList();
+    }
+    return news;
   }
 
   public News createNews(News news) {

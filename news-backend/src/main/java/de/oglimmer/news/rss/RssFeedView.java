@@ -20,6 +20,8 @@ import org.springframework.web.servlet.view.feed.AbstractRssFeedView;
 @AllArgsConstructor
 public class RssFeedView extends AbstractRssFeedView {
 
+  public record RssParams(List<Long> feedIds, List<String> includeTags, List<String> excludeTags) {}
+
   private NewsService newsService;
   private NewsConfiguration newsConfiguration;
 
@@ -34,7 +36,12 @@ public class RssFeedView extends AbstractRssFeedView {
   @Override
   protected List<Item> buildFeedItems(
       Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) {
-    return newsService.getNewsRollingWindow(1).stream().map(this::createItem).toList();
+    RssParams params = (RssParams) model.get("rssParams");
+    return newsService
+        .getNewsRollingWindow(params.feedIds(), params.includeTags(), params.excludeTags())
+        .stream()
+        .map(this::createItem)
+        .toList();
   }
 
   private Item createItem(News news) {
