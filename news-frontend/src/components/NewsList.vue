@@ -563,7 +563,7 @@ onClickOutside(refContainer, closeAllDropdowns)
 /* Digest Modal */
 .digest-modal {
   width: 90%;
-  max-width: 680px;
+  max-width: 780px;
   max-height: 80vh;
   overflow-y: auto;
   padding: 2rem;
