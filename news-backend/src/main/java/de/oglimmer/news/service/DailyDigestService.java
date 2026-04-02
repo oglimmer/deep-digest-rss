@@ -1,11 +1,16 @@
 /* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.service;
 
+import de.oglimmer.news.db.DailyDigest;
+import de.oglimmer.news.db.DailyDigestRepository;
 import de.oglimmer.news.db.News;
 import de.oglimmer.news.db.NewsRepository;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,13 +24,14 @@ public class DailyDigestService {
   private final NewsRepository newsRepository;
   private final AiSummarizationService aiSummarizationService;
   private final DiscordService discordService;
+  private final DailyDigestRepository dailyDigestRepository;
 
   @Scheduled(cron = "0 0 19 * * *", zone = "Europe/Berlin")
   public void generateAndPostDailyDigest() {
-    generateDigest(24, true);
+    generateDigest(24, true, true);
   }
 
-  public String generateDigest(int hours, boolean postToDiscord) {
+  public String generateDigest(int hours, boolean postToDiscord, boolean persist) {
     log.info("Starting digest generation for the last {} hours", hours);
 
     Instant end = Instant.now();
@@ -64,7 +70,17 @@ public class DailyDigestService {
       discordService.postMessage(message);
     }
 
+    if (persist) {
+      dailyDigestRepository.save(
+          DailyDigest.builder().content(message).createdOn(Instant.now()).build());
+    }
+
     log.info("Digest completed with {} articles", newsList.size());
     return message;
+  }
+
+  public Optional<DailyDigest> findDigestForDate(LocalDate date) {
+    Instant endOfDay = date.plusDays(1).atStartOfDay(ZoneId.of("Europe/Berlin")).toInstant();
+    return dailyDigestRepository.findFirstByCreatedOnBeforeOrderByCreatedOnDesc(endOfDay);
   }
 }

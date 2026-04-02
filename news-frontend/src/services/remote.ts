@@ -102,6 +102,23 @@ export const fetchNewsById = async (id: number) => {
   }
 }
 
+export const fetchDailyDigest = async (date: Date) => {
+  try {
+    const response = await fetch(`${__API_URL__}/api/v1/daily-digest?date=${dateToYearMonthDay(date)}`, {
+      headers: { Authorization: dataStore.get().authentizationHeader }
+    })
+    if (response.ok) {
+      return await response.json()
+    } else if (response.status === 404) {
+      return null
+    } else {
+      console.error('Failed to fetch daily digest')
+    }
+  } catch (error) {
+    console.error('Error fetching daily digest:', error)
+  }
+}
+
 export const vote = async (newsId: number, up: boolean) => {
   try {
     await fetch(`${__API_URL__}/api/v1/news/${newsId}/vote`, {

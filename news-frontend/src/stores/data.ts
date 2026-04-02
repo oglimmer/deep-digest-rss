@@ -1,5 +1,5 @@
-import type { FeedEntry, NewsEntry } from "@/interfaces";
-import { login, vote, fetchFeeds, fetchNews, fetchNewsById, fetchTagGroup } from "@/services/remote";
+import type { DailyDigestEntry, FeedEntry, NewsEntry } from "@/interfaces";
+import { login, vote, fetchFeeds, fetchNews, fetchNewsById, fetchTagGroup, fetchDailyDigest } from "@/services/remote";
 import { defineStore } from "pinia"
 
 
@@ -22,7 +22,8 @@ export const useDataStore = defineStore('data', {
     fontSize: 16,
     singleNewsMode: false,
     deepLinkedNewsId: null as number | null,
-    deepLinkedNewsEntry: null as NewsEntry | null
+    deepLinkedNewsEntry: null as NewsEntry | null,
+    dailyDigest: null as DailyDigestEntry | null
   }),
   getters: {
     authentizationHeader(state) {
@@ -186,6 +187,11 @@ export const useDataStore = defineStore('data', {
       if (response) {
         this.deepLinkedNewsEntry = response
       }
+    },
+    async fetchDailyDigest() {
+      const date = this.dateToShowAsDate
+      const response = await fetchDailyDigest(date)
+      this.dailyDigest = response ?? null
     }
   },
   persist: true

@@ -18,6 +18,10 @@ const changeDate = async (days: number) => {
 }
 
 const handleDeepLink = async (clearFilters: boolean) => {
+  if (window.location.hash === '#digest') {
+    await openDigest()
+    return
+  }
   const match = window.location.hash.match(/^#article\/(\d+)$/)
   if (match) {
     const id = parseInt(match[1]!, 10)
@@ -34,6 +38,9 @@ const handleDeepLink = async (clearFilters: boolean) => {
 }
 
 const onHashChange = () => {
+  if (window.location.hash !== '#digest') {
+    showDigestModal.value = false
+  }
   handleDeepLink(false)
 }
 
@@ -115,6 +122,48 @@ const toggleModal = () => {
   showModal.value = !showModal.value
 }
 
+// --- Digest Modal ---
+const showDigestModal = ref(false)
+const digestLoading = ref(false)
+const openDigest = async () => {
+  showDigestModal.value = true
+  digestLoading.value = true
+  window.location.hash = 'digest'
+  await store.fetchDailyDigest()
+  digestLoading.value = false
+}
+const closeDigest = () => {
+  showDigestModal.value = false
+  if (window.location.hash === '#digest') {
+    window.location.hash = ''
+  }
+}
+
+const renderDigestContent = (content: string) => {
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>')
+}
+
+const formatDigestDate = (iso: string) => {
+  return new Date(iso).toLocaleDateString('de-DE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 const singleNewsViewEntries = computed(() => {
   const entries = store.filteredNews
   const deepEntry = store.deepLinkedNewsEntry
@@ -157,6 +206,10 @@ onClickOutside(refContainer, closeAllDropdowns)
     </div>
 
     <div class="filters">
+      <button @click="openDigest" class="control-btn digest-btn" title="Daily Digest">
+        Digest
+      </button>
+
       <button v-if="!store.loggedIn" @click="toggleModal" class="control-btn" title="Login">
         Login
       </button>
@@ -218,6 +271,24 @@ onClickOutside(refContainer, closeAllDropdowns)
   <!-- Loading Spinner -->
   <div v-if="loading" class="loading-spinner">
     <div class="spinner"></div>
+  </div>
+  <!-- Digest Modal -->
+  <div v-if="showDigestModal" class="modal-overlay" @click="closeDigest">
+    <div class="modal-content digest-modal" @click.stop>
+      <button class="digest-close" @click="closeDigest">&times;</button>
+      <div v-if="digestLoading" class="digest-loading">
+        <div class="spinner"></div>
+      </div>
+      <div v-else-if="store.dailyDigest" class="digest-body">
+        <div class="digest-meta">
+          {{ formatDigestDate(store.dailyDigest.createdOn) }}
+        </div>
+        <div class="digest-content" v-html="renderDigestContent(store.dailyDigest.content)"></div>
+      </div>
+      <div v-else class="digest-empty">
+        Kein Digest f&uuml;r diesen Tag verf&uuml;gbar.
+      </div>
+    </div>
   </div>
   <!-- Modal Overlay -->
   <div v-if="showModal" class="modal-overlay" @click="toggleModal">
@@ -487,6 +558,89 @@ onClickOutside(refContainer, closeAllDropdowns)
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Digest Modal */
+.digest-modal {
+  width: 90%;
+  max-width: 680px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 2rem;
+  position: relative;
+}
+
+.digest-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.digest-close:hover {
+  color: var(--text-primary);
+}
+
+.digest-loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.digest-meta {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.digest-content {
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.digest-content h2 {
+  font-family: var(--font-display);
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+  color: var(--text-primary);
+}
+
+.digest-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+  color: var(--text-secondary);
+}
+
+.digest-content p {
+  margin: 0.5rem 0;
+}
+
+.digest-content strong {
+  color: var(--text-primary);
+}
+
+.digest-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 3rem 1rem;
+  font-style: italic;
 }
 
 </style>

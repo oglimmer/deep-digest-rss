@@ -17,3 +17,8 @@ export interface FeedEntry {
   title: string
   createdOn: string
 }
+
+export interface DailyDigestEntry {
+  content: string
+  createdOn: string
+}
