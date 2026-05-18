@@ -8,8 +8,10 @@ import de.oglimmer.news.web.dto.FilterFeedItemToProcessDto;
 import de.oglimmer.news.web.dto.PatchFeedItemToProcessDto;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -87,13 +89,11 @@ public class FeedItemToProcessService {
 
   public List<String> filterFeedItemToProcess(
       FilterFeedItemToProcessDto filterFeedItemToProcessDto) {
-    List<FeedItemToProcess> all = feedItemToProcessRepository.findAll();
-    // return only refId not found in all
-    return filterFeedItemToProcessDto.getRefIds().stream()
-        .filter(
-            refId ->
-                all.stream()
-                    .noneMatch(feedItemToProcess -> feedItemToProcess.getRefId().equals(refId)))
-        .toList();
+    List<String> refIds = filterFeedItemToProcessDto.getRefIds();
+    if (refIds == null || refIds.isEmpty()) {
+      return List.of();
+    }
+    Set<String> existing = new HashSet<>(feedItemToProcessRepository.findExistingRefIds(refIds));
+    return refIds.stream().filter(r -> !existing.contains(r)).toList();
   }
 }
