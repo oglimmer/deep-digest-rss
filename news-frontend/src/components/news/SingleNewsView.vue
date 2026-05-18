@@ -1,11 +1,25 @@
 <script setup lang="ts">
 import type { NewsEntry } from '@/interfaces'
-import { useDataStore } from '@/stores/data'
+import { useNewsStore } from '@/stores/news'
+import { useUiStore } from '@/stores/ui'
+import { useRoute, useRouter } from 'vue-router'
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 
-const store = useDataStore()
+const news = useNewsStore()
+const ui = useUiStore()
+const route = useRoute()
+const router = useRouter()
 const containerRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+
+const exitSingleMode = () => {
+  if (route.query.article !== undefined) {
+    const { article: _omit, ...rest } = route.query
+    void _omit
+    router.replace({ query: rest })
+  }
+  ui.toggleSingleNewsMode()
+}
 
 defineProps<{
   newsEntries: NewsEntry[]
@@ -17,21 +31,21 @@ onMounted(async () => {
   if (!container) return
 
   // Scroll to deep-linked article
-  if (store.deepLinkedNewsId) {
-    const el = container.querySelector(`[data-article-id="${store.deepLinkedNewsId}"]`)
+  if (news.deepLinkedId) {
+    const el = container.querySelector(`[data-article-id="${news.deepLinkedId}"]`)
     if (el) {
       el.scrollIntoView()
     }
   }
 
-  // Track visible article and update hash
+  // Track visible article and write back to route query
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           const id = (entry.target as HTMLElement).dataset.articleId
-          if (id) {
-            window.location.hash = `#article/${id}`
+          if (id && route.query.article !== id) {
+            router.replace({ query: { ...route.query, article: id } })
           }
         }
       }
@@ -46,8 +60,10 @@ onMounted(async () => {
 
 onUnmounted(() => {
   observer?.disconnect()
-  if (!store.deepLinkedNewsId) {
-    window.location.hash = ''
+  if (!news.deepLinkedId && route.query.article !== undefined) {
+    const { article: _omit, ...rest } = route.query
+    void _omit
+    router.replace({ query: rest })
   }
 })
 </script>
@@ -56,7 +72,7 @@ onUnmounted(() => {
   <div class="single-news-container" ref="containerRef">
     <button
       class="exit-btn"
-      @click="store.toggleSingleNewsMode()"
+      @click="exitSingleMode"
       title="Exit single article view"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">

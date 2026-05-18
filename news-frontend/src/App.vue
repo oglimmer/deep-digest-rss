@@ -1,40 +1,30 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import NewsList from './components/NewsList.vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import ThemeToggle from './components/ThemeToggle.vue';
-import DeveloperPage from './views/DeveloperPage.vue';
-import { useDataStore } from '@/stores/data';
-import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useThemeStore } from '@/stores/theme';
 
-const showDev = ref(false);
-
-const store = useDataStore();
+const auth = useAuthStore();
+const theme = useThemeStore();
+const route = useRoute();
+const router = useRouter();
 const appsOpen = ref(false);
 
 type AppEntry = {
   name: string;
   url?: string;
-  onClick?: () => void;
+  to?: string;
   current?: boolean;
 };
+
+const isDeveloper = computed(() => route.path.startsWith('/developer'));
 
 const apps = computed<AppEntry[]>(() => [
   { name: 'Content', url: 'https://content.oglimmer.com/' },
   { name: 'Infographics', url: 'https://infographics.oglimmer.com/' },
-  {
-    name: 'News',
-    onClick: () => {
-      showDev.value = false;
-    },
-    current: !showDev.value,
-  },
-  {
-    name: 'News - Developer Portal',
-    onClick: () => {
-      showDev.value = true;
-    },
-    current: showDev.value,
-  },
+  { name: 'News', to: '/', current: !isDeveloper.value },
+  { name: 'News - Developer Portal', to: '/developer', current: isDeveloper.value },
   { name: 'Linky', url: 'https://www.linky1.com/' },
 ]);
 
@@ -42,11 +32,9 @@ const toggleApps = () => {
   appsOpen.value = !appsOpen.value;
 };
 
-const handleAppClick = (app: AppEntry) => {
-  if (app.onClick) {
-    app.onClick();
-    appsOpen.value = false;
-  }
+const navigateTo = (path: string) => {
+  router.push(path);
+  appsOpen.value = false;
 };
 
 const onClickOutside = (e: MouseEvent) => {
@@ -57,7 +45,7 @@ const onClickOutside = (e: MouseEvent) => {
 };
 
 onMounted(() => {
-  store.initTheme();
+  theme.init();
   document.addEventListener('click', onClickOutside);
 });
 </script>
@@ -70,7 +58,7 @@ onMounted(() => {
         <span class="site-subtitle">Kuratiert & zusammengefasst</span>
       </div>
       <div class="header-right">
-        <div v-if="store.loggedIn" class="apps-menu">
+        <div v-if="auth.loggedIn" class="apps-menu">
           <button class="apps-btn" @click="toggleApps" title="Switch app">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="3" cy="3" r="1.5" />
@@ -98,11 +86,11 @@ onMounted(() => {
                 <span v-if="app.current" class="current-badge">current</span>
               </a>
               <button
-                v-else
+                v-else-if="app.to"
                 type="button"
                 class="app-link"
                 :class="{ 'app-current': app.current }"
-                @click="handleAppClick(app)"
+                @click="navigateTo(app.to)"
               >
                 {{ app.name }}
                 <span v-if="app.current" class="current-badge">current</span>
@@ -114,8 +102,7 @@ onMounted(() => {
       </div>
     </header>
     <div class="header-rule"></div>
-    <DeveloperPage v-if="showDev" />
-    <NewsList v-else />
+    <RouterView />
   </main>
 </template>
 

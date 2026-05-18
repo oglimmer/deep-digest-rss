@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { useDataStore } from '@/stores/data';
+import type { NewsEntry } from '@/interfaces';
+import { useAuthStore } from '@/stores/auth';
+import { useNewsStore } from '@/stores/news';
 
-const dataStore = useDataStore();
+const props = defineProps<{
+  entry: NewsEntry;
+  feedTitle: string;
+}>();
 
-const props = defineProps(['entry', 'feedTitle'])
+const auth = useAuthStore();
+const news = useNewsStore();
 
 const sendVoteUp = async () => {
-  dataStore.addVote(props.entry.id, true);
+  news.addVote(props.entry.id, true);
 };
 const sendVoteDown = async () => {
-  dataStore.addVote(props.entry.id, false);
+  news.addVote(props.entry.id, false);
 };
 </script>
 
@@ -25,7 +31,7 @@ const sendVoteDown = async () => {
       <div class="tags">
         <span class="tag" v-for="tag in entry.tags" :key="tag">{{ tag }}</span>
       </div>
-      <div class="vote-actions" v-if="dataStore.loggedIn">
+      <div class="vote-actions" v-if="auth.loggedIn">
         <a v-if="!entry.voted" href="#" @click.prevent="sendVoteUp" class="vote-btn vote-up" title="Upvote">+1</a>
         <a v-if="entry.voted" href="#" @click.prevent="sendVoteDown" class="vote-btn vote-down" title="Remove vote">-1</a>
       </div>

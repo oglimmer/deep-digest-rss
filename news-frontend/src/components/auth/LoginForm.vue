@@ -1,20 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useDataStore } from '@/stores/data';
+import { useAuthStore } from '@/stores/auth';
+import { useNewsStore } from '@/stores/news';
 
 const props = defineProps<{ closeModal: () => void }>();
 
-const dataStore = useDataStore();
+const auth = useAuthStore();
+const news = useNewsStore();
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 
 const loginHandler = async () => {
-  const result = await dataStore.authorize(email.value, password.value);
+  const result = await auth.login(email.value, password.value);
   if (result) {
     error.value = result;
   } else {
+    await news.fetch();
     props.closeModal();
   }
 };

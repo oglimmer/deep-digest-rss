@@ -1,7 +1,21 @@
 <script setup lang="ts">
-import { useDataStore } from '@/stores/data';
+import { useThemeStore, type FontFamily } from '@/stores/theme';
+import { useUiStore } from '@/stores/ui';
+import { useRoute, useRouter } from 'vue-router';
 
-const store = useDataStore();
+const theme = useThemeStore();
+const ui = useUiStore();
+const route = useRoute();
+const router = useRouter();
+
+const toggleSingleMode = () => {
+  if (ui.singleNewsMode && route.query.article !== undefined) {
+    const { article: _omit, ...rest } = route.query;
+    void _omit;
+    router.replace({ query: rest });
+  }
+  ui.toggleSingleNewsMode();
+};
 
 const fontOptions = [
   { value: 'system', label: 'Editorial' },
@@ -12,18 +26,18 @@ const fontOptions = [
 ] as const;
 
 const decreaseFontSize = () => {
-  store.setFontSize(store.fontSize - 1);
+  theme.setFontSize(theme.fontSize - 1);
 };
 
 const increaseFontSize = () => {
-  store.setFontSize(store.fontSize + 1);
+  theme.setFontSize(theme.fontSize + 1);
 };
 
 const cycleFontSize = () => {
-  if (store.fontSize >= 24) {
-    store.setFontSize(12);
+  if (theme.fontSize >= 24) {
+    theme.setFontSize(12);
   } else {
-    store.setFontSize(store.fontSize + 2);
+    theme.setFontSize(theme.fontSize + 2);
   }
 };
 </script>
@@ -33,8 +47,8 @@ const cycleFontSize = () => {
     <!-- Font selector -->
     <select
       class="font-select"
-      :value="store.fontFamily"
-      @change="store.setFontFamily(($event.target as HTMLSelectElement).value as 'system' | 'georgia' | 'palatino' | 'charter' | 'verdana')"
+      :value="theme.fontFamily"
+      @change="theme.setFontFamily(($event.target as HTMLSelectElement).value as FontFamily)"
       title="Select font family"
     >
       <option v-for="opt in fontOptions" :key="opt.value" :value="opt.value">
@@ -43,20 +57,20 @@ const cycleFontSize = () => {
     </select>
 
     <!-- Font size controls (desktop) -->
-    <div v-if="!store.singleNewsMode" class="font-size-controls">
+    <div v-if="!ui.singleNewsMode" class="font-size-controls">
       <button
         class="size-btn"
         @click="decreaseFontSize"
-        :disabled="store.fontSize <= 12"
+        :disabled="theme.fontSize <= 12"
         title="Decrease font size"
       >
         A-
       </button>
-      <span class="font-size-display">{{ store.fontSize }}</span>
+      <span class="font-size-display">{{ theme.fontSize }}</span>
       <button
         class="size-btn"
         @click="increaseFontSize"
-        :disabled="store.fontSize >= 24"
+        :disabled="theme.fontSize >= 24"
         title="Increase font size"
       >
         A+
@@ -75,20 +89,20 @@ const cycleFontSize = () => {
     <!-- Dark mode toggle -->
     <button
       class="theme-toggle"
-      @click="store.toggleDarkMode()"
-      :title="store.darkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+      @click="theme.toggleDarkMode()"
+      :title="theme.darkMode ? 'Switch to light mode' : 'Switch to dark mode'"
     >
-      <span v-if="store.darkMode">&#9728;</span>
+      <span v-if="theme.darkMode">&#9728;</span>
       <span v-else>&#9790;</span>
     </button>
 
     <!-- Single news mode toggle -->
     <button
       class="view-toggle"
-      @click="store.toggleSingleNewsMode()"
-      :title="store.singleNewsMode ? 'Switch to normal view' : 'Switch to single article view'"
+      @click="toggleSingleMode"
+      :title="ui.singleNewsMode ? 'Switch to normal view' : 'Switch to single article view'"
     >
-      {{ store.singleNewsMode ? '&#9776;' : '&#9634;' }}
+      {{ ui.singleNewsMode ? '&#9776;' : '&#9634;' }}
     </button>
   </div>
 </template>

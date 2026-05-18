@@ -24,6 +24,9 @@ RUN npm run build
 # Use the official Nginx image to serve the built application
 FROM nginx:alpine
 
+# SPA fallback config: serve index.html for unmatched routes (vue-router HTML5 history)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copy the built files from the previous stage
 COPY --from=0 /app/dist /usr/share/nginx/html
 
