@@ -4,21 +4,49 @@ import NewsList from './components/NewsList.vue';
 import ThemeToggle from './components/ThemeToggle.vue';
 import DeveloperPage from './views/DeveloperPage.vue';
 import { useDataStore } from '@/stores/data';
+import { computed } from 'vue';
 
 const showDev = ref(false);
 
 const store = useDataStore();
 const appsOpen = ref(false);
 
-const apps = [
+type AppEntry = {
+  name: string;
+  url?: string;
+  onClick?: () => void;
+  current?: boolean;
+};
+
+const apps = computed<AppEntry[]>(() => [
   { name: 'Content', url: 'https://content.oglimmer.com/' },
   { name: 'Infographics', url: 'https://infographics.oglimmer.com/' },
-  { name: 'News', url: 'https://news.oglimmer.com/', current: true },
+  {
+    name: 'News',
+    onClick: () => {
+      showDev.value = false;
+    },
+    current: !showDev.value,
+  },
+  {
+    name: 'News - Developer Portal',
+    onClick: () => {
+      showDev.value = true;
+    },
+    current: showDev.value,
+  },
   { name: 'Linky', url: 'https://www.linky1.com/' },
-];
+]);
 
 const toggleApps = () => {
   appsOpen.value = !appsOpen.value;
+};
+
+const handleAppClick = (app: AppEntry) => {
+  if (app.onClick) {
+    app.onClick();
+    appsOpen.value = false;
+  }
 };
 
 const onClickOutside = (e: MouseEvent) => {
@@ -57,23 +85,31 @@ onMounted(() => {
             </svg>
           </button>
           <div v-if="appsOpen" class="apps-dropdown">
-            <a
-              v-for="app in apps"
-              :key="app.url"
-              :href="app.url"
-              class="app-link"
-              :class="{ 'app-current': app.current }"
-              target="_blank"
-              rel="noopener"
-            >
-              {{ app.name }}
-              <span v-if="app.current" class="current-badge">current</span>
-            </a>
+            <template v-for="app in apps" :key="app.name">
+              <a
+                v-if="app.url"
+                :href="app.url"
+                class="app-link"
+                :class="{ 'app-current': app.current }"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ app.name }}
+                <span v-if="app.current" class="current-badge">current</span>
+              </a>
+              <button
+                v-else
+                type="button"
+                class="app-link"
+                :class="{ 'app-current': app.current }"
+                @click="handleAppClick(app)"
+              >
+                {{ app.name }}
+                <span v-if="app.current" class="current-badge">current</span>
+              </button>
+            </template>
           </div>
         </div>
-        <button class="dev-btn" @click="showDev = !showDev" :class="{ 'dev-btn-active': showDev }">
-          Dev
-        </button>
         <ThemeToggle />
       </div>
     </header>
@@ -140,33 +176,6 @@ main {
   position: relative;
 }
 
-.dev-btn {
-  padding: 0.25rem 0.6rem;
-  font-family: var(--font-ui);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.dev-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--border-hover);
-  background: var(--bg-hover);
-}
-
-.dev-btn-active {
-  background: var(--primary-color);
-  color: #fff;
-  border-color: var(--primary-color);
-}
-
 .apps-btn {
   display: flex;
   align-items: center;
@@ -213,6 +222,7 @@ main {
 
 .app-link {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.625rem;
@@ -221,7 +231,11 @@ main {
   font-family: var(--font-ui);
   font-size: 0.78rem;
   font-weight: 500;
+  border: none;
   border-radius: 5px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
   transition: background-color 0.15s;
 }
 

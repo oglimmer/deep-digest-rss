@@ -18,7 +18,9 @@ const toggle = (id: string) => {
   expanded.value = expanded.value === id ? null : id
 }
 
-const BASE_URL = 'http://localhost:8080'
+const BASE_URL = 'https://news.oglimmer.com'
+
+const btoa = (s: string) => window.btoa(s)
 
 const endpoints = [
   {
@@ -600,7 +602,7 @@ Authorization: Basic base64(email:authToken)</pre>
               <button
                 class="copy-btn"
                 :class="{ copied: copiedId === 'token-flow' }"
-                @click="copy('POST /api/v1/auth/login\n{ \"email\": \"you@example.com\", \"password\": \"secret\" }', 'token-flow')"
+                @click="copy('POST /api/v1/auth/login\n{ &quot;email&quot;: &quot;you@example.com&quot;, &quot;password&quot;: &quot;secret&quot; }', 'token-flow')"
               >{{ copiedId === 'token-flow' ? '✓' : 'copy' }}</button>
             </div>
           </div>
@@ -664,7 +666,7 @@ Authorization: Basic base64(email:authToken)</pre>
           <button
             class="copy-btn"
             :class="{ copied: copiedId === 'ex1' }"
-            @click="copy(`curl -H \"Authorization: Basic ${btoa('read:read')}\" \\\n  ${BASE_URL}/api/v1/news?date=2025-05-18`, 'ex1')"
+            @click="copy(`curl -H &quot;Authorization: Basic ${btoa('read:read')}&quot; \\\n  ${BASE_URL}/api/v1/news?date=2025-05-18`, 'ex1')"
           >{{ copiedId === 'ex1' ? '✓' : 'copy' }}</button>
         </div>
 
@@ -683,7 +685,7 @@ curl -X POST {{ BASE_URL }}/api/v1/news/42/vote \
           <button
             class="copy-btn"
             :class="{ copied: copiedId === 'ex2' }"
-            @click="copy(`curl -X POST ${BASE_URL}/api/v1/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"you@example.com\",\"password\":\"secret\"}'`, 'ex2')"
+            @click="copy(`curl -X POST ${BASE_URL}/api/v1/auth/login -H 'Content-Type: application/json' -d '{&quot;email&quot;:&quot;you@example.com&quot;,&quot;password&quot;:&quot;secret&quot;}'`, 'ex2')"
           >{{ copiedId === 'ex2' ? '✓' : 'copy' }}</button>
         </div>
 
