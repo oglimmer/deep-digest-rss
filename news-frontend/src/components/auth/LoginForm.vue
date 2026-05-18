@@ -31,8 +31,8 @@ const loginHandler = async () => {
     </div>
     <form @submit.prevent="loginHandler">
       <div class="input-group">
-        <label for="login-email">Email</label>
-        <input id="login-email" type="email" v-model="email" placeholder="you@example.com" required />
+        <label for="login-email">Email or username</label>
+        <input id="login-email" type="text" v-model="email" placeholder="you@example.com" required />
       </div>
       <div class="input-group">
         <label for="login-password">Password</label>
