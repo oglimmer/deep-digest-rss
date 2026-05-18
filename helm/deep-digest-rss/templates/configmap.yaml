@@ -13,3 +13,4 @@ data:
   USERNAME: {{ .Values.config.username | quote }}
   MODEL: {{ .Values.config.model | quote }}
   GENERATION_ENGINE: {{ .Values.config.generationEngine | quote }}
+  CORS_ALLOWED_ORIGINS: {{ .Values.config.corsAllowedOrigins | quote }}

@@ -5,21 +5,30 @@ services:
       - "5173:80"
     environment:
       - API_URL=http://localhost:8888
-      - API_USER=read
-      - API_PASSWORD=read
   backend:
     build: news-backend
     ports:
       - "8888:8888"
     environment:
       - DB_HOST=database
+      - REDIS_HOST=redis
+      - COOKIE_SECURE=false
       - AUTH_ACTUATOR_PASSWORD=xxx
       - AUTH_SWAGGER_PASSWORD=xxx
       - AUTH_WRITE_PASSWORD=write
+      - SCRAPER_API_KEY=local-dev-scraper-key
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173
+      - CSRF_ENABLED=false
       - APP_EXTERNAL_DOMAIN=http://localhost:8888
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_started
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
   database:
     image: mariadb
     environment:
@@ -38,8 +47,7 @@ services:
     build: scraper
     environment:
       - NO_ENV_FILE=true
-      - USERNAME=${USERNAME:?No username defined}
-      - PASSWORD=${PASSWORD:?No password defined}
+      - SCRAPER_API_KEY=${SCRAPER_API_KEY:-local-dev-scraper-key}
       - URL=${URL:?No URL defined}
       - MODEL=${MODEL:?No model defined}
       - API_KEY=${API_KEY:?No API KEY defined}
@@ -48,8 +56,7 @@ services:
     build: scraper
     command: ["./run.sh", "taggroups"]
     environment:
-      - USERNAME=${USERNAME:?No username defined}
-      - PASSWORD=${PASSWORD:?No password defined}
+      - SCRAPER_API_KEY=${SCRAPER_API_KEY:-local-dev-scraper-key}
       - URL=${URL:?No URL defined}
       - MODEL=${MODEL:?No model defined}
       - API_KEY=${API_KEY:?No API KEY defined}

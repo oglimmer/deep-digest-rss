@@ -13,6 +13,16 @@ spring:
     hibernate:
       ddl-auto: "validate"
     open-in-view: true
+  data:
+    redis:
+      host: "${REDIS_HOST:localhost}"
+      port: "${REDIS_PORT:6379}"
+  session:
+    store-type: "redis"
+    timeout: "30d"
+    redis:
+      flush-mode: "on-save"
+      namespace: "ddrss:session"
 logging:
   level:
     root: "INFO"
@@ -31,6 +41,8 @@ management:
       show-components: "when-authorized"
       show-details: "when-authorized"
       roles: "ADMIN"
+      probes:
+        enabled: true
   info:
     git:
       mode: "full"
@@ -43,13 +55,17 @@ management:
       enabled: true
     os:
       enabled: true
-auth:
-  actuator-user: "actuator"
-  actuator-password: "actuator"
-  swagger-user: "doc"
-  swagger-password: "doc"
-  write-user: "write"
-  write-password: "write"
+app:
+  cookie-secure: "${COOKIE_SECURE:true}"
+  session:
+    absolute-timeout-days: "${SESSION_ABSOLUTE_TIMEOUT_DAYS:90}"
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:5173}"
+  rate-limit:
+    login-per-email-per-15m: "${RATE_LIMIT_LOGIN_EMAIL:5}"
+    login-per-ip-per-15m: "${RATE_LIMIT_LOGIN_IP:20}"
+  security:
+    csrf-enabled: "${CSRF_ENABLED:false}"
 daily-digest:
   discord-webhook-urls: "${DISCORD_WEBHOOK_URLS:}"
   model: "${MODEL:}"

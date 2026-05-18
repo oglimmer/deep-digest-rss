@@ -18,7 +18,7 @@ RESTART="${RESTART:-true}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-default}"
 
 # Component configuration (bash 3.2+ compatible)
-ALL_COMPONENTS="news-frontend news-backend scraper auth"
+ALL_COMPONENTS="news-frontend news-backend scraper"
 
 # Get image tag for a component
 get_image_tag() {
@@ -27,7 +27,6 @@ get_image_tag() {
     news-frontend) echo "${REGISTRY}/news-frontend:${TAG}" ;;
     news-backend)  echo "${REGISTRY}/news-backend:${TAG}" ;;
     scraper)       echo "${REGISTRY}/news-scraper:${TAG}" ;;
-    auth)          echo "${REGISTRY}/auth-module:${TAG}" ;;
     *) echo ""; return 1 ;;
   esac
 }
@@ -48,7 +47,6 @@ get_deployments() {
     news-frontend) echo "news-frontend" ;;
     news-backend)  echo "news-backend" ;;
     scraper)       echo "news-scraper news-taggroupper" ;;
-    auth)          echo "news-auth" ;;
     *) echo ""; return 1 ;;
   esac
 }
@@ -90,7 +88,6 @@ COMPONENT FLAGS:
   -b, --backend       Include backend component
   -f, --frontend      Include frontend component
   -s, --scraper       Include scraper component
-  -a, --auth          Include auth module
   --all               Include all components
 
   You must specify at least one component flag or use --all.
@@ -288,10 +285,6 @@ cmd_build() {
         ;;
       -s|--scraper)
         selected_components+=("scraper")
-        shift
-        ;;
-      -a|--auth)
-        selected_components+=("auth")
         shift
         ;;
       --all)

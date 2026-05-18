@@ -97,7 +97,8 @@ def download_netscape_cookie(cookie, feed_id, headers, item_url):
     requests.patch(
         patch_url,
         json={"cookie": new_cookie},
-        auth=(config.USERNAME, config.PASSWORD),
+        headers=config.AUTH_HEADERS,
+        auth=config.AUTH_BASIC,
         timeout=30
     )
     return page_content

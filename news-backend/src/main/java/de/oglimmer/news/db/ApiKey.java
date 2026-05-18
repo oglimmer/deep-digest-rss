@@ -2,41 +2,44 @@
 package de.oglimmer.news.db;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import lombok.*;
 
 @Getter
 @Setter
-@Entity(name = "users")
+@Entity(name = "api_keys")
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"votes", "roles"})
+@ToString(exclude = "roles")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class ApiKey {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String email;
+  @Column(nullable = false, unique = true, length = 64)
+  private String name;
 
-  @Column(nullable = false)
-  private String password;
+  @Column(name = "key_hash", nullable = false)
+  private String keyHash;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  private List<NewsVote> votes;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-  @Column(nullable = false)
-  private String timezone;
+  @Column(name = "last_used_at")
+  private Instant lastUsedAt;
+
+  @Column(name = "revoked_at")
+  private Instant revokedAt;
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
-      name = "user_roles",
-      joinColumns = @JoinColumn(name = "user_id"),
+      name = "api_key_roles",
+      joinColumns = @JoinColumn(name = "api_key_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   @Builder.Default
   private Set<Role> roles = new HashSet<>();

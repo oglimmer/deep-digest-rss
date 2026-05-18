@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Deep-Digest-RSS is a news aggregation platform with AI-powered summarization. It pulls RSS feeds and uses AI engines (ChatGPT) to generate interest scores and summaries. Monorepo with four services.
+Deep-Digest-RSS is a news aggregation platform with AI-powered summarization. It pulls RSS feeds and uses AI engines (ChatGPT) to generate interest scores and summaries. Monorepo with three services: backend, frontend, scraper.
 
 ## Build & Development Commands
 
@@ -36,12 +36,6 @@ python main.py              # Default: continuous RSS fetching + AI processing
 python main.py taggroups    # Generate tag groups
 ```
 
-### Auth (auth) — Express.js + Redis
-```bash
-cd auth
-node src/index.js
-```
-
 ### Full Stack via Docker
 ```bash
 cp .env.example .env        # Configure API keys
@@ -57,10 +51,9 @@ docker run -d --name mariadb -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=n
 
 ### Service Responsibilities
 
-- **news-backend**: REST API (`/api/v1/`), MariaDB via Flyway migrations, Spring Security (basic auth + cookie + query param auth), scheduled daily digest (19:00 Berlin time → Discord), Prometheus metrics, Swagger at `/swagger-ui/`
-- **news-frontend**: SPA consuming the backend API. Pinia store with localStorage persistence. Light/dark theming, font customization, time-based news sections (Morning/Afternoon/Night), single-article scroll-snap view
-- **scraper**: Polls backend for unprocessed feed items, downloads page content, extracts text, generates AI summary + interest score, pushes results back. Pluggable AI engines configured via env vars
-- **auth**: Session management with Redis. Validates basic auth credentials, issues session tokens stored in cookies (90-day default lifetime)
+- **news-backend**: REST API (`/api/v1/`), MariaDB via Flyway migrations, Spring Security with Spring Session (Redis-backed `DDRSS_SESSION` cookie) for browser users and `X-API-Key` for service-to-service callers, scheduled daily digest (19:00 Berlin time → Discord), Prometheus metrics, Swagger at `/swagger-ui/`. Unauthenticated probes at `/actuator/health/{liveness,readiness}`.
+- **news-frontend**: SPA consuming the backend API. Pinia store (non-persisted for auth — session cookie is the source of truth). Light/dark theming, font customization, time-based news sections (Morning/Afternoon/Night), single-article scroll-snap view
+- **scraper**: Polls backend for unprocessed feed items, downloads page content, extracts text, generates AI summary + interest score, pushes results back. Authenticates with `X-API-Key` from `SCRAPER_API_KEY` env var. Pluggable AI engines configured via env vars
 
 ### Data Flow
 

@@ -1,35 +1,44 @@
 import { defineStore } from 'pinia'
-import { login as apiLogin } from '@/api/auth'
+import { login as apiLogin, logout as apiLogout, me as apiMe } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     loggedIn: false,
     email: '',
-    authToken: '',
+    roles: [] as string[],
+    hydrated: false,
   }),
-  getters: {
-    authHeader(state): string {
-      return state.loggedIn
-        ? `Basic ${btoa(state.email + ':' + state.authToken)}`
-        : `Basic ${btoa(__API_USER__ + ':' + __API_PASSWORD__)}`
-    },
-  },
   actions: {
-    async login(email: string, password: string): Promise<string> {
-      const token = await apiLogin(email, password)
-      if (token) {
+    async hydrate() {
+      const result = await apiMe()
+      if (result) {
         this.loggedIn = true
-        this.email = email
-        this.authToken = token
-        return ''
+        this.email = result.email
+        this.roles = result.roles
+      } else {
+        this.loggedIn = false
+        this.email = ''
+        this.roles = []
       }
-      return 'Login Failed'
+      this.hydrated = true
     },
-    logout() {
+    async login(email: string, password: string): Promise<string> {
+      const result = await apiLogin(email, password)
+      if (!result) return 'Login Failed'
+      this.loggedIn = true
+      this.email = result.email
+      this.roles = result.roles
+      this.hydrated = true
+      return ''
+    },
+    async logout() {
+      await apiLogout()
+      this.clear()
+    },
+    clear() {
       this.loggedIn = false
       this.email = ''
-      this.authToken = ''
+      this.roles = []
     },
   },
-  persist: true,
 })

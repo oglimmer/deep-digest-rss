@@ -29,6 +29,12 @@ spec:
                 configMapKeyRef:
                   name: news-config
                   key: NO_ENV_FILE
+            - name: SCRAPER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: SCRAPER_API_KEY
+                  optional: true
             - name: USERNAME
               valueFrom:
                 configMapKeyRef:

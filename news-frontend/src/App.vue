@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ThemeToggle from './components/ThemeToggle.vue';
+import LoginForm from './components/auth/LoginForm.vue';
+import { AUTH_EXPIRED_EVENT } from '@/api/client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 
@@ -44,21 +46,44 @@ const onClickOutside = (e: MouseEvent) => {
   }
 };
 
-onMounted(() => {
+const onAuthExpired = () => {
+  auth.clear();
+};
+
+// LoginForm expects a closeModal callback; the loggedIn flip drives rendering instead.
+const noop = () => {};
+
+onMounted(async () => {
   theme.init();
   document.addEventListener('click', onClickOutside);
+  window.addEventListener(AUTH_EXPIRED_EVENT, onAuthExpired);
+  await auth.hydrate();
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside);
+  window.removeEventListener(AUTH_EXPIRED_EVENT, onAuthExpired);
 });
 </script>
 
 <template>
-  <main>
+  <!-- While hydrating session, render nothing to avoid a flash of UI. -->
+  <main v-if="!auth.hydrated"></main>
+
+  <!-- Logged out: only the LoginForm. No header, no router-view, no API calls. -->
+  <main v-else-if="!auth.loggedIn" class="login-only">
+    <LoginForm :closeModal="noop" />
+  </main>
+
+  <!-- Logged in: full app shell. -->
+  <main v-else>
     <header class="app-header">
       <div class="header-title-area">
         <h1 class="site-title">Lesbare Nachrichten</h1>
         <span class="site-subtitle">Kuratiert & zusammengefasst</span>
       </div>
       <div class="header-right">
-        <div v-if="auth.loggedIn" class="apps-menu">
+        <div class="apps-menu">
           <button class="apps-btn" @click="toggleApps" title="Switch app">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="3" cy="3" r="1.5" />
@@ -110,6 +135,13 @@ onMounted(() => {
 main {
   max-width: 740px;
   margin: 0 auto;
+}
+
+.login-only {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 .app-header {

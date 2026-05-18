@@ -18,8 +18,8 @@ def push_to_db(feed_id, item_id, parsed_content, max_retries=3):
         response = requests.post(
             f"{config.URL}/api/v1/news",
             json=payload,
-            auth=(config.USERNAME, config.PASSWORD),
-            headers={'Content-Type': 'application/json'},
+            headers=config.AUTH_HEADERS,
+            auth=config.AUTH_BASIC,
             timeout=30
         )
         try:

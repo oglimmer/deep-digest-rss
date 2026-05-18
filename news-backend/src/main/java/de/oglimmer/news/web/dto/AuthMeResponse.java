@@ -2,6 +2,7 @@
 package de.oglimmer.news.web.dto;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,7 +10,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class AuthResponse {
+@AllArgsConstructor
+public class AuthMeResponse {
 
   private String email;
   private List<String> roles;

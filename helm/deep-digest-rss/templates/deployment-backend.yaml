@@ -93,15 +93,40 @@ spec:
                 configMapKeyRef:
                   name: news-config
                   key: GENERATION_ENGINE
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: SCRAPER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: SCRAPER_API_KEY
+                  optional: true
+            - name: CORS_ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: CORS_ALLOWED_ORIGINS
+            - name: CSRF_ENABLED
+              value: "false"
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            # ~5 minutes for the JVM + Flyway + Hibernate to come up.
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 60
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8080
-              httpHeaders:
-                - name: Authorization
-                  value: Basic YWN0dWF0b3I6Z3pXZTdobTg4QVhCaXdDRg==
-            initialDelaySeconds: 5
             periodSeconds: 5
             successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}

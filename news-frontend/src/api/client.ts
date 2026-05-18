@@ -1,5 +1,3 @@
-import { useAuthStore } from '@/stores/auth'
-
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -11,6 +9,8 @@ export class ApiError extends Error {
   }
 }
 
+export const AUTH_EXPIRED_EVENT = 'auth:expired'
+
 type QueryValue = string | number | boolean | undefined | null
 type Query = Record<string, QueryValue | QueryValue[]>
 
@@ -18,7 +18,9 @@ interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   query?: Query
   body?: unknown
-  auth?: boolean
+  // If true, a 401 response will NOT dispatch an auth:expired event. Useful for the
+  // initial /auth/me probe where 401 just means "not logged in".
+  silentOn401?: boolean
 }
 
 const buildQuery = (query?: Query): string => {
@@ -44,28 +46,54 @@ const dateToYMD = (date: Date): string => {
   return `${y}-${m}-${d}`
 }
 
+const readCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null
+  const prefix = name + '='
+  for (const part of document.cookie.split(';')) {
+    const trimmed = part.trim()
+    if (trimmed.startsWith(prefix)) {
+      return decodeURIComponent(trimmed.substring(prefix.length))
+    }
+  }
+  return null
+}
+
+const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
 export const apiFetch = async <T = unknown>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> => {
-  const { method = 'GET', query, body, auth = true } = options
+  const { method = 'GET', query, body, silentOn401 = false } = options
 
   const headers: Record<string, string> = {}
-  if (auth) {
-    headers.Authorization = useAuthStore().authHeader
-  }
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json'
+  }
+  if (MUTATING_METHODS.has(method)) {
+    const csrf = readCookie('XSRF-TOKEN')
+    if (csrf) headers['X-XSRF-TOKEN'] = csrf
   }
 
   const response = await fetch(`${__API_URL__}${path}${buildQuery(query)}`, {
     method,
     headers,
+    credentials: 'include',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 
+  if (response.status === 401 && !silentOn401) {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT))
+    }
+  }
+
   if (!response.ok) {
-    throw new ApiError(response.status, response.statusText, `${method} ${path} failed: ${response.status}`)
+    throw new ApiError(
+      response.status,
+      response.statusText,
+      `${method} ${path} failed: ${response.status}`,
+    )
   }
 
   if (response.status === 204) {

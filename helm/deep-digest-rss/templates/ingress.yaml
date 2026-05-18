@@ -1,16 +1,4 @@
 apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: custom-news-auth
-  labels:
-    {{- include "deep-digest-rss.labels" . | nindent 4 }}
-spec:
-  forwardAuth:
-    address: "http://news-auth-service.{{ .Release.Namespace }}.svc.cluster.local:3000"
-    addAuthCookiesToResponse:
-      - auth
----
-apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: news-backend-ingressroute
@@ -56,7 +44,6 @@ metadata:
     {{- include "deep-digest-rss.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certManager.clusterIssuer | quote }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-custom-news-auth@kubernetescrd
 spec:
   tls:
     - secretName: {{ .Values.ingress.tls.secretName }}

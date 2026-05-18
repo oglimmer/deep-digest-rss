@@ -66,7 +66,7 @@ def normalize_entries(parsed_feed):
 
 
 def perform_request(method, url, payload):
-    response = requests.request(method, url, auth=(config.USERNAME, config.PASSWORD), json=payload, timeout=30)
+    response = requests.request(method, url, headers=config.AUTH_HEADERS, auth=config.AUTH_BASIC, json=payload, timeout=30)
     if not response.ok:
         raise Exception(f"Request failed: {response.status_code} {response.reason}")
     return response.json()

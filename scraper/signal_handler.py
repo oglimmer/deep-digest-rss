@@ -15,8 +15,8 @@ def set_status():
             requests.patch(
                 f"{config.URL}/api/v1/feed-item-to-process/{last_item_in_process}",
                 json={"processState": "NEW"},
-                headers={"Content-Type": "application/json"},
-                auth=(config.USERNAME, config.PASSWORD),
+                headers=config.AUTH_HEADERS,
+                auth=config.AUTH_BASIC,
                 timeout=10
             )
             logger.info(f"Reset process state for feed item {last_item_in_process}")

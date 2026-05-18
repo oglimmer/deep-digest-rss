@@ -56,18 +56,6 @@ taggroupper:
       memory: "512Mi"
       cpu: "250m"
 
-auth:
-  image: auth-module
-  tag: latest
-  replicas: 1
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "25m"
-    limits:
-      memory: "512Mi"
-      cpu: "250m"
-
 config:
   dbHost: mariadb
   serverPort: "8080"
@@ -77,6 +65,7 @@ config:
   username: write
   model: gpt-4o-mini
   generationEngine: chatgpt
+  corsAllowedOrigins: https://news.oglimmer.com
 
 ingress:
   tls:
