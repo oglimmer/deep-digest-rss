@@ -1,11 +1,23 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+
 const emit = defineEmits<{ close: [] }>()
 
-defineProps<{
+withDefaults(defineProps<{
   width?: string
   maxWidth?: string
+  maxHeight?: string
   padding?: string
-}>()
+}>(), {
+  maxHeight: '90vh',
+})
+
+const onKey = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') emit('close')
+}
+
+onMounted(() => window.addEventListener('keydown', onKey))
+onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
@@ -15,6 +27,7 @@ defineProps<{
       :style="{
         width: width,
         maxWidth: maxWidth,
+        maxHeight: maxHeight,
         padding: padding,
       }"
       @click.stop
@@ -46,6 +59,7 @@ defineProps<{
   border-radius: 12px;
   box-shadow: 0 16px 48px var(--shadow-strong);
   position: relative;
+  overflow-y: auto;
   animation: modalReveal 0.2s ease;
 }
 
