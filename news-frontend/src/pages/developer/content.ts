@@ -32,15 +32,6 @@ export const services: ServiceCard[] = [
     image: 'news-frontend',
   },
   {
-    name: 'news-auth',
-    stack: 'Express · Redis',
-    port: '3000',
-    role: 'Session tokens · cookie issuer',
-    accent: 'svc-auth',
-    glyph: 'A',
-    image: 'news-auth',
-  },
-  {
     name: 'news-scraper',
     stack: 'Python 3.11 · OpenAI SDK',
     port: '—',
@@ -122,6 +113,11 @@ export const migrations = [
   { ver: 'V8.0.0', what: 'news_vote (user ↔ article)' },
   { ver: 'V13.0.0', what: 'news.timely + news.impact_scope' },
   { ver: 'V14.0.0', what: 'daily_digest — content LONGTEXT, created_on' },
+  { ver: 'V15.0.0', what: 'roles + user_roles (ADMIN / USER / READONLY)' },
+  { ver: 'V15.0.1', what: 'seed service accounts (read, write, actuator, swagger)' },
+  { ver: 'V15.0.2', what: 'backfill existing users with USER + READONLY' },
+  { ver: 'V16.0.0', what: 'api_keys + api_key_roles (X-API-Key for services)' },
+  { ver: 'V17.0.0', what: 'drop legacy users.auth_token / auth_token_valid_until' },
 ]
 
 export const deployTargets = [
@@ -178,17 +174,44 @@ export const endpoints: EndpointGroup[] = [
         method: 'POST',
         path: '/api/v1/auth/login',
         role: 'public',
-        summary: 'Authenticate and obtain an auth token',
+        summary: 'Authenticate and start a session',
         params: [],
         request: `{
   "email": "user@example.com",
   "password": "secret"
 }`,
         response: `{
-  "authToken": "abc123def456..."
+  "email": "user@example.com",
+  "roles": ["USER", "READONLY"]
 }`,
         notes:
-          'The returned authToken is used as the password in subsequent Basic Auth calls: Authorization: Basic base64(email:authToken)',
+          'On success the server sets a DDRSS_SESSION cookie (Redis-backed Spring Session). Send the cookie with subsequent requests; absolute timeout is 90 days. Rate-limited per email (5 / 15min) and per IP (20 / 15min) — returns 429 with Retry-After when tripped.',
+      },
+      {
+        id: 'auth-me',
+        method: 'GET',
+        path: '/api/v1/auth/me',
+        role: 'authenticated',
+        summary: 'Return the currently authenticated principal',
+        params: [],
+        request: '',
+        response: `{
+  "email": "user@example.com",
+  "roles": ["USER", "READONLY"]
+}`,
+        notes:
+          'Used by the SPA on boot to rehydrate auth state from the session cookie. 401 means "not logged in".',
+      },
+      {
+        id: 'auth-logout',
+        method: 'POST',
+        path: '/api/v1/auth/logout',
+        role: 'authenticated',
+        summary: 'Invalidate the current session',
+        params: [],
+        request: '',
+        response: '204 No Content',
+        notes: 'Invalidates the HttpSession and clears the SecurityContext.',
       },
       {
         id: 'auth-register',
@@ -202,7 +225,7 @@ export const endpoints: EndpointGroup[] = [
   "password": "secret"
 }`,
         response: '200 OK (empty body)',
-        notes: '',
+        notes: 'New accounts are granted USER + READONLY. Call /auth/login afterwards to get a session.',
       },
     ],
   },
@@ -547,15 +570,27 @@ export const dtos: DtoCard[] = [
     direction: 'Request',
     description: 'Credentials for login and register',
     fields: [
-      { name: 'email', type: 'string', notes: 'User email address' },
+      { name: 'email', type: 'string', notes: 'Email address — or service-account username (read, write, actuator, swagger)' },
       { name: 'password', type: 'string', notes: 'Plain-text password' },
     ],
   },
   {
     name: 'AuthResponse',
     direction: 'Response',
-    description: 'Returned by POST /auth/login',
-    fields: [{ name: 'authToken', type: 'string', notes: 'Token used as password in Basic Auth' }],
+    description: 'Returned by POST /auth/login alongside a Set-Cookie: DDRSS_SESSION header',
+    fields: [
+      { name: 'email', type: 'string', notes: 'Authenticated user email' },
+      { name: 'roles', type: 'string[]', notes: 'Granted roles (sorted), e.g. ["USER","READONLY"]' },
+    ],
+  },
+  {
+    name: 'AuthMeResponse',
+    direction: 'Response',
+    description: 'Returned by GET /auth/me when a session is active',
+    fields: [
+      { name: 'email', type: 'string', notes: 'Email of the principal — or "api-key:<name>" for service callers' },
+      { name: 'roles', type: 'string[]', notes: 'Granted roles (sorted)' },
+    ],
   },
   {
     name: 'NewsDto',
@@ -643,6 +678,14 @@ export const dtos: DtoCard[] = [
       { name: 'refId', type: 'string', notes: 'Unique RSS item reference' },
       { name: 'url', type: 'string', notes: '' },
       { name: 'title', type: 'string', notes: '' },
+    ],
+  },
+  {
+    name: 'FilterFeedItemToProcessDto',
+    direction: 'Request',
+    description: 'Payload for POST /feed-item-to-process/filter (dedupe by refId)',
+    fields: [
+      { name: 'refIds', type: 'string[]', notes: 'Candidate refIds; the response returns the subset NOT yet in the queue' },
     ],
   },
   {

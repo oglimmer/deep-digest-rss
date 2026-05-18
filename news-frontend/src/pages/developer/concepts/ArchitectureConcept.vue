@@ -6,14 +6,15 @@ import { services } from '../content'
   <div class="tab-content">
     <div class="concept-hero">
       <div class="concept-kicker">01 — Architecture</div>
-      <h2 class="concept-title">Five workloads, one pipeline</h2>
+      <h2 class="concept-title">Four workloads, one pipeline</h2>
       <p class="concept-lede">
         In production each box below is its own Kubernetes deployment. The
-        <strong>backend</strong> owns state and scheduling, the
+        <strong>backend</strong> owns state, scheduling, and authentication
+        (session cookies for browsers, <code>X-API-Key</code> for services), the
         <strong>scraper</strong> turns articles into AI summaries, the
-        <strong>taggroupper</strong> sorts those tags into categories, the
-        <strong>frontend</strong> reads, and <strong>auth</strong> issues sessions. All
-        coordination happens over HTTP against the backend.
+        <strong>taggroupper</strong> sorts those tags into categories, and the
+        <strong>frontend</strong> reads. All coordination happens over HTTP against
+        the backend; Redis backs sessions and login rate limits.
       </p>
     </div>
 
@@ -61,11 +62,11 @@ import { services } from '../content'
           <div class="flow-node flow-svc">news-frontend<br /><small>filter UI</small></div>
         </div>
         <div class="flow-row">
-          <div class="flow-node flow-svc">news-auth<br /><small>basic auth → token</small></div>
+          <div class="flow-node flow-svc">browser login<br /><small>POST /auth/login</small></div>
           <span class="flow-arrow">→</span>
-          <div class="flow-node flow-db">Redis<br /><small>session store</small></div>
+          <div class="flow-node flow-db">Redis<br /><small>Spring Session</small></div>
           <span class="flow-arrow">→</span>
-          <div class="flow-node flow-svc">cookie on every call</div>
+          <div class="flow-node flow-svc">DDRSS_SESSION cookie<br /><small>or X-API-Key for services</small></div>
         </div>
       </div>
       <p class="concept-note">
@@ -80,7 +81,6 @@ import { services } from '../content'
       <div class="code-block">
         <pre>$ kubectl get pods -n news
 NAME                                READY   STATUS
-news-auth-9d45575cc-…               1/1     Running
 news-backend-f79857ff6-…            1/1     Running
 news-frontend-bc55db7c9-…           1/1     Running
 news-scraper-8565947887-…           1/1     Running

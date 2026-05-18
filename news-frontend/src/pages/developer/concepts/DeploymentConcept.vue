@@ -52,12 +52,6 @@ import { deployTargets } from '../content'
             <td>80</td>
           </tr>
           <tr>
-            <td><code>news-auth</code></td>
-            <td><code>news-auth</code></td>
-            <td>Node 24</td>
-            <td>3000</td>
-          </tr>
-          <tr>
             <td><code>news-scraper</code></td>
             <td><code>news-scraper</code></td>
             <td>Python 3.11</td>

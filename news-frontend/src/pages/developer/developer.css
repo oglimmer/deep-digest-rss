@@ -1049,15 +1049,17 @@
   flex-shrink: 0;
 }
 
-.role-public   { background: #e8f5e9; color: #2e7d32; }
-.role-readonly { background: #e3f2fd; color: #1565c0; }
-.role-user     { background: #fff3e0; color: #e65100; }
-.role-admin    { background: #fce4ec; color: #880e4f; }
+.role-public        { background: #e8f5e9; color: #2e7d32; }
+.role-readonly      { background: #e3f2fd; color: #1565c0; }
+.role-user          { background: #fff3e0; color: #e65100; }
+.role-admin         { background: #fce4ec; color: #880e4f; }
+.role-authenticated { background: #ede7f6; color: #4527a0; }
 
-[data-theme="dark"] .role-public   { background: #1b3a1f; color: #66bb6a; }
-[data-theme="dark"] .role-readonly { background: #0d2a42; color: #64b5f6; }
-[data-theme="dark"] .role-user     { background: #3e2000; color: #ffb74d; }
-[data-theme="dark"] .role-admin    { background: #3e0017; color: #f48fb1; }
+[data-theme="dark"] .role-public        { background: #1b3a1f; color: #66bb6a; }
+[data-theme="dark"] .role-readonly      { background: #0d2a42; color: #64b5f6; }
+[data-theme="dark"] .role-user          { background: #3e2000; color: #ffb74d; }
+[data-theme="dark"] .role-admin         { background: #3e0017; color: #f48fb1; }
+[data-theme="dark"] .role-authenticated { background: #221b3a; color: #b39ddb; }
 
 /* Method badges */
 .method-badge {
