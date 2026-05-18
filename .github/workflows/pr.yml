@@ -1,0 +1,144 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      scraper: ${{ steps.filter.outputs.scraper }}
+      helm: ${{ steps.filter.outputs.helm }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'news-backend/**'
+            frontend:
+              - 'news-frontend/**'
+            scraper:
+              - 'scraper/**'
+              - '!scraper/lib/**'
+              - '!scraper/bin/**'
+              - '!scraper/node_modules/**'
+              - '!scraper/__pycache__/**'
+            helm:
+              - 'helm/**'
+            workflow:
+              - '.github/workflows/**'
+
+  backend:
+    name: Backend (Java)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: news-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Spotless check
+        run: ./mvnw -B spotless:check
+      - name: Tests (with Testcontainers)
+        env:
+          RUN_INTEGRATION_TESTS: 'true'
+        run: ./mvnw -B test
+
+  frontend:
+    name: Frontend (Vue)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: news-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: news-frontend/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type-check
+        run: npm run type-check
+      - name: Build
+        run: npm run build-only
+
+  scraper:
+    name: Scraper (Python)
+    needs: changes
+    if: needs.changes.outputs.scraper == 'true' || needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: scraper/requirements.txt
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Syntax check
+        run: |
+          find . -maxdepth 2 -name '*.py' \
+            -not -path './lib/*' \
+            -not -path './bin/*' \
+            -not -path './__pycache__/*' \
+            -not -path './old/*' \
+            -print0 | xargs -0 python -m py_compile
+
+  helm:
+    name: Helm lint
+    needs: changes
+    if: needs.changes.outputs.helm == 'true' || needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint helm/deep-digest-rss
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.29.0/gitleaks_8.29.0_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+      - name: Scan PR diff
+        run: |
+          gitleaks detect \
+            --config=.gitleaks.toml \
+            --redact \
+            --log-opts="origin/${{ github.base_ref }}..HEAD"
