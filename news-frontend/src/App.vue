@@ -2,7 +2,10 @@
 import { onMounted, ref } from 'vue';
 import NewsList from './components/NewsList.vue';
 import ThemeToggle from './components/ThemeToggle.vue';
+import DeveloperPage from './views/DeveloperPage.vue';
 import { useDataStore } from '@/stores/data';
+
+const showDev = ref(false);
 
 const store = useDataStore();
 const appsOpen = ref(false);
@@ -68,11 +71,15 @@ onMounted(() => {
             </a>
           </div>
         </div>
+        <button class="dev-btn" @click="showDev = !showDev" :class="{ 'dev-btn-active': showDev }">
+          Dev
+        </button>
         <ThemeToggle />
       </div>
     </header>
     <div class="header-rule"></div>
-    <NewsList />
+    <DeveloperPage v-if="showDev" />
+    <NewsList v-else />
   </main>
 </template>
 
@@ -131,6 +138,33 @@ main {
 
 .apps-menu {
   position: relative;
+}
+
+.dev-btn {
+  padding: 0.25rem 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dev-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.dev-btn-active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
 }
 
 .apps-btn {
