@@ -154,7 +154,7 @@ public class AiSummarizationService {
             "model",
             properties.getAnthropicModel(),
             "max_tokens",
-            4096,
+            8192,
             "system",
             systemPrompt,
             "messages",
