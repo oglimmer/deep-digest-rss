@@ -70,9 +70,27 @@ onUnmounted(() => {
   <!-- While hydrating session, render nothing to avoid a flash of UI. -->
   <main v-if="!auth.hydrated"></main>
 
-  <!-- Logged out: only the LoginForm. No header, no router-view, no API calls. -->
+  <!-- Logged out: intro + LoginForm. No header, no router-view, no API calls. -->
   <main v-else-if="!auth.loggedIn" class="login-only">
-    <LoginForm :closeModal="noop" />
+    <div class="auth-card">
+      <section class="auth-intro">
+        <h1 class="landing-title">Deep Digest RSS</h1>
+        <p class="landing-tagline">Readable news, curated &amp; summarized</p>
+        <p class="landing-desc">
+          Stories from across your RSS feeds, each given a short, neutral AI summary and an
+          interest score — so you can skim what matters without opening a dozen tabs.
+        </p>
+        <ul class="landing-features">
+          <li><strong>Aggregated feeds</strong> — many sources collected in one place.</li>
+          <li><strong>AI summaries</strong> — every article condensed to the essentials.</li>
+          <li><strong>Interest scores</strong> — a quick signal for what's worth your time.</li>
+          <li><strong>By time of day</strong> — morning, afternoon and night sections.</li>
+        </ul>
+      </section>
+      <div class="auth-login">
+        <LoginForm :closeModal="noop" />
+      </div>
+    </div>
   </main>
 
   <!-- Logged in: full app shell. -->
@@ -142,6 +160,114 @@ main {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  padding: 1.5rem;
+}
+
+/* Unified card: intro panel + login panel share one border, radius and shadow. */
+.auth-card {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 820px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px var(--shadow-strong), 0 2px 8px var(--shadow-color);
+  overflow: hidden;
+}
+
+.auth-intro {
+  flex: 1 1 0;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+}
+
+.auth-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-title {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.landing-tagline {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0.6rem 0 1.5rem 0;
+}
+
+.landing-desc {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+}
+
+.landing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.landing-features li {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.landing-features li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+}
+
+.landing-features strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Stack into a single column on narrow viewports. */
+@media (max-width: 720px) {
+  .auth-card {
+    flex-direction: column;
+    max-width: 400px;
+  }
+
+  .auth-intro {
+    min-width: 0;
+    padding: 2rem 2rem 1.75rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
 }
 
 .app-header {
