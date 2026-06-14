@@ -66,6 +66,9 @@ config:
   model: gpt-4o-mini
   generationEngine: chatgpt
   corsAllowedOrigins: https://news.oglimmer.com
+  # MCP OAuth issuer (must be the externally reachable base URL) and CORS origins.
+  mcpIssuerUri: https://news.oglimmer.com
+  mcpCorsAllowedOrigins: https://claude.ai
 
 ingress:
   tls:

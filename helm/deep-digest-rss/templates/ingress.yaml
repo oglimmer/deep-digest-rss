@@ -33,6 +33,15 @@ spec:
       services:
         - name: news-backend-service
           port: 8080
+    # MCP server + embedded OAuth2 authorization server (token issuance, dynamic client
+    # registration, discovery metadata, interactive login) — all served by the backend.
+    - match: >-
+        Host(`{{ .Values.domain }}`) && (PathPrefix(`/mcp`) || PathPrefix(`/oauth2`)
+        || PathPrefix(`/connect`) || PathPrefix(`/.well-known`) || PathPrefix(`/login`))
+      kind: Rule
+      services:
+        - name: news-backend-service
+          port: 8080
   tls:
     secretName: {{ .Values.ingress.tls.secretName }}
 ---

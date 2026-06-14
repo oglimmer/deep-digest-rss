@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in · DeepDigestRSS</title>
+    <style>
+      /* Tokens mirror the SPA (news-frontend/src/assets/main.css). Light by default;
+         dark via prefers-color-scheme since this server-rendered page has no theme toggle. */
+      :root {
+        --bg-primary: #fdfaf5;
+        --bg-secondary: #f5f0e8;
+        --bg-tertiary: #ede6da;
+        --bg-hover: #ede6da;
+        --text-primary: #1a1612;
+        --text-secondary: #4a4238;
+        --text-muted: #9b8e7e;
+        --border-color: #ddd5c8;
+        --border-hover: #c8bbab;
+        --primary-color: #b84c2e;
+        --primary-hover: #9a3d23;
+        --error-color: #b33a3a;
+        --error-bg: #fceaea;
+        --error-border: #d9a0a0;
+        --accent-line: #b84c2e;
+        --shadow-strong: rgba(26, 22, 18, 0.12);
+        --focus-ring: rgba(184, 76, 46, 0.08);
+        --font-display: "Didot", "Bodoni MT", "Noto Serif Display", "Book Antiqua", Georgia, serif;
+        --font-ui: "Avenir Next", "Avenir", "Segoe UI", system-ui, sans-serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #171512;
+          --bg-secondary: #211e1a;
+          --bg-tertiary: #2c2822;
+          --bg-hover: #2c2822;
+          --text-primary: #e8e0d4;
+          --text-secondary: #b5aa9a;
+          --text-muted: #7a7062;
+          --border-color: #3a352d;
+          --border-hover: #4a4438;
+          --primary-color: #e07a52;
+          --primary-hover: #c86840;
+          --error-color: #e06b6b;
+          --error-bg: #2e1b1b;
+          --error-border: #5a2e2e;
+          --accent-line: #e07a52;
+          --shadow-strong: rgba(0, 0, 0, 0.4);
+          --focus-ring: rgba(224, 122, 82, 0.12);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.5rem;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .card {
+        width: 380px;
+        max-width: 90vw;
+        padding: 2.25rem 2rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 12px 40px var(--shadow-strong);
+      }
+
+      .accent {
+        height: 3px;
+        width: 44px;
+        background-color: var(--accent-line);
+        border-radius: 2px;
+        margin-bottom: 1.25rem;
+      }
+
+      .header {
+        margin-bottom: 1.5rem;
+      }
+
+      .header h1 {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 400;
+        margin: 0 0 0.35rem 0;
+        color: var(--text-primary);
+      }
+
+      .brand {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .subtitle {
+        margin: 0.75rem 0 0 0;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: var(--text-secondary);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .input-group label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      input {
+        padding: 0.65rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: var(--font-ui);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+      }
+
+      input::placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--focus-ring);
+      }
+
+      .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid var(--error-border);
+        border-radius: 6px;
+        background-color: var(--error-bg);
+        color: var(--error-color);
+        font-weight: 500;
+        font-size: 0.8rem;
+      }
+
+      .error-message::before {
+        content: "!";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background-color: var(--error-color);
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      button {
+        margin-top: 0.25rem;
+        padding: 0.7rem;
+        border: none;
+        border-radius: 6px;
+        font-family: var(--font-ui);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background-color: var(--primary-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="accent"></div>
+      <div class="header">
+        <h1>Sign in</h1>
+        <span class="brand">DeepDigestRSS</span>
+        <p class="subtitle">Authorize an app to access your news digest via the Model Context Protocol.</p>
+      </div>
+
+      <div class="error-message" th:if="${param.error}">Invalid email or password.</div>
+
+      <form method="post" th:action="@{/login}">
+        <div class="input-group">
+          <label for="username">Email or username</label>
+          <input id="username" name="username" type="text" placeholder="you@example.com"
+                 autocomplete="username" autofocus required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Enter password"
+                 autocomplete="current-password" required />
+        </div>
+        <input th:if="${_csrf}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Sign in</button>
+      </form>
+    </main>
+  </body>
+</html>

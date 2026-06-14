@@ -31,6 +31,31 @@ Shared infra: MariaDB (data), Redis (HTTP sessions).
 - **Browser users**: Spring Session with a Redis-backed `DDRSS_SESSION` cookie.
 - **Service-to-service** (scraper → backend): `X-API-Key` header, value from
   `SCRAPER_API_KEY`.
+- **MCP clients** (AI agents → backend): OAuth 2.1 bearer tokens. See [MCP server](#mcp-server).
+
+### MCP server
+
+The backend hosts a [Model Context Protocol](https://modelcontextprotocol.io) server
+(streamable HTTP) at `/mcp`, exposing read-only news tools — `list_news`,
+`search_recent_news`, `list_feeds`, `list_tag_groups`.
+
+It is secured per the MCP authorization spec: the backend is an OAuth 2.1 resource server
+and embeds its own authorization server (Spring Authorization Server +
+[`spring-ai-community/mcp-security`](https://github.com/spring-ai-community/mcp-security)).
+Clients self-register via **Dynamic Client Registration (RFC 7591)** — no manual client
+setup needed.
+
+- Discovery: `/.well-known/oauth-protected-resource`, `/.well-known/oauth-authorization-server`
+- Dynamic client registration: `POST /oauth2/register`
+- Authorization (interactive login reusing the user table): `/oauth2/authorize` → `/login`
+- Token: `/oauth2/token`
+
+Add it in a client (e.g. Claude) as a custom connector pointing at `http(s)://<host>/mcp`;
+the client will register itself and walk you through the OAuth login.
+
+Config (env): `MCP_ISSUER_URI` (externally reachable base URL), `MCP_CORS_ALLOWED_ORIGINS`,
+and `MCP_JWK_PRIVATE_KEY`/`MCP_JWK_PUBLIC_KEY` (persistent RSA signing key — set these in
+production so tokens survive restarts).
 
 ## Quick start (Docker Compose)
 

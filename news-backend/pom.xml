@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.5</version>
+    <version>4.1.0</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -30,9 +30,18 @@
     <java.version>21</java.version>
     <testcontainers.version>1.21.3</testcontainers.version>
     <bucket4j.version>8.10.1</bucket4j.version>
+    <spring-ai.version>2.0.0</spring-ai.version>
+    <mcp-security.version>0.1.13</mcp-security.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
@@ -82,11 +91,26 @@
       <artifactId>lombok</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- MCP server (streamable HTTP) + OAuth2 security per the MCP authorization spec -->
+    <dependency>
+      <groupId>org.springaicommunity</groupId>
+      <artifactId>mcp-authorization-server-spring-boot</artifactId>
+      <version>${mcp-security.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springaicommunity</groupId>
+      <artifactId>mcp-server-security-spring-boot</artifactId>
+      <version>${mcp-security.version}</version>
+    </dependency>
     <!-- swagger/openapi doc -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
     </dependency>
 
     <dependency>
@@ -117,8 +141,21 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security-oauth2-authorization-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <!-- Server-rendered, themed OAuth login page -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
     <!-- validation via annotation support -->
     <dependency>

@@ -108,6 +108,28 @@ spec:
                   key: CORS_ALLOWED_ORIGINS
             - name: CSRF_ENABLED
               value: "false"
+            - name: MCP_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: MCP_ISSUER_URI
+            - name: MCP_CORS_ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: MCP_CORS_ALLOWED_ORIGINS
+            - name: MCP_JWK_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: MCP_JWK_PRIVATE_KEY
+                  optional: true
+            - name: MCP_JWK_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: news-secrets
+                  key: MCP_JWK_PUBLIC_KEY
+                  optional: true
           startupProbe:
             httpGet:
               path: /actuator/health/readiness

@@ -10,6 +10,8 @@ import de.oglimmer.news.config.auth.CsrfTokenResponseHeaderBindingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -55,7 +57,11 @@ public class SecurityConfiguration {
     return config.getAuthenticationManager();
   }
 
+  // Lowest precedence: catch-all chain for the app's own endpoints (/api/v1, actuator, swagger).
+  // The MCP/OAuth chains in McpOAuthSecurityConfig have explicit higher-priority securityMatchers
+  // and are consulted first, so this chain only ever sees the remaining requests.
   @Bean
+  @Order(Ordered.LOWEST_PRECEDENCE)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.sessionManagement(
             sessionManagement ->
