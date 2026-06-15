@@ -78,6 +78,9 @@ app:
     issuer-uri: "${MCP_ISSUER_URI:http://localhost:8080}"
     cors-allowed-origins: "${MCP_CORS_ALLOWED_ORIGINS:*}"
     dynamic-client-registration-enabled: "${MCP_DCR_ENABLED:true}"
+    token:
+      access-token-ttl: "${MCP_ACCESS_TOKEN_TTL:30m}"
+      refresh-token-ttl: "${MCP_REFRESH_TOKEN_TTL:180d}"
     jwk:
       private-key: "${MCP_JWK_PRIVATE_KEY:}"
       public-key: "${MCP_JWK_PUBLIC_KEY:}"

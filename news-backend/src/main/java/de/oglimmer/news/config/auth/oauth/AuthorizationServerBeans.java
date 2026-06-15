@@ -1,6 +1,7 @@
 /* Copyright (c) 2025 by oglimmer.com / Oliver Zimpasser. All rights reserved. */
 package de.oglimmer.news.config.auth.oauth;
 
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +28,19 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 @Configuration
 public class AuthorizationServerBeans {
 
+  /**
+   * Registered-client store wrapped so every client (including Dynamic Client Registration clients
+   * created at runtime) issues long-lived, rotating refresh tokens. Without this, the default
+   * 60-minute refresh-token lifetime forced MCP clients to re-authenticate after about an hour. See
+   * {@link LongLivedTokenRegisteredClientRepository}.
+   */
   @Bean
-  public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-    return new JdbcRegisteredClientRepository(jdbcTemplate);
+  public RegisteredClientRepository registeredClientRepository(
+      JdbcTemplate jdbcTemplate,
+      @Value("${app.mcp.token.access-token-ttl:30m}") Duration accessTokenTtl,
+      @Value("${app.mcp.token.refresh-token-ttl:180d}") Duration refreshTokenTtl) {
+    return new LongLivedTokenRegisteredClientRepository(
+        new JdbcRegisteredClientRepository(jdbcTemplate), accessTokenTtl, refreshTokenTtl);
   }
 
   @Bean
