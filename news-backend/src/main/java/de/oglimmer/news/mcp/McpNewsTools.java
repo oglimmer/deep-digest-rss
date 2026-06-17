@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.ai.mcp.annotation.McpTool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,15 +39,17 @@ public class McpNewsTools {
 
   @McpTool(
       name = "list_news",
+      title = "List news",
       description =
           "List news items for a given day. Returns title, summary text, url, tags and the"
-              + " current user's vote state.")
+              + " current user's vote state.",
+      annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
   public List<NewsDto> listNews(
-      @ToolParam(
+      @McpToolParam(
               description = "Day to list, ISO-8601 (YYYY-MM-DD). Defaults to today when omitted.",
               required = false)
           String date,
-      @ToolParam(
+      @McpToolParam(
               description = "Optional comma-separated feed ids to restrict the results.",
               required = false)
           String feedIds) {
@@ -57,15 +59,17 @@ public class McpNewsTools {
 
   @McpTool(
       name = "search_recent_news",
+      title = "Search recent news",
       description =
           "Search news from the last 24 hours, optionally filtering by tags to include or"
-              + " exclude.")
+              + " exclude.",
+      annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
   public List<NewsDto> searchRecentNews(
-      @ToolParam(description = "Comma-separated tags to include.", required = false)
+      @McpToolParam(description = "Comma-separated tags to include.", required = false)
           String includeTags,
-      @ToolParam(description = "Comma-separated tags to exclude.", required = false)
+      @McpToolParam(description = "Comma-separated tags to exclude.", required = false)
           String excludeTags,
-      @ToolParam(
+      @McpToolParam(
               description = "Optional comma-separated feed ids to restrict the results.",
               required = false)
           String feedIds) {
@@ -75,7 +79,11 @@ public class McpNewsTools {
     return news.stream().map(n -> modelMapper.map(n, NewsDto.class)).toList();
   }
 
-  @McpTool(name = "list_feeds", description = "List all RSS feeds the platform aggregates.")
+  @McpTool(
+      name = "list_feeds",
+      title = "List feeds",
+      description = "List all RSS feeds the platform aggregates.",
+      annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
   public List<FeedSummary> listFeeds() {
     return feedService.Feeds().stream()
         .map(this::toFeedSummary)
@@ -85,10 +93,12 @@ public class McpNewsTools {
 
   @McpTool(
       name = "list_tag_groups",
+      title = "List tag groups",
       description =
-          "List the curated tag groups for a given day, mapping each group title to its tags.")
+          "List the curated tag groups for a given day, mapping each group title to its tags.",
+      annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
   public Map<String, String[]> listTagGroups(
-      @ToolParam(
+      @McpToolParam(
               description = "Day in UTC, ISO-8601 (YYYY-MM-DD). Defaults to today when omitted.",
               required = false)
           String date) {
