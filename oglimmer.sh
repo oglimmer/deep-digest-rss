@@ -17,6 +17,11 @@ PUSH_ONLY="${PUSH_ONLY:-false}"
 RESTART="${RESTART:-true}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-default}"
 
+# Restart hook configuration. Used when kubectl is not available (e.g. CI build
+# runners that can't reach the cluster directly). The hook triggers an
+# in-cluster rollout; see restart_via_hook() below.
+RESTART_HOOK_URL="${RESTART_HOOK_URL:-https://restart.oglimmer.com/restart}"
+
 # Component configuration (bash 3.2+ compatible)
 ALL_COMPONENTS="news-frontend news-backend scraper"
 
@@ -113,6 +118,13 @@ ENVIRONMENT VARIABLES:
   PUSH_ONLY          Only push, don't build (true/false)
   RESTART            Restart deployments after push (true/false, default: true)
   K8S_NAMESPACE      Kubernetes namespace (default: default)
+  RESTART_TOKEN      Bearer token for the restart hook. Used to restart
+                     deployments when kubectl is unavailable (e.g. CI).
+  RESTART_HOOK_URL   Restart hook base URL (default: https://restart.oglimmer.com/restart)
+
+RESTART BEHAVIOR:
+  When a restart is requested, kubectl is used if available; otherwise the
+  restart hook is called using RESTART_TOKEN. Pass --no-restart to skip.
 
 EXAMPLES:
   ${SCRIPT_NAME} build --all                     # Build, push, and restart all
@@ -135,13 +147,19 @@ validate_dependencies() {
     missing_deps+=("docker")
   fi
 
-  if [[ "${RESTART}" == "true" ]] && ! command -v kubectl >/dev/null 2>&1; then
-    missing_deps+=("kubectl")
-  fi
-
   if [[ ${#missing_deps[@]} -gt 0 ]]; then
     echo "${RED}Error: Missing required dependencies: ${missing_deps[*]}${RESET}" >&2
     echo "Please install the missing dependencies and try again." >&2
+    exit 1
+  fi
+
+  # Restarting a deployment needs EITHER kubectl (direct rollout) OR a
+  # RESTART_TOKEN (to call the restart hook). CI build runners have neither
+  # cluster access nor kubectl and set RESTART_TOKEN instead. Fail early when a
+  # restart is requested but neither path is available.
+  if [[ "${RESTART}" == "true" ]] && ! command -v kubectl >/dev/null 2>&1 && [[ -z "${RESTART_TOKEN:-}" ]]; then
+    echo "${RED}Error: Restart requested but kubectl is not available and RESTART_TOKEN is not set${RESET}" >&2
+    echo "Install kubectl, set RESTART_TOKEN, or pass --no-restart." >&2
     exit 1
   fi
 
@@ -234,7 +252,30 @@ push_all() {
   fi
 }
 
-# Restart Kubernetes deployment(s) for a component
+# Restart a single deployment via the in-cluster restart hook (POST
+# authenticated with RESTART_TOKEN). Used when kubectl is unavailable, e.g. on
+# CI runners that can't reach the cluster directly. The token is never echoed,
+# even in dry-run/verbose mode.
+restart_via_hook() {
+  local deployment="$1"
+  local url="${RESTART_HOOK_URL}/${K8S_NAMESPACE}/${deployment}"
+
+  echo "${BOLD}Restarting ${deployment} via hook: ${url}${RESET}"
+
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "${YELLOW}[DRY-RUN]${RESET} curl -fsS -X POST -H 'Authorization: Bearer ***' ${url}"
+    return 0
+  fi
+
+  if ! curl -fsS -X POST -H "Authorization: Bearer ${RESTART_TOKEN}" "${url}" >/dev/null; then
+    echo "${RED}Error: Failed to trigger restart for ${deployment} via hook${RESET}" >&2
+    return 1
+  fi
+}
+
+# Restart Kubernetes deployment(s) for a component. Prefer kubectl when it is
+# available (local/dev with cluster access); otherwise fall back to the restart
+# hook using RESTART_TOKEN (CI runners without cluster access).
 restart_component() {
   local component="$1"
   local deployments
@@ -243,7 +284,11 @@ restart_component() {
 
   for deployment in ${deployments}; do
     echo "${BOLD}Restarting ${deployment}...${RESET}"
-    execute kubectl rollout restart deployment/"${deployment}" -n "${K8S_NAMESPACE}"
+    if command -v kubectl >/dev/null 2>&1; then
+      execute kubectl rollout restart deployment/"${deployment}" -n "${K8S_NAMESPACE}" || return 1
+    else
+      restart_via_hook "${deployment}" || return 1
+    fi
     echo "${GREEN}✓ Restarted ${deployment}${RESET}"
   done
 }
