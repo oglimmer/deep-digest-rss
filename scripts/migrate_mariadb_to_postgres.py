@@ -174,6 +174,45 @@ def copy_table(my, pg, table, dry_run):
     return source_count, copied
 
 
+# (child table, child column, parent table) for every foreign key in the schema. Checked after
+# a load that ran with FK triggers disabled.
+FOREIGN_KEYS = [
+    ("user_roles", "user_id", "users"),
+    ("user_roles", "role_id", "roles"),
+    ("api_key_roles", "api_key_id", "api_keys"),
+    ("api_key_roles", "role_id", "roles"),
+    ("feed_item_to_process", "feed_id", "feed"),
+    ("news", "feed_id", "feed"),
+    ("news", "original_feed_item_id", "feed_item_to_process"),
+    ("news_tags", "news_id", "news"),
+    ("news_tags", "tags_id", "tags"),
+    ("tag_group_tags", "tag_group_id", "tag_group"),
+    ("tag_group_tags", "tags_id", "tags"),
+    ("news_vote", "news_id", "news"),
+    ("news_vote", "user_id", "users"),
+]
+
+
+def verify_foreign_keys(pg):
+    """Re-check referential integrity, since the load may have bypassed the FK triggers."""
+    orphans = []
+    with pg.cursor() as cur:
+        for child, column, parent in FOREIGN_KEYS:
+            cur.execute(
+                f'SELECT COUNT(*) FROM "{child}" c '
+                f'LEFT JOIN "{parent}" p ON p.id = c."{column}" '
+                f'WHERE c."{column}" IS NOT NULL AND p.id IS NULL'
+            )
+            count = cur.fetchone()[0]
+            if count:
+                orphans.append(f"{child}.{column} -> {parent}: {count} orphan(s)")
+    if orphans:
+        for line in orphans:
+            log(f"  ORPHAN {line}")
+        raise RuntimeError("referential integrity check failed")
+    log(f"  foreign keys verified ({len(FOREIGN_KEYS)} constraints, no orphans)")
+
+
 def reset_sequences(pg):
     with pg.cursor() as cur:
         for table in SEQUENCE_TABLES:
@@ -220,8 +259,29 @@ def main():
     # Pin both sides to UTC so no driver applies a local-time conversion of its own.
     with my.cursor() as cur:
         cur.execute("SET time_zone = '+00:00'")
+        # This script reads from MariaDB with an unbuffered cursor and stops reading while it
+        # writes each batch into PostgreSQL. On the wide/foreign-keyed tables a batch can take
+        # minutes, and MariaDB drops the connection once it has been unable to write to us for
+        # net_write_timeout (default 60s) -- surfacing as "(2013, Lost connection to MySQL
+        # server during query)" partway through the copy. Give the server room to wait.
+        cur.execute("SET SESSION net_write_timeout = 3600")
+        cur.execute("SET SESSION net_read_timeout = 3600")
+        cur.execute("SET SESSION wait_timeout = 28800")
+    # Per-row FK trigger checks dominate the run on the join tables (news_tags and
+    # tag_group_tags are ~4.9M rows between them), slowing a batch enough that MariaDB times
+    # the read side out. session_replication_role=replica skips them for this session; it needs
+    # superuser, so fall back to a normal (slower) load when connected as the app role. The
+    # source enforced the same foreign keys, the copy runs in dependency order, and
+    # verify_foreign_keys() re-checks for orphans afterwards.
+    pg.autocommit = True
     with pg.cursor() as cur:
         cur.execute("SET TIME ZONE 'UTC'")
+        try:
+            cur.execute("SET session_replication_role = replica")
+            log("  FK triggers disabled for this session (superuser)")
+        except psycopg2.Error as exc:
+            log(f"  note: keeping FK checks on ({str(exc).strip()}); copy will be slower")
+    pg.autocommit = False
 
     log(f"source: {my.host}/{os.environ.get('MYSQL_DB', 'news_prod')} (MariaDB)")
     log(f"target: {pg.get_dsn_parameters()['host']}/{pg.get_dsn_parameters()['dbname']} (PostgreSQL)")
@@ -235,6 +295,7 @@ def main():
             pg.rollback()
             log("\ndry-run: rolled back, nothing written")
             return 0
+        verify_foreign_keys(pg)
         reset_sequences(pg)
         pg.commit()
     except Exception:

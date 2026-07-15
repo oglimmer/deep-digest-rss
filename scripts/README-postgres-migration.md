@@ -34,14 +34,22 @@ The username `news-app` matches what `helm/SEALED-SECRETS.md` already documents 
 `news-app` and `SPRING_DATASOURCE_PASSWORD` = the password from step 1, following
 `helm/SEALED-SECRETS.md`. These env vars override the `application.yml` defaults.
 
-## 3. Stop writers
+## 3. Deploy the chart, then stop writers
 
-Scale the writers down so the source stops changing mid-copy — otherwise rows scraped during
-the copy are lost:
+`helm upgrade` re-applies `replicas` from `values.yaml`, so it silently scales the writers back
+to 1. Upgrade **first**, scale down **after**, and re-check — otherwise the scraper quietly keeps
+running against the half-built database:
 
 ```bash
+helm upgrade deep-digest-rss helm/deep-digest-rss --namespace default --force-conflicts
 kubectl scale deploy/news-backend deploy/news-scraper deploy/news-taggroupper --replicas=0
+kubectl get deploy | grep news    # confirm 0/0 before continuing
 ```
+
+`--force-conflicts` is needed because `news-secrets` was originally created with a client-side
+`kubectl apply`; without it, Helm's server-side apply refuses to take over the two
+`SPRING_DATASOURCE_*` fields and the upgrade fails halfway, leaving the ConfigMap pointing at
+PostgreSQL while the Secret still holds the MariaDB password.
 
 ## 4. Create the schema
 
@@ -63,13 +71,21 @@ both databases (a throwaway pod in the cluster is simplest):
 ```bash
 pip install pymysql psycopg2-binary
 MYSQL_HOST=mariadb MYSQL_USER=root MYSQL_PASSWORD=<mariadb-root-pw> \
-PG_HOST=postgres.default.svc.cluster.local PG_USER=news-app PG_PASSWORD=<new-password> \
+PG_HOST=postgres.default.svc.cluster.local PG_USER=postgres PG_PASSWORD=<superuser-pw> \
     python3 migrate_mariadb_to_postgres.py --dry-run   # counts only, writes nothing
 ```
 
-Drop `--dry-run` to perform the copy. It runs in one transaction: on any error the target is
-rolled back and left untouched, and re-running is safe. It finishes by printing a per-table
-source-vs-target row count — every line must say `ok`.
+Connect as the `postgres` superuser, not `news-app`: the script uses
+`session_replication_role = replica` to skip per-row foreign-key trigger checks, which is the
+difference between ~11k rows/sec and ~2k rows/sec on this cluster. At the slow rate a single
+batch on `news_tags` can exceed MariaDB's `net_write_timeout` while the script is busy writing,
+and the source connection is dropped mid-copy (`(2013, Lost connection to MySQL server during
+query)`). The script raises that timeout too, and re-checks every foreign key for orphans before
+committing. It falls back to a normal, slower load if the role is not a superuser.
+
+Drop `--dry-run` to perform the copy (~15 min for 5.5M rows). It runs in one transaction: on any
+error the target is rolled back and left untouched, and re-running is safe. It finishes by
+printing a per-table source-vs-target row count — every line must say `ok`.
 
 The truncate also clears the reference rows `V1.0.0` seeds (roles, service accounts, the
 scraper API key, the two default feeds). That is deliberate: the MariaDB copies of those rows
