@@ -7,8 +7,8 @@ This secret is managed via [Sealed Secrets](https://github.com/bitnami-labs/seal
 
 | Key | Used by | Description |
 |-----|---------|-------------|
-| `SPRING_DATASOURCE_USERNAME` | backend | MariaDB username |
-| `SPRING_DATASOURCE_PASSWORD` | backend | MariaDB password |
+| `SPRING_DATASOURCE_USERNAME` | backend | PostgreSQL username |
+| `SPRING_DATASOURCE_PASSWORD` | backend | PostgreSQL password |
 | `AUTH_ACTUATOR_PASSWORD` | backend | Password for `/actuator` endpoint |
 | `AUTH_SWAGGER_PASSWORD` | backend | Password for Swagger UI |
 | `AUTH_WRITE_PASSWORD` | backend, scraper, taggroupper | Password for write API access |

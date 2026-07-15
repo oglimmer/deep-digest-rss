@@ -13,11 +13,11 @@ Monorepo with three services:
 
 | Service          | Stack                              | Port  | Role                                                                 |
 |------------------|------------------------------------|-------|----------------------------------------------------------------------|
-| `news-backend`   | Spring Boot 4, Java 21, MariaDB    | 8080  | REST API (`/api/v1/`), Flyway migrations, scheduled jobs, auth       |
+| `news-backend`   | Spring Boot 4, Java 21, PostgreSQL | 8080  | REST API (`/api/v1/`), Flyway migrations, scheduled jobs, auth       |
 | `news-frontend`  | Vue 3, TypeScript, Vite, Pinia     | 5173  | SPA with light/dark themes, time-of-day sections, voting             |
 | `scraper`        | Python 3                           | -     | Polls backend queue, fetches pages, runs AI summarization            |
 
-Shared infra: MariaDB (data), Redis (HTTP sessions).
+Shared infra: PostgreSQL (data), Redis (HTTP sessions).
 
 ### Data flow
 
@@ -84,12 +84,11 @@ Then open:
 ### Database & Redis only (when running services on the host)
 
 ```bash
-docker run -d --name mariadb \
-  -e MARIADB_ROOT_PASSWORD=root \
-  -e MARIADB_DATABASE=news_prod \
-  -e MARIADB_USER=news \
-  -e MARIADB_PASSWORD=news \
-  -p 3306:3306 mariadb:latest
+docker run -d --name postgres \
+  -e POSTGRES_DB=news_prod \
+  -e POSTGRES_USER=news \
+  -e POSTGRES_PASSWORD=news \
+  -p 5432:5432 postgres:18
 
 docker run -d --name redis -p 6379:6379 redis:7-alpine
 ```

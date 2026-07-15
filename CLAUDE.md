@@ -44,14 +44,14 @@ docker compose up --build
 
 For local DB without Docker Compose:
 ```bash
-docker run -d --name mariadb -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=news_prod -e MARIADB_USER=news -e MARIADB_PASSWORD=news -p 3306:3306 mariadb:latest
+docker run -d --name postgres -e POSTGRES_DB=news_prod -e POSTGRES_USER=news -e POSTGRES_PASSWORD=news -p 5432:5432 postgres:18
 ```
 
 ## Architecture
 
 ### Service Responsibilities
 
-- **news-backend**: REST API (`/api/v1/`), MariaDB via Flyway migrations, Spring Security with Spring Session (Redis-backed `DDRSS_SESSION` cookie) for browser users and `X-API-Key` for service-to-service callers, scheduled daily digest (19:00 Berlin time → Discord), Prometheus metrics, Swagger at `/swagger-ui/`. Unauthenticated probes at `/actuator/health/{liveness,readiness}`. Also hosts an **MCP server** (streamable HTTP) at `/mcp` exposing read-only news tools, secured as an OAuth 2.1 resource server. The backend embeds its own OAuth2 **authorization server** (Spring Authorization Server + `spring-ai-community/mcp-security`) supporting **Dynamic Client Registration (RFC 7591)** at `/oauth2/register`, discovery metadata at `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`, and an interactive `/login` page (reusing the user table) for the authorization_code flow. See `config/auth/oauth/`.
+- **news-backend**: REST API (`/api/v1/`), PostgreSQL via Flyway migrations, Spring Security with Spring Session (Redis-backed `DDRSS_SESSION` cookie) for browser users and `X-API-Key` for service-to-service callers, scheduled daily digest (19:00 Berlin time → Discord), Prometheus metrics, Swagger at `/swagger-ui/`. Unauthenticated probes at `/actuator/health/{liveness,readiness}`. Also hosts an **MCP server** (streamable HTTP) at `/mcp` exposing read-only news tools, secured as an OAuth 2.1 resource server. The backend embeds its own OAuth2 **authorization server** (Spring Authorization Server + `spring-ai-community/mcp-security`) supporting **Dynamic Client Registration (RFC 7591)** at `/oauth2/register`, discovery metadata at `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`, and an interactive `/login` page (reusing the user table) for the authorization_code flow. See `config/auth/oauth/`.
 - **news-frontend**: SPA consuming the backend API. Pinia store (non-persisted for auth — session cookie is the source of truth). Light/dark theming, font customization, time-based news sections (Morning/Afternoon/Night), single-article scroll-snap view
 - **scraper**: Polls backend for unprocessed feed items, downloads page content, extracts text, generates AI summary + interest score, pushes results back. Authenticates with `X-API-Key` from `SCRAPER_API_KEY` env var. Pluggable AI engines configured via env vars
 
@@ -63,7 +63,11 @@ docker run -d --name mariadb -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=n
 
 ### Database
 
-MariaDB with Flyway migrations in `news-backend/src/main/resources/db/migration/`. Key tables: `news`, `feed`, `feed_item_to_process`, `user`, `tags`, `tag_group`, `news_vote`.
+PostgreSQL with Flyway migrations in `news-backend/src/main/resources/db/migration/`. Key tables: `news`, `feed`, `feed_item_to_process`, `user`, `tags`, `tag_group`, `news_vote`.
+
+In prod the DB is the central `postgres` service in the cluster's `default` namespace (shared with other apps, e.g. `wiki`), using a per-app database `news_prod` and user `news-app`. Local dev runs its own `postgres:18` container via `compose.yml`.
+
+The migration history was squashed into a single PostgreSQL baseline (`V1.0.0__init.sql`) when the project moved off MariaDB; the pre-migration MariaDB history is in git history only. Entity string columns backed by `TEXT` use `@JdbcTypeCode(SqlTypes.LONGVARCHAR)` rather than `@Lob` — on PostgreSQL, `@Lob` on a `String` maps to `oid` (large-object) instead of `text`.
 
 ## Code Style
 

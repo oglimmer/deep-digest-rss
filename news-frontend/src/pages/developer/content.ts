@@ -105,6 +105,12 @@ export const tagCategories = [
 ]
 
 export const migrations = [
+  { ver: 'V1.0.0', what: 'PostgreSQL baseline — full schema in one migration' },
+]
+
+// V1.0.0 is a squashed baseline written when the project moved from MariaDB to PostgreSQL.
+// These are the MariaDB-era migrations it replaced; they survive in git history only.
+export const legacyMigrations = [
   { ver: 'V1.0.0', what: 'news table — id, title, text, url, ref_id, created_on' },
   { ver: 'V2.0.0', what: 'feed_item table' },
   { ver: 'V3.0.0', what: 'feed cookie auth (gated RSS sources)' },
@@ -118,13 +124,14 @@ export const migrations = [
   { ver: 'V15.0.2', what: 'backfill existing users with USER + READONLY' },
   { ver: 'V16.0.0', what: 'api_keys + api_key_roles (X-API-Key for services)' },
   { ver: 'V17.0.0', what: 'drop legacy users.auth_token / auth_token_valid_until' },
+  { ver: 'V18.0.0', what: 'oauth2 authorization server tables (MCP)' },
 ]
 
 export const deployTargets = [
   {
     name: 'Local Dev',
     cmd: 'docker compose up --build',
-    desc: 'compose.yml wires all four services plus MariaDB on 3306.',
+    desc: 'compose.yml wires all four services plus PostgreSQL on 5432.',
     note: 'Fastest path to a running stack',
   },
   {
@@ -137,7 +144,7 @@ export const deployTargets = [
     name: 'Standalone',
     cmd: './mvnw spring-boot:run',
     desc: 'Backend on 8080, frontend on 5173 (npm run dev). Useful when iterating on one service.',
-    note: 'Requires MariaDB running separately',
+    note: 'Requires PostgreSQL running separately',
   },
 ]
 

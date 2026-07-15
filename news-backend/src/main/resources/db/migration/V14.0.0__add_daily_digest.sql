@@ -1,5 +1,0 @@
-CREATE TABLE daily_digest (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content LONGTEXT NOT NULL,
-    created_on TIMESTAMP(6) NOT NULL
-);

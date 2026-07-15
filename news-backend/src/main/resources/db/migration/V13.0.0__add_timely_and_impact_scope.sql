@@ -1,2 +1,0 @@
-ALTER TABLE news ADD COLUMN timely BOOLEAN;
-ALTER TABLE news ADD COLUMN impact_scope VARCHAR(20);

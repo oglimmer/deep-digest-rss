@@ -33,6 +33,16 @@ spec:
                 configMapKeyRef:
                   name: news-config
                   key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: news-config
+                  key: DB_NAME
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

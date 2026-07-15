@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { migrations } from '../content'
+import { migrations, legacyMigrations } from '../content'
 </script>
 
 <template>
   <div class="tab-content">
     <div class="concept-hero">
       <div class="concept-kicker">06 — Database</div>
-      <h2 class="concept-title">MariaDB, evolved by Flyway</h2>
+      <h2 class="concept-title">PostgreSQL, evolved by Flyway</h2>
       <p class="concept-lede">
         Every schema change is a numbered migration in
         <code>news-backend/src/main/resources/db/migration/</code>. Flyway applies them on
@@ -18,6 +18,17 @@ import { migrations } from '../content'
       <h3 class="sub-title">Schema timeline</h3>
       <div class="timeline">
         <div v-for="m in migrations" :key="m.ver" class="timeline-row">
+          <div class="timeline-ver">{{ m.ver }}</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-what">{{ m.what }}</div>
+        </div>
+      </div>
+      <p class="timeline-note">
+        The schema was squashed into a single baseline when the project moved from MariaDB to
+        PostgreSQL — the MariaDB-era migrations below live in git history only.
+      </p>
+      <div class="timeline timeline-legacy">
+        <div v-for="m in legacyMigrations" :key="m.ver" class="timeline-row">
           <div class="timeline-ver">{{ m.ver }}</div>
           <div class="timeline-dot"></div>
           <div class="timeline-what">{{ m.what }}</div>

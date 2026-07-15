@@ -6,6 +6,8 @@ metadata:
     {{- include "deep-digest-rss.labels" . | nindent 4 }}
 data:
   DB_HOST: {{ .Values.config.dbHost | quote }}
+  DB_PORT: {{ .Values.config.dbPort | quote }}
+  DB_NAME: {{ .Values.config.dbName | quote }}
   SERVER_PORT: {{ .Values.config.serverPort | quote }}
   APP_EXTERNAL_DOMAIN: {{ .Values.config.externalDomain | quote }}
   API_URL: {{ .Values.config.apiUrl | quote }}

@@ -1,1 +1,0 @@
-ALTER TABLE daily_digest MODIFY content MEDIUMTEXT NOT NULL;

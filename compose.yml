@@ -30,19 +30,18 @@ services:
     ports:
       - "6379:6379"
   database:
-    image: mariadb
+    image: postgres:18
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=news_prod
-      - MYSQL_USER=news
-      - MYSQL_PASSWORD=news
+      - POSTGRES_DB=news_prod
+      - POSTGRES_USER=news
+      - POSTGRES_PASSWORD=news
     healthcheck:
-      test: mariadb -unews -pnews news_prod -e "select 1"
+      test: ["CMD-SHELL", "pg_isready -U news -d news_prod"]
       interval: 10s
       timeout: 60s
       retries: 5
     ports:
-      - "3306:3306"
+      - "5432:5432"
   scraper:
     build: scraper
     environment:

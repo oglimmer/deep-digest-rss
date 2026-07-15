@@ -5,10 +5,10 @@ spring:
   application:
     name: "news"
   datasource:
-    url: "jdbc:mariadb://${DB_HOST:localhost}/news_prod?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true"
-    username: "news"
-    password: "news"
-    driver-class-name: "org.mariadb.jdbc.Driver"
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:news_prod}"
+    username: "${DB_USERNAME:news}"
+    password: "${DB_PASSWORD:news}"
+    driver-class-name: "org.postgresql.Driver"
   jpa:
     hibernate:
       ddl-auto: "validate"

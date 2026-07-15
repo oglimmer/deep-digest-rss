@@ -780,6 +780,22 @@
   line-height: 1.4;
 }
 
+.timeline-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0.9rem 0 0.4rem;
+}
+
+/* Superseded MariaDB-era migrations: kept for context, dimmed so the live baseline leads. */
+.timeline-legacy {
+  opacity: 0.62;
+}
+
+.timeline-legacy .timeline-dot {
+  border-color: var(--text-muted);
+}
+
 /* Table grid (DB tables) */
 .table-grid {
   display: grid;

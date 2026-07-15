@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -29,14 +31,14 @@ public class News {
   @NotNull
   private FeedItemToProcess originalFeedItem;
 
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(nullable = false, length = 4096)
   private String url;
 
   @Column(nullable = false)
   private String title;
 
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(nullable = false, length = 2_000_000)
   @NotNull
   private String text;

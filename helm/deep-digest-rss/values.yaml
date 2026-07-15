@@ -57,7 +57,11 @@ taggroupper:
       cpu: "250m"
 
 config:
-  dbHost: mariadb
+  # Central PostgreSQL service shared across apps (see also the wiki chart). Credentials
+  # live in the news-secrets sealed secret as SPRING_DATASOURCE_USERNAME / _PASSWORD.
+  dbHost: postgres.default.svc.cluster.local
+  dbPort: "5432"
+  dbName: news_prod
   serverPort: "8080"
   externalDomain: https://news.oglimmer.com
   apiUrl: https://news.oglimmer.com
