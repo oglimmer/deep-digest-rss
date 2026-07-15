@@ -2,6 +2,10 @@ image:
   registry: registry.oglimmer.com
   pullSecret: oglimmerregistrykey
 
+# Pods only schedule onto nodes labelled `dedicated=news-system`. Keep at least two nodes
+# labelled: with only one, a rolling update cannot place the new pod until the old one exits,
+# and the backend has to share whatever else lives there. Label a node with:
+#   kubectl label node <node> dedicated=news-system
 nodeSelector:
   dedicated: news-system
 
@@ -13,11 +17,15 @@ backend:
   replicas: 1
   resources:
     requests:
+      # CPU requests set the pod's scheduler weight, not just its placement. At 25m the
+      # backend was entitled to ~0.6% of a contended node and was starved by its
+      # neighbours until the health probes timed out and it got killed. The large list
+      # endpoints are CPU-bound on JSON serialisation, so give it a real share.
       memory: "512Mi"
-      cpu: "25m"
+      cpu: "500m"
     limits:
       memory: "2000Mi"
-      cpu: "1"
+      cpu: "2"
 
 frontend:
   image: news-frontend

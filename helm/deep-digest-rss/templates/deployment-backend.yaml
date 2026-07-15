@@ -140,6 +140,11 @@ spec:
                   name: news-secrets
                   key: MCP_JWK_PUBLIC_KEY
                   optional: true
+          # The probe timeouts below are deliberately generous. They default to 1s, and this
+          # node is heavily contended: a few concurrent requests to the large endpoints
+          # (/api/v1/news is ~900KB/day, /api/v1/tag-group ~180KB) are enough to delay the
+          # actuator response past 1s. Liveness then killed a backend that was merely busy,
+          # and the ~150s restart turned a slow page into an outage.
           startupProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -147,18 +152,22 @@ spec:
             # ~5 minutes for the JVM + Flyway + Hibernate to come up.
             initialDelaySeconds: 20
             periodSeconds: 5
+            timeoutSeconds: 5
             failureThreshold: 60
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
             periodSeconds: 5
+            timeoutSeconds: 3
             successThreshold: 1
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
             periodSeconds: 10
-            failureThreshold: 3
+            timeoutSeconds: 5
+            failureThreshold: 6
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
