@@ -20,9 +20,16 @@ backend:
       # CPU requests set the pod's scheduler weight, not just its placement. At 25m the
       # backend was entitled to ~0.6% of a contended node and was starved by its
       # neighbours until the health probes timed out and it got killed. The large list
-      # endpoints are CPU-bound on JSON serialisation, so give it a real share.
+      # endpoints are CPU-bound on JSON serialisation, so it needs a real share.
+      #
+      # Trimmed 500m -> 250m: still 10x the ~17m steady draw and ~6% of a 4-core node,
+      # so the starvation margin above is kept, but the reservation no longer pins an
+      # eighth of a node it never uses. This pod only schedules onto nodes labelled
+      # dedicated=news-system (node23/node27 today) and both sit near 100% *reserved*
+      # while running under 20% actual, which is what made the oversized request costly.
+      # Do not take this below ~250m without re-checking the probe-timeout history.
       memory: "512Mi"
-      cpu: "500m"
+      cpu: "250m"
     limits:
       memory: "2000Mi"
       cpu: "2"
