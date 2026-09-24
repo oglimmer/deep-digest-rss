@@ -4,13 +4,22 @@ import sys
 import shrink
 from loguru import logger
 
+SHRINK_JS_TIMEOUT_SECONDS = 120
+
 def shrink_stub(input_data):
-    result = subprocess.run(
-        ['node', 'shrink.js'],
-        input=input_data,
-        text=True,
-        capture_output=True
-    )
+    try:
+        result = subprocess.run(
+            ['node', 'shrink.js'],
+            input=input_data,
+            text=True,
+            capture_output=True,
+            timeout=SHRINK_JS_TIMEOUT_SECONDS
+        )
+    except subprocess.TimeoutExpired:
+        logger.error(f"shrink.js did not finish within {SHRINK_JS_TIMEOUT_SECONDS}s")
+        logger.error("Falling back to shrink.py")
+        return shrink.process(input_data)
+
     if result.returncode != 0:
         logger.error("Failed to run shrink.js with input data")
         logger.error(input_data)
