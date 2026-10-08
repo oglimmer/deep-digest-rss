@@ -89,7 +89,7 @@ export const aiEnvVars = [
   { key: 'GENERATION_ENGINE', val: 'chatgpt', note: 'Selects the active engine' },
   { key: 'MODEL', val: 'gpt-4o-mini', note: 'OpenAI model id' },
   { key: 'API_KEY', val: 'sk-…', note: 'OpenAI key' },
-  { key: 'ANTHROPIC_MODEL', val: 'claude-haiku-4-5-20251001', note: 'Anthropic fallback' },
+  { key: 'ANTHROPIC_MODEL', val: 'claude-haiku-5-5', note: 'Anthropic fallback' },
   { key: 'ANTHROPIC_API_KEY', val: 'sk-ant-…', note: 'Anthropic key' },
 ]
 

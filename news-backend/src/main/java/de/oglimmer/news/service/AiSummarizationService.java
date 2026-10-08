@@ -4,6 +4,7 @@ package de.oglimmer.news.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -154,7 +155,9 @@ public class AiSummarizationService {
             "model",
             properties.getAnthropicModel(),
             "max_tokens",
-            8192,
+            16000,
+            "output_config",
+            Map.of("effort", "medium"),
             "system",
             systemPrompt,
             "messages",
@@ -172,8 +175,27 @@ public class AiSummarizationService {
             .retrieve()
             .body(Map.class);
 
+    Object stopReason = response.get("stop_reason");
+    if ("refusal".equals(stopReason)) {
+      throw new IllegalStateException(
+          "Anthropic refused the request: " + response.get("stop_details"));
+    }
+    if ("max_tokens".equals(stopReason)) {
+      log.warn("Anthropic response hit max_tokens, summary may be truncated");
+    }
+
+    // Thinking models put thinking blocks before the answer, so pick text blocks by type
     @SuppressWarnings("unchecked")
-    List<Map<String, String>> content = (List<Map<String, String>>) response.get("content");
-    return content.getFirst().get("text");
+    List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("content");
+    String text =
+        content.stream()
+            .filter(block -> "text".equals(block.get("type")))
+            .map(block -> (String) block.get("text"))
+            .collect(Collectors.joining());
+    if (text.isBlank()) {
+      throw new IllegalStateException(
+          "Anthropic response contained no text (stop_reason=" + stopReason + ")");
+    }
+    return text;
   }
 }
